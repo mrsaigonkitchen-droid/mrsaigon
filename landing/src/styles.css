@@ -1,0 +1,331 @@
+/* Global theme for Landing */
+:root {
+  --bg: #0b0b0c;
+  --bg-gradient: radial-gradient(1400px 700px at 10% 0%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 60%),
+                  radial-gradient(1000px 500px at 90% 20%, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%);
+  --card: #131316;
+  --border: #27272a;
+  --primary: #F5D393;
+  --text: #F4F4F5;
+  --muted: #A1A1AA;
+}
+
+html, body, #root { 
+  height: 100%; 
+}
+
+html {
+  /* Enable smooth scrolling with GPU acceleration */
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  /* Fixed background that doesn't scroll */
+  background: #0b0c0f;
+  background-image:
+    linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.6) 100%),
+    url("https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=30");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: var(--text);
+  /* Performance optimization */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent layout shift while loading */
+  will-change: auto;
+}
+
+a { color: var(--text); }
+
+.glass {
+  /* Replace expensive backdrop-filter with solid background */
+  background: rgba(11,12,15,0.92);
+  /* Remove backdrop-filter for better performance */
+  /* backdrop-filter: blur(10px); */
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  /* Add GPU acceleration hint */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* High-contrast content container over photography backgrounds */
+.panel {
+  background: rgba(12, 12, 16, 0.92);
+  /* backdrop-filter: blur(6px); */ /* Removed for performance */
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  padding: 28px;
+  /* GPU acceleration */
+  transform: translateZ(0);
+}
+
+.card {
+  background: rgba(18,18,22,0.92);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  /* GPU acceleration */
+  transform: translateZ(0);
+}
+
+.heroTitle {
+  text-shadow: 0 6px 26px rgba(0,0,0,0.65), 0 2px 8px rgba(0,0,0,0.6);
+}
+
+/* Performance optimization for images */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Optimize scrolling on mobile */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar for horizontal scroll containers */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ===== PERFORMANCE-OPTIMIZED CSS ANIMATIONS ===== */
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide up animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide down animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scale in animation */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Utility classes for animations */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.6s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease-out;
+}
+
+/* Delayed animations */
+.animate-delay-100 {
+  animation-delay: 0.1s;
+  animation-fill-mode: both;
+}
+
+.animate-delay-200 {
+  animation-delay: 0.2s;
+  animation-fill-mode: both;
+}
+
+.animate-delay-300 {
+  animation-delay: 0.3s;
+  animation-fill-mode: both;
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.3s ease;
+}
+
+.transition-fast {
+  transition: all 0.15s ease;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN - Mobile & Tablet
+   ============================================ */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  body {
+    /* Disable fixed background on mobile for better performance */
+    background-attachment: scroll;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+
+  /* Hide desktop navigation items on mobile */
+  nav a:not(.mobile-menu-toggle) {
+    display: none !important;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+
+  /* Stack grid columns */
+  .grid-auto-fit {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Smaller padding on mobile */
+  .panel, .card {
+    padding: 16px !important;
+  }
+
+  /* Better touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Adjust FAB position on mobile */
+  [style*="position: fixed"][style*="bottom: 20"] {
+    bottom: 16px !important;
+    right: 16px !important;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 896px) and (orientation: landscape) {
+  /* Reduce hero height on landscape mobile */
+  section[style*="100vh"] {
+    min-height: 400px !important;
+  }
+}
+
+/* High-DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
+}

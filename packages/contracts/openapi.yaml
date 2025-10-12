@@ -1,0 +1,144 @@
+openapi: 3.1.0
+info:
+  title: Restaurant Platform API
+  version: 0.1.0
+servers:
+  - url: http://localhost:4202
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+  /auth/login:
+    post:
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Logged in
+        '401':
+          description: Invalid credentials
+  /auth/logout:
+    post:
+      summary: Logout current session
+      responses:
+        '200': { description: Logged out }
+  /auth/me:
+    get:
+      summary: Get current authenticated user
+      responses:
+        '200': { description: Current user }
+        '401': { description: Not authenticated }
+  /pages/{slug}:
+    get:
+      summary: Get page by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Page }
+        '404': { description: Not found }
+    put:
+      summary: Update page title
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+      responses:
+        '200': { description: Updated }
+  /pages/{slug}/sections:
+    post:
+      summary: Create section for page
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kind: { type: string }
+                order: { type: integer }
+                data: { type: object }
+      responses:
+        '201': { description: Created }
+  /sections/{id}:
+    put:
+      summary: Update section
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order: { type: integer }
+                data: { type: object }
+      responses:
+        '200': { description: Updated }
+    delete:
+      summary: Delete section
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Deleted }
+  /media:
+    post:
+      summary: Upload media asset
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201': { description: Created }
+  /media/{id}:
+    delete:
+      summary: Delete media asset
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Deleted }
+

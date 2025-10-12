@@ -1,0 +1,12 @@
+# Ignore backup directories
+backup_*
+
+# Ignore tmp directories
+tmp/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore static files
+static/
+

@@ -1,0 +1,14 @@
+{
+  "routes": [
+    "/",
+    "/menu",
+    "/gallery",
+    "/about",
+    "/contact"
+  ]
+}
+
+
+
+
+

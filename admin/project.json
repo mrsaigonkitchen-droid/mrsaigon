@@ -1,0 +1,36 @@
+{
+  "name": "admin",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "admin/src",
+  "projectType": "application",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project admin --web",
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/admin",
+        "configFile": "admin/vite.config.ts",
+        "tsConfig": "admin/tsconfig.app.json"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/vite:dev-server",
+      "options": {
+        "buildTarget": "admin:build"
+      }
+    },
+    "preview": {
+      "executor": "@nx/vite:preview",
+      "options": {
+        "buildTarget": "admin:build"
+      }
+    }
+  }
+}

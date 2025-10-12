@@ -1,0 +1,178 @@
+datasource db {
+	provider = "sqlite"
+	url      = env("DATABASE_URL")
+}
+
+generator client {
+	provider = "prisma-client-js"
+}
+
+model User {
+	id           String     @id @default(cuid())
+	email        String     @unique
+	passwordHash String
+	name         String
+	role         String     @default("MANAGER") // ADMIN, MANAGER, VIEWER
+	sessions     Session[]
+	blogPosts    BlogPost[]
+	createdAt    DateTime   @default(now())
+	updatedAt    DateTime   @updatedAt
+}
+
+model Session {
+	id        String   @id @default(cuid())
+	userId    String
+	user      User     @relation(fields: [userId], references: [id])
+	token     String   @unique
+	expiresAt DateTime
+	createdAt DateTime @default(now())
+}
+
+model MediaAsset {
+	id              String   @id @default(cuid())
+	url             String
+	alt             String?
+	caption         String?
+	width           Int?
+	height          Int?
+	size            Int?     // File size in bytes
+	mimeType        String?
+	isGalleryImage  Boolean  @default(false)  // True if used in gallery section
+	isFeatured      Boolean  @default(false)  // Featured image in gallery
+	displayOrder    Int      @default(0)      // Order in gallery
+	tags            String?  // Comma-separated tags for filtering
+	createdAt       DateTime @default(now())
+	updatedAt       DateTime @updatedAt
+}
+
+model Page {
+	id           String    @id @default(cuid())
+	slug         String    @unique
+	title        String
+	headerConfig String?   // JSON string for header customization
+	footerConfig String?   // JSON string for footer customization
+	sections     Section[]
+	createdAt    DateTime  @default(now())
+	updatedAt    DateTime  @updatedAt
+}
+
+model Section {
+	id        String      @id @default(cuid())
+	pageId    String
+	page      Page        @relation(fields: [pageId], references: [id])
+	kind      String      // HERO, GALLERY, FEATURED_MENU, CTA, TESTIMONIALS, RICH_TEXT, BANNER, SPECIAL_OFFERS, RESERVATION_FORM, CONTACT_INFO, OPENING_HOURS
+	order     Int
+	data      String      // JSON string
+	createdAt DateTime    @default(now())
+	updatedAt DateTime    @updatedAt
+}
+
+model Reservation {
+	id          String   @id @default(cuid())
+	name        String
+	email       String
+	phone       String
+	date        DateTime
+	time        String
+	partySize   Int
+	specialRequest String?
+	status      String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED, COMPLETED
+	createdAt   DateTime @default(now())
+	updatedAt   DateTime @updatedAt
+}
+
+model SpecialOffer {
+	id          String   @id @default(cuid())
+	title       String
+	description String
+	discount    Int?
+	validFrom   DateTime
+	validUntil  DateTime
+	imageId     String?
+	isActive    Boolean  @default(true)
+	createdAt   DateTime @default(now())
+	updatedAt   DateTime @updatedAt
+}
+
+model BlogCategory {
+	id          String      @id @default(cuid())
+	name        String      @unique
+	slug        String      @unique
+	description String?
+	color       String?     // Hex color for UI
+	posts       BlogPost[]
+	createdAt   DateTime    @default(now())
+	updatedAt   DateTime    @updatedAt
+}
+
+model BlogPost {
+	id           String         @id @default(cuid())
+	title        String
+	slug         String         @unique
+	excerpt      String?
+	content      String         // Rich HTML content
+	featuredImage String?       // URL to image
+	categoryId   String
+	category     BlogCategory   @relation(fields: [categoryId], references: [id])
+	authorId     String
+	author       User           @relation(fields: [authorId], references: [id])
+	tags         String?        // Comma-separated tags
+	status       String         @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+	isFeatured   Boolean        @default(false) // Show on homepage
+	publishedAt  DateTime?
+	comments     BlogComment[]
+	createdAt    DateTime       @default(now())
+	updatedAt    DateTime       @updatedAt
+}
+
+model BlogComment {
+	id        String   @id @default(cuid())
+	postId    String
+	post      BlogPost @relation(fields: [postId], references: [id])
+	name      String
+	email     String
+	content   String
+	status    String   @default("PENDING") // PENDING, APPROVED, SPAM
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
+}
+
+model MenuCategory {
+	id          String      @id @default(cuid())
+	name        String      @unique
+	slug        String      @unique
+	description String?
+	order       Int         @default(0)     // Display order
+	icon        String?     // Icon class (e.g., ri-restaurant-line)
+	color       String?     // Hex color for UI
+	items       MenuItem[]
+	createdAt   DateTime    @default(now())
+	updatedAt   DateTime    @updatedAt
+}
+
+model MenuItem {
+	id            String         @id @default(cuid())
+	name          String
+	description   String
+	price         Float
+	imageUrl      String?
+	categoryId    String?
+	category      MenuCategory?  @relation(fields: [categoryId], references: [id])
+	tags          String?        // Comma-separated tags (e.g., "Healthy,Spicy,New")
+	isVegetarian  Boolean        @default(false)
+	isSpicy       Boolean        @default(false)
+	popular       Boolean        @default(false)
+	available     Boolean        @default(true)  // Is item available or sold out
+	order         Int            @default(0)     // Display order
+	createdAt     DateTime       @default(now())
+	updatedAt     DateTime       @updatedAt
+}
+
+model Settings {
+	id            String   @id @default(cuid())
+	key           String   @unique // e.g., "restaurant", "theme", "social"
+	value         String   // JSON string with settings data
+	createdAt     DateTime @default(now())
+	updatedAt     DateTime @updatedAt
+}
+

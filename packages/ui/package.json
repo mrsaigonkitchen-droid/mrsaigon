@@ -1,0 +1,17 @@
+{
+  "name": "@app/ui",
+  "version": "0.0.1",
+  "dependencies": {
+    "@app/shared": "workspace:*",
+    "framer-motion": "^12.23.22",
+    "tslib": "^2.8.1",
+    "@nx/rollup": "21.6.3",
+    "@rollup/plugin-url": "^8.0.2",
+    "@svgr/rollup": "^8.1.0"
+  },
+  "devDependencies": {
+    "@nx/rollup": "^21.6.3",
+    "@rollup/plugin-url": "^8.0.2",
+    "@svgr/rollup": "^8.1.0"
+  }
+}

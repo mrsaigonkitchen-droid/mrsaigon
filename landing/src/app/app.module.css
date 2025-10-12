@@ -1,0 +1,4 @@
+/* Your styles goes here. */
+.skeleton{position:relative;overflow:hidden}
+.skeleton::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);animation:sk 1.2s infinite}
+@keyframes sk{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
