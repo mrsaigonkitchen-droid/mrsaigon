@@ -107,9 +107,12 @@ function AppContent() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/pages" element={<PagesPage onNavigateToSections={(slug) => navigate(`/sections/${slug}`)} />} />
+            {/* Unified Pages & Sections route */}
+            <Route path="/pages/:slug" element={<SectionsPageWrapper />} />
+            <Route path="/pages" element={<SectionsPageWrapper />} />
+            {/* Legacy routes for backward compatibility */}
             <Route path="/sections/:slug" element={<SectionsPageWrapper />} />
-            <Route path="/sections" element={<Navigate to="/sections/home" replace />} />
+            <Route path="/sections" element={<Navigate to="/pages/home" replace />} />
             <Route path="/menu" element={<MenuPage />} />
             <Route path="/media" element={<MediaPage />} />
             <Route path="/reservations" element={<ReservationsPage />} />

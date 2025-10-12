@@ -8,8 +8,10 @@ import type { Page, Section, SectionKind } from '../types';
 import { SectionEditor } from '../components/SectionEditor';
 import { SectionTypePicker } from '../components/SectionTypePicker';
 import { SectionsList } from '../components/SectionsList';
+import { PageSelectorBar } from '../components/PageSelectorBar';
 
 export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
+  const [pages, setPages] = useState<Page[]>([]);
   const [page, setPage] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingSection, setEditingSection] = useState<Section | null>(null);
@@ -19,31 +21,73 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
   const [previewKey, setPreviewKey] = useState(0);
 
   useEffect(() => {
-    loadPage();
-  }, [pageSlug]);
+    loadPages();
+  }, []);
 
-  async function loadPage() {
+  useEffect(() => {
+    if (pageSlug && pages.length > 0) {
+      const foundPage = pages.find(p => p.slug === pageSlug);
+      if (foundPage) {
+        setPage(foundPage);
+      }
+    }
+  }, [pageSlug, pages]);
+
+  async function loadPages() {
     try {
-      const data = await pagesApi.get(pageSlug);
-      setPage(data);
+      const data = await pagesApi.list();
+      setPages(data);
+      // Auto-select page based on pageSlug or default to first page
+      const selectedPage = data.find(p => p.slug === pageSlug) || data[0];
+      if (selectedPage) {
+        await loadPage(selectedPage.slug);
+      }
     } catch (error) {
-      console.error('Failed to load page:', error);
+      console.error('Failed to load pages:', error);
     } finally {
       setLoading(false);
     }
   }
 
+  async function loadPage(slug: string) {
+    try {
+      const data = await pagesApi.get(slug);
+      setPage(data);
+    } catch (error) {
+      console.error('Failed to load page:', error);
+    }
+  }
+
+  async function handleSelectPage(selectedPage: Page) {
+    setPage(null); // Clear current page to show loading
+    await loadPage(selectedPage.slug);
+  }
+
+  async function handleCreatePage(data: { slug: string; title: string }) {
+    await pagesApi.create(data);
+  }
+
+  async function handleEditPage(slug: string, data: { title: string }) {
+    await pagesApi.update(slug, data);
+  }
+
+  async function handleDeletePage(slug: string) {
+    await pagesApi.delete(slug);
+  }
+
   async function handleDeleteSection(sectionId: string) {
     if (!confirm('Are you sure you want to delete this section?')) return;
+    if (!page) return;
     try {
       await sectionsApi.delete(sectionId);
-      await loadPage();
+      await loadPage(page.slug);
     } catch (error) {
       console.error('Failed to delete section:', error);
     }
   }
 
   async function handleReorder(reorderedSections: Section[]) {
+    if (!page) return;
     try {
       // Optimistically update UI
       setPage(prev => prev ? { ...prev, sections: reorderedSections } : null);
@@ -53,20 +97,21 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
     } catch (error) {
       console.error('Failed to reorder sections:', error);
       // Reload to revert on error
-      await loadPage();
+      await loadPage(page.slug);
     }
   }
 
   async function handleSaveSection(sectionId: string | null, data: unknown) {
+    if (!page) return;
     try {
       if (sectionId) {
         // Update existing section
         await sectionsApi.update(sectionId, { data });
       } else if (creatingSection) {
         // Create new section
-        await sectionsApi.create(pageSlug, { kind: creatingSection, data });
+        await sectionsApi.create(page.slug, { kind: creatingSection, data });
       }
-      await loadPage();
+      await loadPage(page.slug);
       // Reload live preview iframe
       setPreviewKey(prev => prev + 1);
       setEditingSection(null);
@@ -132,31 +177,42 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
   }
 
   return (
-    <div style={{ maxWidth: showLivePreview ? '100%' : 1400, margin: '0 auto', height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
-      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px' }}>
+    <div style={{ maxWidth: showLivePreview ? '100%' : 1400, margin: '0 auto', height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '0 20px' }}>
+      {/* Page Selector Bar */}
+      <PageSelectorBar
+        pages={pages}
+        selectedPage={page}
+        onSelectPage={handleSelectPage}
+        onCreatePage={handleCreatePage}
+        onEditPage={handleEditPage}
+        onDeletePage={handleDeletePage}
+        onRefresh={loadPages}
+      />
+
+      {/* Actions Bar */}
+      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div
             style={{
-              width: 48,
-              height: 48,
+              width: 40,
+              height: 40,
               borderRadius: tokens.radius.md,
               background: `linear-gradient(135deg, ${tokens.color.primary}, ${tokens.color.accent})`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 24,
+              fontSize: 20,
               color: '#111',
             }}
           >
             <i className="ri-layout-grid-line" />
           </div>
           <div>
-            <h1 style={{ fontSize: 32, fontWeight: 700, color: tokens.color.text, margin: 0 }}>
-              {page?.title || pageSlug} Sections
-            </h1>
-            <p style={{ color: tokens.color.muted, fontSize: 15, margin: 0 }}>
-              Manage content sections for /{pageSlug} page
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: tokens.color.text, margin: 0 }}>
+              Page Sections
+            </h2>
+            <p style={{ color: tokens.color.muted, fontSize: 14, margin: 0 }}>
+              Drag sections to reorder • Click to edit
             </p>
           </div>
         </div>
@@ -181,7 +237,7 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
         flex: 1, 
         gap: 24, 
         overflow: 'hidden',
-        padding: '0 20px 20px',
+        paddingBottom: 20,
       }}>
         {/* Left Panel - Sections List */}
         <div style={{ 
@@ -190,97 +246,46 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
           maxWidth: showLivePreview ? '50%' : '1400px',
           margin: showLivePreview ? 0 : '0 auto',
         }}>
-          {/* Page Overview Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                padding: 20,
-                background: `linear-gradient(135deg, ${tokens.color.primary}20, ${tokens.color.accent}20)`,
-                border: `1px solid ${tokens.color.primary}40`,
-                borderRadius: tokens.radius.lg,
-              }}
-            >
-              <div style={{ fontSize: 14, color: tokens.color.muted, marginBottom: 8 }}>Total Sections</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: tokens.color.text }}>{page?.sections?.length || 0}</div>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              style={{
-                padding: 20,
-                background: 'rgba(59, 130, 246, 0.1)',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
-                borderRadius: tokens.radius.lg,
-              }}
-            >
-              <div style={{ fontSize: 14, color: tokens.color.muted, marginBottom: 8 }}>Section Types</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: tokens.color.text }}>
-                {new Set(page?.sections?.map(s => s.kind)).size || 0}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              style={{
-                padding: 20,
-                background: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                borderRadius: tokens.radius.lg,
-              }}
-            >
-              <div style={{ fontSize: 14, color: tokens.color.muted, marginBottom: 8 }}>Page Status</div>
-              <div style={{ fontSize: 20, fontWeight: 600, color: '#10B981', marginTop: 8 }}>
-                <i className="ri-check-line" style={{ marginRight: 6 }} />
-                Published
-              </div>
-            </motion.div>
-          </div>
 
           {!page?.sections || page.sections.length === 0 ? (
-        <Card title="No Sections Yet" icon="ri-layout-grid-line">
-          <div style={{ textAlign: 'center', padding: 60, color: tokens.color.muted }}>
-            <i className="ri-layout-grid-line" style={{ fontSize: 64, display: 'block', marginBottom: 16, opacity: 0.3 }} />
-            <h3 style={{ fontSize: 20, fontWeight: 600, color: tokens.color.text, marginBottom: 8 }}>
-              Start Building Your Page
-            </h3>
-            <p style={{ fontSize: 15, marginBottom: 24 }}>
-              Add your first section to get started
-            </p>
-            <Button onClick={() => setShowTypePicker(true)} icon="ri-add-line">
-              Add First Section
-            </Button>
-          </div>
-        </Card>
-      ) : (
-        <Card 
-          title="Page Sections" 
-          subtitle="Drag sections to reorder • Click to edit"
-          icon="ri-list-ordered"
-        >
-          <SectionsList
-            sections={page.sections}
-            sectionTypes={sectionTypes}
-            categoryColors={{
-              'Hero & Banners': '#f5d393',
-              'Content': '#3B82F6',
-              'Menu & Offers': '#10B981',
-              'Gallery & Media': '#8B5CF6',
-              'Social Proof': '#F59E0B',
-              'Call to Action': '#EF4444',
-              'Forms & Contact': '#06B6D4',
-            }}
-            onEdit={setEditingSection}
-            onDelete={handleDeleteSectionWithPreview}
-            onReorder={handleReorderWithPreview}
-          />
-        </Card>
-      )}
+            <Card title="No Sections Yet" icon="ri-layout-grid-line">
+              <div style={{ textAlign: 'center', padding: 60, color: tokens.color.muted }}>
+                <i className="ri-layout-grid-line" style={{ fontSize: 64, display: 'block', marginBottom: 16, opacity: 0.3 }} />
+                <h3 style={{ fontSize: 20, fontWeight: 600, color: tokens.color.text, marginBottom: 8 }}>
+                  Start Building Your Page
+                </h3>
+                <p style={{ fontSize: 15, marginBottom: 24 }}>
+                  Add your first section to get started
+                </p>
+                <Button onClick={() => setShowTypePicker(true)} icon="ri-add-line">
+                  Add First Section
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <Card 
+              title={`${page.sections.length} Section${page.sections.length > 1 ? 's' : ''}`}
+              subtitle="Drag sections to reorder • Click to edit"
+              icon="ri-list-ordered"
+            >
+              <SectionsList
+                sections={page.sections}
+                sectionTypes={sectionTypes}
+                categoryColors={{
+                  'Hero & Banners': '#f5d393',
+                  'Content': '#3B82F6',
+                  'Menu & Offers': '#10B981',
+                  'Gallery & Media': '#8B5CF6',
+                  'Social Proof': '#F59E0B',
+                  'Call to Action': '#EF4444',
+                  'Forms & Contact': '#06B6D4',
+                }}
+                onEdit={setEditingSection}
+                onDelete={handleDeleteSectionWithPreview}
+                onReorder={handleReorderWithPreview}
+              />
+            </Card>
+          )}
         </div>
 
         {/* Right Panel - Live Preview */}

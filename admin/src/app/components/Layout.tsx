@@ -18,9 +18,8 @@ export function Layout({ children, currentRoute, currentPageSlug, onNavigate, on
 
   const menuItems: Array<{ route: RouteType; icon: string; label: string }> = [
     { route: 'dashboard', icon: 'ri-dashboard-3-line', label: 'Dashboard' },
-    { route: 'sections', icon: 'ri-layout-grid-line', label: 'Sections' },
+    { route: 'pages', icon: 'ri-pages-line', label: 'Pages & Sections' },
     { route: 'preview', icon: 'ri-tv-line', label: 'Live Preview' },
-    { route: 'pages', icon: 'ri-pages-line', label: 'Pages' },
     { route: 'menu', icon: 'ri-restaurant-2-line', label: 'Menu' },
     { route: 'media', icon: 'ri-gallery-line', label: 'Media & Gallery' },
     { route: 'reservations', icon: 'ri-calendar-check-line', label: 'Reservations' },
