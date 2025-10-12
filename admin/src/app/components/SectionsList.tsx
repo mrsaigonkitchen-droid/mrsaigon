@@ -193,6 +193,7 @@ export function SectionsList({
   function getCategoryColor(section: Section): string {
     switch (section.kind) {
       case 'HERO':
+      case 'HERO_SIMPLE':
       case 'BANNER':
         return categoryColors['Hero & Banners'];
       case 'RICH_TEXT':
@@ -208,6 +209,7 @@ export function SectionsList({
       case 'TESTIMONIALS':
         return categoryColors['Social Proof'];
       case 'CTA':
+      case 'CALL_TO_ACTION':
         return categoryColors['Call to Action'];
       case 'RESERVATION_FORM':
       case 'CONTACT_INFO':
