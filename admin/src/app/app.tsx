@@ -9,14 +9,10 @@ import { DashboardPage } from './pages/DashboardPage';
 import { SectionsPage } from './pages/SectionsPage';
 import { MediaPage } from './pages/MediaPage';
 import { LivePreviewPage } from './pages/LivePreviewPage';
-import { BlogCategoriesPage } from './pages/BlogCategoriesPage';
-import { BlogPostsPage } from './pages/BlogPostsPage';
+import { BlogManagerPage } from './pages/BlogManagerPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LeadsPage } from './pages/LeadsPage';
-import { ServiceCategoriesPage } from './pages/ServiceCategoriesPage';
-import { UnitPricesPage } from './pages/UnitPricesPage';
-import { MaterialsPage } from './pages/MaterialsPage';
-import { FormulasPage } from './pages/FormulasPage';
+import { PricingConfigPage } from './pages/PricingConfigPage';
 import { useUser, store } from './store';
 import { authApi } from './api';
 import type { RouteType } from './types';
@@ -117,14 +113,10 @@ function AppContent() {
             <Route path="/sections/:slug" element={<SectionsPageWrapper />} />
             <Route path="/sections" element={<Navigate to="/pages/home" replace />} />
             <Route path="/leads" element={<LeadsPage />} />
-            <Route path="/service-categories" element={<ServiceCategoriesPage />} />
-            <Route path="/unit-prices" element={<UnitPricesPage />} />
-            <Route path="/materials" element={<MaterialsPage />} />
-            <Route path="/formulas" element={<FormulasPage />} />
+            <Route path="/pricing-config" element={<PricingConfigPage />} />
             <Route path="/media" element={<MediaPage />} />
             <Route path="/preview" element={<LivePreviewPage />} />
-            <Route path="/blog-categories" element={<BlogCategoriesPage />} />
-            <Route path="/blog-posts" element={<BlogPostsPage />} />
+            <Route path="/blog-manager" element={<BlogManagerPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

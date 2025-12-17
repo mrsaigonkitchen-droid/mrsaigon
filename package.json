@@ -1,5 +1,5 @@
 {
-  "name": "@ai-sales-agents-platform/source",
+  "name": "@anh-tho-xay/source",
   "version": "0.0.1",
   "type": "commonjs",
   "main": "./src/index.js",
@@ -25,7 +25,6 @@
     "@nx/eslint-plugin": "21.6.3",
     "@nx/jest": "21.6.3",
     "@prisma/client": "5.22.0",
-    "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "tslib": "^2.3.0"
   },
@@ -51,7 +50,7 @@
     "@swc/helpers": "~0.5.11",
     "@testing-library/dom": "10.4.0",
     "@testing-library/react": "16.1.0",
-    "@types/bcrypt": "^6.0.0",
+    "@types/bcryptjs": "^3.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "20.19.9",
     "@types/react": "19.0.0",

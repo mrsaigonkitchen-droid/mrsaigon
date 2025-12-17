@@ -1,5 +1,13 @@
-import { useState, memo } from 'react';
+import { useState, memo, useMemo } from 'react';
 import { tokens } from '@app/shared';
+
+// Helper to resolve image URLs
+function resolveImageUrl(url?: string): string {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.startsWith('/media/')) return `http://localhost:4202${url}`;
+  return url;
+}
 
 interface BlogImageThumbnailProps {
   src?: string;
@@ -8,126 +16,146 @@ interface BlogImageThumbnailProps {
 }
 
 /**
- * Blog Image Thumbnail - Banner style with lightbox support
- * Displays image with hover effect and click to open lightbox
+ * Blog Content Image - Displays image with natural aspect ratio
+ * Responsive, maintains quality, with lightbox support on click
  */
-export const BlogImageThumbnail = memo(function BlogImageThumbnail({ 
-  src, 
-  alt, 
-  onClick 
+export const BlogImageThumbnail = memo(function BlogImageThumbnail({
+  src,
+  alt,
+  onClick,
 }: BlogImageThumbnailProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const resolvedSrc = useMemo(() => resolveImageUrl(src), [src]);
+
+  if (!resolvedSrc || hasError) {
+    return (
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '100%',
+          margin: '24px 0',
+          padding: '40px 20px',
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px dashed rgba(255,255,255,0.15)',
+          borderRadius: '12px',
+          textAlign: 'center',
+          color: tokens.color.muted,
+          fontSize: '14px',
+        }}
+      >
+        <i className="ri-image-line" style={{ fontSize: '32px', display: 'block', marginBottom: '8px', opacity: 0.5 }} />
+        Không thể tải ảnh
+      </div>
+    );
+  }
 
   return (
-    <div
+    <figure
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onClick?.()}
       style={{
         position: 'relative',
         width: '100%',
-        maxWidth: '800px',
-        height: '200px',
-        margin: '32px auto',
-        borderRadius: '16px',
+        maxWidth: '100%',
+        margin: '24px 0',
+        padding: 0,
+        cursor: onClick ? 'zoom-in' : 'default',
+        borderRadius: '12px',
         overflow: 'hidden',
-        cursor: 'pointer',
         border: isHovered
-          ? `3px solid ${tokens.color.primary}`
-          : '2px solid rgba(255,255,255,0.2)',
+          ? `2px solid ${tokens.color.primary}80`
+          : '1px solid rgba(255,255,255,0.1)',
         boxShadow: isHovered
-          ? `0 0 40px ${tokens.color.primary}60, 0 8px 32px rgba(0,0,0,0.4)`
-          : '0 8px 32px rgba(0,0,0,0.4)',
+          ? `0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px ${tokens.color.primary}40`
+          : '0 4px 16px rgba(0,0,0,0.3)',
         transition: 'all 0.3s ease',
-        background: isHovered ? `${tokens.color.primary}08` : 'transparent',
+        background: 'rgba(0,0,0,0.2)',
       }}
     >
-      {/* Image background */}
-      <div
+      {/* Loading placeholder */}
+      {!isLoaded && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(12,12,16,0.8)',
+            zIndex: 1,
+          }}
+        >
+          <div
+            style={{
+              width: '32px',
+              height: '32px',
+              border: '3px solid rgba(255,255,255,0.1)',
+              borderTopColor: tokens.color.primary,
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Actual image - natural aspect ratio, no height limit */}
+      <img
+        src={resolvedSrc}
+        alt={alt || 'Blog image'}
+        loading="lazy"
+        onLoad={() => setIsLoaded(true)}
+        onError={() => setHasError(true)}
         style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 0,
-          backgroundImage: `url(${src})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-          transition: 'transform 0.5s ease',
-          pointerEvents: 'none',
+          display: 'block',
+          width: '100%',
+          height: 'auto',
+          objectFit: 'contain',
+          transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+          transition: 'transform 0.4s ease',
+          opacity: isLoaded ? 1 : 0,
         }}
-        role="img"
-        aria-label={alt}
       />
 
-      {/* Overlay gradient */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: isHovered
-            ? 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3))'
-            : 'linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.2))',
-          zIndex: 1,
-          transition: 'all 0.3s ease',
-        }}
-      />
+      {/* Hover overlay with zoom icon */}
+      {onClick && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: isHovered ? 'rgba(0,0,0,0.3)' : 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.3s ease',
+            pointerEvents: 'none',
+          }}
+        >
+          <div
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'rgba(0,0,0,0.7)',
+              backdropFilter: 'blur(8px)',
+              border: `2px solid ${tokens.color.primary}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: isHovered ? 1 : 0,
+              transform: isHovered ? 'scale(1)' : 'scale(0.8)',
+              transition: 'all 0.3s ease',
+              boxShadow: `0 4px 16px ${tokens.color.primary}40`,
+            }}
+          >
+            <i className="ri-zoom-in-line" style={{ fontSize: '24px', color: 'white' }} />
+          </div>
+        </div>
+      )}
 
-      {/* Hover Icon */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: `translate(-50%, -50%) scale(${isHovered ? 1 : 0.8})`,
-          opacity: isHovered ? 1 : 0,
-          zIndex: 10,
-          background: 'rgba(0,0,0,0.8)',
-          backdropFilter: 'blur(12px)',
-          border: `2px solid ${tokens.color.primary}99`,
-          borderRadius: '50%',
-          width: '72px',
-          height: '72px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'all 0.3s ease',
-          pointerEvents: 'none',
-          fontSize: '32px',
-          color: 'white',
-          boxShadow: `0 0 20px ${tokens.color.primary}4D`,
-        }}
-      >
-        🔍
-      </div>
 
-      {/* Hint badge */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '16px',
-          right: '16px',
-          background: 'rgba(0,0,0,0.85)',
-          backdropFilter: 'blur(8px)',
-          border: `1px solid ${tokens.color.primary}80`,
-          borderRadius: '8px',
-          padding: '8px 14px',
-          fontSize: '13px',
-          color: 'rgba(255,255,255,0.95)',
-          fontWeight: 500,
-          zIndex: 10,
-          opacity: isHovered ? 1 : 0,
-          transform: isHovered ? 'translateY(0)' : 'translateY(10px)',
-          transition: 'all 0.3s ease',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          pointerEvents: 'none',
-          boxShadow: `0 0 15px ${tokens.color.primary}33`,
-        }}
-      >
-        🔍 Click để xem full
-      </div>
-    </div>
+    </figure>
   );
 });

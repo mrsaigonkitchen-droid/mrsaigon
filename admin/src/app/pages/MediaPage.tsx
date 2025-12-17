@@ -18,6 +18,7 @@ interface MediaUsageInfo {
 export function MediaPage() {
   const toast = useToast();
   const [uploading, setUploading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mediaFiles, setMediaFiles] = useState<MediaAsset[]>([]);
   const [selectedFile, setSelectedFile] = useState<MediaAsset | null>(null);
@@ -27,7 +28,6 @@ export function MediaPage() {
   const [filter, setFilter] = useState<MediaFilter>('all');
   const [editFormData, setEditFormData] = useState({
     alt: '',
-    caption: '',
     tags: '',
   });
   const [mediaUsage, setMediaUsage] = useState<Record<string, MediaUsageInfo>>({});
@@ -61,6 +61,30 @@ export function MediaPage() {
       }
     } catch (error) {
       console.error('Failed to load media usage:', error);
+    }
+  };
+
+  const handleSyncMedia = async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch('http://localhost:4202/media/sync', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(data.message || 'Đồng bộ thành công!');
+        // Reload media and usage
+        await loadMedia();
+        await loadMediaUsage();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || 'Đồng bộ thất bại');
+      }
+    } catch (error) {
+      toast.error('Lỗi: ' + (error as Error).message);
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -100,7 +124,6 @@ export function MediaPage() {
     setSelectedFile(file);
     setEditFormData({
       alt: file.alt || '',
-      caption: file.caption || '',
       tags: file.tags || '',
     });
     setShowEditModal(true);
@@ -265,6 +288,14 @@ export function MediaPage() {
               onChange={(e) => handleFileUpload(e.target.files)}
               style={{ display: 'none' }}
             />
+            <Button
+              variant="secondary"
+              icon="ri-refresh-line"
+              onClick={handleSyncMedia}
+              loading={syncing}
+            >
+              Sync DB
+            </Button>
             <Button
               variant="primary"
               icon="ri-upload-cloud-line"
@@ -673,7 +704,6 @@ function MediaCard({ file, index, usageInfo, onEdit, onDelete, onCopy }: MediaCa
 // Edit Modal Component
 interface EditMediaFormData {
   alt: string;
-  caption: string;
   tags: string;
 }
 
@@ -760,23 +790,34 @@ function EditMediaModal({ file, formData, onFormChange, onSave, onClose }: EditM
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <Input
-                label="Alt Text"
-                value={formData.alt}
-                onChange={(value) => onFormChange({ ...formData, alt: value })}
-                placeholder="Mô tả hình ảnh..."
-                fullWidth
-              />
+              {/* SEO Info Box */}
+              <div style={{ 
+                padding: '12px 16px', 
+                background: `${tokens.color.primary}10`, 
+                border: `1px solid ${tokens.color.primary}30`,
+                borderRadius: tokens.radius.md, 
+                fontSize: 13, 
+                color: tokens.color.muted,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+              }}>
+                <i className="ri-seo-line" style={{ fontSize: 18, color: tokens.color.primary, marginTop: 2 }} />
+                <div>
+                  <strong style={{ color: tokens.color.text }}>SEO Tips:</strong> Alt text giúp Google hiểu nội dung ảnh. 
+                  Mô tả ngắn gọn, chính xác những gì có trong ảnh.
+                </div>
+              </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: tokens.color.text, marginBottom: 8 }}>
-                  Caption
+                  Alt Text (Mô tả ảnh) *
                 </label>
                 <textarea
-                  value={formData.caption}
-                  onChange={(e) => onFormChange({ ...formData, caption: e.target.value })}
-                  placeholder="Chú thích hình ảnh..."
-                  rows={3}
+                  value={formData.alt}
+                  onChange={(e) => onFormChange({ ...formData, alt: e.target.value })}
+                  placeholder="Ví dụ: Logo công ty Anh Thợ Xây với hình ảnh thợ xây và bánh răng"
+                  rows={2}
                   style={{
                     width: '100%',
                     padding: '10px 16px',
@@ -790,15 +831,21 @@ function EditMediaModal({ file, formData, onFormChange, onSave, onClose }: EditM
                     fontFamily: 'inherit',
                   }}
                 />
+                <p style={{ fontSize: 11, color: tokens.color.muted, marginTop: 4, marginBottom: 0 }}>
+                  Quan trọng cho SEO và accessibility. Mô tả nội dung ảnh cho người dùng khiếm thị.
+                </p>
               </div>
 
               <Input
-                label="Tags (phân cách bằng dấu phẩy)"
+                label="Tags (từ khóa tìm kiếm)"
                 value={formData.tags}
                 onChange={(value) => onFormChange({ ...formData, tags: value })}
-                placeholder="vật dụng, sơn, gạch..."
+                placeholder="logo, xây dựng, cải tạo nhà..."
                 fullWidth
               />
+              <p style={{ fontSize: 11, color: tokens.color.muted, marginTop: -12, marginBottom: 0 }}>
+                Phân cách bằng dấu phẩy. Giúp tìm kiếm ảnh trong Media Library.
+              </p>
 
               <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.02)', borderRadius: tokens.radius.md, fontSize: 12, color: tokens.color.muted }}>
                 <div><strong>URL:</strong> {file.url}</div>

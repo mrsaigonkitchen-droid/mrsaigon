@@ -371,11 +371,7 @@ export type RouteType =
   | 'sections'
   | 'media'
   | 'preview'
-  | 'blog-categories'
-  | 'blog-posts'
+  | 'blog-manager'
   | 'settings'
   | 'leads'
-  | 'service-categories'
-  | 'unit-prices'
-  | 'materials'
-  | 'formulas';
+  | 'pricing-config';

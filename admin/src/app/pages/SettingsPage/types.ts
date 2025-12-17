@@ -11,17 +11,32 @@ export interface CompanySettings {
   backgroundImage?: string;
 }
 
-export interface ThemeSettings {
-  primaryColor: string;
-  accentColor: string;
-  fontFamily: string;
+// Announcement - Thông báo cho trang User (sẽ phát triển sau)
+export interface AnnouncementSettings {
+  enabled: boolean;
+  text: string;
+  link?: string;
+  linkText?: string;
+  backgroundColor: string;
+  textColor: string;
 }
 
-export interface NotificationSettings {
-  emailNotifications: boolean;
-  newLeads: boolean;
-  newComments: boolean;
-  systemUpdates: boolean;
+// Popup Banner - Cửa sổ popup quảng cáo trên Landing
+export interface PopupSettings {
+  enabled: boolean;
+  title: string;
+  content: string;
+  imageUrl?: string;
+  buttonText?: string;
+  buttonLink?: string;
+  showOnce: boolean; // Chỉ hiển thị 1 lần/session
+  delaySeconds: number; // Delay trước khi hiển thị
+}
+
+// Combined Promo Settings
+export interface PromoSettings {
+  announcement: AnnouncementSettings;
+  popup: PopupSettings;
 }
 
 export interface HeaderConfig {
@@ -39,7 +54,7 @@ export interface FooterConfig {
   copyright?: { text?: string };
 }
 
-export type SettingsTab = 'layout' | 'company' | 'theme' | 'notifications';
+export type SettingsTab = 'layout' | 'company' | 'promo';
 
 // Glass Morphism Design Tokens (matching landing page)
 export const glass = {
@@ -62,17 +77,29 @@ export const defaultCompanySettings: CompanySettings = {
   workingHours: 'T2 - T7: 8:00 - 18:00',
 };
 
-export const defaultThemeSettings: ThemeSettings = {
-  primaryColor: '#f5d393',
-  accentColor: '#3b82f6',
-  fontFamily: 'Inter',
+export const defaultAnnouncementSettings: AnnouncementSettings = {
+  enabled: false,
+  text: '🎉 Khuyến mãi đặc biệt: Giảm 10% cho khách hàng mới!',
+  link: '/bao-gia',
+  linkText: 'Xem ngay',
+  backgroundColor: '#f5d393',
+  textColor: '#111111',
 };
 
-export const defaultNotificationSettings: NotificationSettings = {
-  emailNotifications: true,
-  newLeads: true,
-  newComments: true,
-  systemUpdates: false,
+export const defaultPopupSettings: PopupSettings = {
+  enabled: false,
+  title: 'Ưu đãi đặc biệt!',
+  content: 'Đăng ký tư vấn ngay hôm nay để nhận ưu đãi giảm 15% cho dịch vụ cải tạo nhà.',
+  imageUrl: '',
+  buttonText: 'Nhận ưu đãi',
+  buttonLink: '/bao-gia',
+  showOnce: true,
+  delaySeconds: 3,
+};
+
+export const defaultPromoSettings: PromoSettings = {
+  announcement: defaultAnnouncementSettings,
+  popup: defaultPopupSettings,
 };
 
 export const defaultHeaderConfig: HeaderConfig = {

@@ -21,13 +21,9 @@ export function Layout({ children, currentRoute, currentPageSlug, onNavigate, on
     { route: 'pages', icon: 'ri-pages-line', label: 'Pages & Sections' },
     { route: 'preview', icon: 'ri-tv-line', label: 'Live Preview' },
     { route: 'leads', icon: 'ri-contacts-book-line', label: 'Khách hàng' },
-    { route: 'service-categories', icon: 'ri-tools-line', label: 'Hạng mục' },
-    { route: 'unit-prices', icon: 'ri-money-dollar-circle-line', label: 'Đơn giá' },
-    { route: 'materials', icon: 'ri-paint-brush-line', label: 'Vật dụng' },
-    { route: 'formulas', icon: 'ri-calculator-line', label: 'Công thức' },
+    { route: 'pricing-config', icon: 'ri-calculator-line', label: 'Cấu hình báo giá' },
     { route: 'media', icon: 'ri-gallery-line', label: 'Media & Gallery' },
-    { route: 'blog-categories', icon: 'ri-price-tag-3-line', label: 'Blog Categories' },
-    { route: 'blog-posts', icon: 'ri-article-line', label: 'Blog Posts' },
+    { route: 'blog-manager', icon: 'ri-quill-pen-line', label: 'Blog Manager' },
     { route: 'settings', icon: 'ri-settings-3-line', label: 'Settings' },
   ];
 

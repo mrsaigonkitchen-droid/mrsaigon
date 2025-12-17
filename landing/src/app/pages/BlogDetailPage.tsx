@@ -229,7 +229,13 @@ export function BlogDetailPage() {
                     code: (props) => <code style={{ fontFamily: 'monospace', fontSize: '14px', background: `${tokens.color.primary}26`, color: tokens.color.primary, padding: '2px 8px', borderRadius: '6px' }} {...props} />,
                     pre: (props) => <pre style={{ overflowX: 'auto', marginBottom: '32px', borderRadius: '12px', background: 'rgba(0,0,0,0.4)', padding: 'clamp(16px, 3vw, 24px)' }} {...props} />,
                     strong: (props) => <strong style={{ color: 'white', fontWeight: 600 }} {...props} />,
-                    img: (props) => <BlogImageThumbnail src={props.src as string} alt={props.alt as string} onClick={() => setLightboxImage(props.src as string)} />,
+                    img: (props) => {
+                      const imgSrc = props.src as string;
+                      const resolvedSrc = imgSrc?.startsWith('/media/') 
+                        ? `http://localhost:4202${imgSrc}` 
+                        : imgSrc;
+                      return <BlogImageThumbnail src={imgSrc} alt={props.alt as string} onClick={() => setLightboxImage(resolvedSrc)} />;
+                    },
                   }}
                 >
                   {post.content}

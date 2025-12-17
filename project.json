@@ -1,35 +1,13 @@
 {
-  "name": "ai-sales-agents-platform",
+  "name": "anh-tho-xay",
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "includedScripts": [],
   "sourceRoot": "src",
   "projectType": "library",
   "tags": [],
   "targets": {
-    "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "options": {
-        "outputPath": "dist/ai-sales-agents-platform",
-        "main": "./src/index.ts",
-        "tsConfig": "./tsconfig.lib.json",
-        "assets": [
-          "*.md"
-        ]
-      }
-    },
     "lint": {
       "command": "eslint ./src ./package.json"
-    },
-    "local-registry": {
-      "executor": "@nx/js:verdaccio",
-      "options": {
-        "port": 4873,
-        "config": ".verdaccio/config.yml",
-        "storage": "tmp/local-registry/storage"
-      }
     }
   }
 }

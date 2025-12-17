@@ -16,7 +16,7 @@ describe('API Core Functionality', () => {
 
   describe('Password Hashing', () => {
     it('should hash password with bcrypt', async () => {
-      const bcrypt = await import('bcrypt');
+      const bcrypt = await import('bcryptjs');
       const password = 'test123456';
       const hash = await bcrypt.hash(password, 12);
       
@@ -26,7 +26,7 @@ describe('API Core Functionality', () => {
     });
 
     it('should verify correct password', async () => {
-      const bcrypt = await import('bcrypt');
+      const bcrypt = await import('bcryptjs');
       const password = 'test123456';
       const hash = await bcrypt.hash(password, 12);
       
@@ -35,7 +35,7 @@ describe('API Core Functionality', () => {
     });
 
     it('should reject incorrect password', async () => {
-      const bcrypt = await import('bcrypt');
+      const bcrypt = await import('bcryptjs');
       const password = 'test123456';
       const wrongPassword = 'wrongpassword';
       const hash = await bcrypt.hash(password, 12);

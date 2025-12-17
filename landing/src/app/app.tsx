@@ -9,6 +9,7 @@ import { ToastProvider, useToast } from './components/Toast';
 import { MobileMenu } from './components/MobileMenu';
 import { ScrollProgress } from './components/ScrollProgress';
 import { FloatingActions } from './sections/FloatingActions';
+import { PromoPopup } from './components/PromoPopup';
 import { Header, type HeaderConfig } from './components/Header';
 import { Footer, type FooterConfig } from './components/Footer';
 import type { PageData } from './types';
@@ -449,6 +450,9 @@ function AppContent() {
             })}
         </>
       )}
+
+      {/* Promo Popup */}
+      <PromoPopup />
 
       {/* Toast Notifications - rendered by ToastProvider */}
     </div>

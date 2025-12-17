@@ -5,7 +5,7 @@ import { serve } from '@hono/node-server';
 import { PrismaClient, Prisma, User } from '@prisma/client';
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import crypto from 'crypto';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
@@ -171,6 +171,95 @@ function normalizeMediaUrl(url: string | null): string | null {
   return match ? match[0] : null;
 }
 
+// Sync media - scan all images in DB and create MediaAsset if not exists
+app.post('/media/sync', async (c) => {
+  const guard = requireRole(c, ['ADMIN']);
+  if (!guard.allowed) return guard.response;
+  
+  try {
+    const allUrls = new Set<string>();
+    
+    // Collect URLs from Materials
+    const materials = await prisma.material.findMany({
+      where: { imageUrl: { not: null } },
+      select: { imageUrl: true },
+    });
+    materials.forEach(m => {
+      const url = normalizeMediaUrl(m.imageUrl);
+      if (url) allUrls.add(url);
+    });
+    
+    // Collect URLs from Blog Posts
+    const blogPosts = await prisma.blogPost.findMany({
+      where: { featuredImage: { not: null } },
+      select: { featuredImage: true },
+    });
+    blogPosts.forEach(b => {
+      const url = normalizeMediaUrl(b.featuredImage);
+      if (url) allUrls.add(url);
+    });
+    
+    // Collect URLs from Sections
+    const sections = await prisma.section.findMany();
+    sections.forEach(s => {
+      const dataStr = typeof s.data === 'string' ? s.data : JSON.stringify(s.data);
+      const urlMatches = dataStr.match(/\/media\/[^"'\s?#]+/g) || [];
+      urlMatches.forEach(url => allUrls.add(url));
+    });
+    
+    // Get existing media URLs
+    const existingMedia = await prisma.mediaAsset.findMany({ select: { url: true } });
+    const existingUrls = new Set(existingMedia.map(m => normalizeMediaUrl(m.url)).filter(Boolean));
+    
+    // Find missing URLs and create MediaAsset
+    const missingUrls = [...allUrls].filter(url => !existingUrls.has(url));
+    let created = 0;
+    
+    for (const url of missingUrls) {
+      // Check if file exists on disk
+      const filename = url.replace('/media/', '');
+      const filePath = path.join(mediaDir, filename);
+      
+      if (fs.existsSync(filePath)) {
+        // Get file info
+        const stats = fs.statSync(filePath);
+        let width = null;
+        let height = null;
+        
+        try {
+          const metadata = await sharp(filePath).metadata();
+          width = metadata.width || null;
+          height = metadata.height || null;
+        } catch {
+          // Not an image or can't read metadata
+        }
+        
+        await prisma.mediaAsset.create({
+          data: {
+            url,
+            alt: filename.replace(/\.[^.]+$/, '').replace(/-/g, ' '),
+            mimeType: filename.endsWith('.webp') ? 'image/webp' : filename.endsWith('.png') ? 'image/png' : 'image/jpeg',
+            width,
+            height,
+            size: stats.size,
+          },
+        });
+        created++;
+      }
+    }
+    
+    return c.json({
+      message: `Synced ${created} new media files`,
+      totalFound: allUrls.size,
+      alreadyExists: existingUrls.size,
+      created,
+    });
+  } catch (error) {
+    console.error('Media sync error:', error);
+    return c.json({ error: 'Failed to sync media' }, 500);
+  }
+});
+
 // Get media usage - track where images are used (MUST be before /media/:filename)
 app.get('/media/usage', async (c) => {
   const guard = requireRole(c, ['ADMIN', 'MANAGER']);
@@ -198,13 +287,14 @@ app.get('/media/usage', async (c) => {
       blogPosts.map(b => normalizeMediaUrl(b.featuredImage)).filter(Boolean) as string[]
     );
     
-    // Get sections with images in data
+    // Get sections with images in data - data is stored as JSON string
     const sections = await prisma.section.findMany();
     const sectionUrls = new Set<string>();
     sections.forEach(s => {
-      const data = s.data;
+      // s.data is JSON string, convert to string for regex search
+      const dataStr = typeof s.data === 'string' ? s.data : JSON.stringify(s.data);
       // Search for image URLs in section data
-      const urlMatches = data.match(/\/media\/[^"'\s?#]+/g) || [];
+      const urlMatches = dataStr.match(/\/media\/[^"'\s?#]+/g) || [];
       urlMatches.forEach(url => sectionUrls.add(url));
     });
     

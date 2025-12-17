@@ -41,7 +41,7 @@ export function MarkdownEditor({
   const [isUploading, setIsUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  const insertText = useCallback((before: string, after: string = '') => {
+  const insertText = useCallback((before: string, after = '') => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
@@ -279,12 +279,19 @@ export function MarkdownEditor({
   );
 }
 
+// Helper to resolve image URLs
+function resolveImageUrl(url: string): string {
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.startsWith('/media/')) return `http://localhost:4202${url}`;
+  return url;
+}
+
 // Simple markdown to HTML converter for preview
 function simpleMarkdownToHtml(markdown: string): string {
   if (!markdown) return '';
   
-  let html = markdown
-    // Escape HTML
+  const html = markdown
+    // Escape HTML (but not for image/link syntax)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -298,10 +305,13 @@ function simpleMarkdownToHtml(markdown: string): string {
     .replace(/~~(.+?)~~/g, '<del>$1</del>')
     // Code
     .replace(/`([^`]+)`/g, '<code style="background: rgba(245,211,147,0.15); padding: 2px 6px; border-radius: 4px; color: #f5d393;">$1</code>')
+    // Images - process before links to avoid conflict
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
+      const resolvedUrl = resolveImageUrl(url);
+      return `<img src="${resolvedUrl}" alt="${alt}" style="max-width: 100%; border-radius: 8px; margin: 16px 0;" />`;
+    })
     // Links
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #f5d393;">$1</a>')
-    // Images
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; border-radius: 8px; margin: 16px 0;" />')
     // Lists
     .replace(/^- (.+)$/gm, '<li style="margin-left: 20px;">$1</li>')
     .replace(/^\d+\. (.+)$/gm, '<li style="margin-left: 20px;">$1</li>')

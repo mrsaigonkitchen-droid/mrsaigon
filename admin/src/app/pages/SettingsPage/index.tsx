@@ -4,18 +4,15 @@ import { tokens } from '@app/shared';
 import { useToast } from '../../components/Toast';
 import { LayoutTab } from './LayoutTab';
 import { CompanyTab } from './CompanyTab';
-import { ThemeTab } from './ThemeTab';
-import { NotificationsTab } from './NotificationsTab';
+import { PromoTab } from './PromoTab';
 import {
   type SettingsTab,
   type CompanySettings,
-  type ThemeSettings,
-  type NotificationSettings,
+  type PromoSettings,
   type HeaderConfig,
   type FooterConfig,
   defaultCompanySettings,
-  defaultThemeSettings,
-  defaultNotificationSettings,
+  defaultPromoSettings,
   defaultHeaderConfig,
   defaultFooterConfig,
   API_URL,
@@ -25,8 +22,7 @@ import {
 const TABS: Array<{ id: SettingsTab; label: string; icon: string }> = [
   { id: 'layout', label: 'Layout', icon: 'ri-layout-line' },
   { id: 'company', label: 'Công ty', icon: 'ri-building-2-line' },
-  { id: 'theme', label: 'Theme', icon: 'ri-palette-line' },
-  { id: 'notifications', label: 'Thông báo', icon: 'ri-notification-3-line' },
+  { id: 'promo', label: 'Quảng cáo', icon: 'ri-megaphone-line' },
 ];
 
 export function SettingsPage() {
@@ -35,8 +31,7 @@ export function SettingsPage() {
 
   // State
   const [companySettings, setCompanySettings] = useState<CompanySettings>(defaultCompanySettings);
-  const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
-  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(defaultNotificationSettings);
+  const [promoSettings, setPromoSettings] = useState<PromoSettings>(defaultPromoSettings);
   const [headerConfig, setHeaderConfig] = useState<HeaderConfig>(defaultHeaderConfig);
   const [footerConfig, setFooterConfig] = useState<FooterConfig>(defaultFooterConfig);
 
@@ -44,9 +39,9 @@ export function SettingsPage() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const [companyRes, themeRes] = await Promise.all([
+        const [companyRes, promoRes] = await Promise.all([
           fetch(`${API_URL}/settings/company`, { credentials: 'include' }),
-          fetch(`${API_URL}/settings/theme`, { credentials: 'include' }),
+          fetch(`${API_URL}/settings/promo`, { credentials: 'include' }),
         ]);
 
         if (companyRes.ok) {
@@ -54,9 +49,9 @@ export function SettingsPage() {
           if (data.value) setCompanySettings((prev) => ({ ...prev, ...data.value }));
         }
 
-        if (themeRes.ok) {
-          const data = await themeRes.json();
-          if (data.value) setThemeSettings((prev) => ({ ...prev, ...data.value }));
+        if (promoRes.ok) {
+          const data = await promoRes.json();
+          if (data.value) setPromoSettings((prev) => ({ ...prev, ...data.value }));
         }
       } catch (error) {
         console.error('Failed to fetch settings:', error);
@@ -168,22 +163,13 @@ export function SettingsPage() {
           />
         )}
 
-        {activeTab === 'theme' && (
-          <ThemeTab
-            key="theme"
-            settings={themeSettings}
-            onChange={setThemeSettings}
+        {activeTab === 'promo' && (
+          <PromoTab
+            key="promo"
+            settings={promoSettings}
+            onChange={setPromoSettings}
             onShowMessage={showSavedMessage}
             onError={handleError}
-          />
-        )}
-
-        {activeTab === 'notifications' && (
-          <NotificationsTab
-            key="notifications"
-            settings={notificationSettings}
-            onChange={setNotificationSettings}
-            onShowMessage={showSavedMessage}
           />
         )}
       </AnimatePresence>
