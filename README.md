@@ -1,96 +1,48 @@
-# AI Sales Agents Platform - Restaurant CMS
+# 🏗️ ANH THỢ XÂY (ATH) - WebApp MVP
 
-A modern, full-stack restaurant management system with Admin Dashboard and Landing Page builder.
+WebApp cho doanh nghiệp cải tạo nhà/căn hộ với tính năng báo giá & dự toán tự động.
 
-## 🚀 Features
+## 🎯 Mục tiêu
 
-### Admin Dashboard (Port 4201)
-- **Live Preview** - See your Landing Page changes in real-time with device preview (mobile/tablet/desktop)
-- **Section Editor** - Visual editor with live preview for all section types
-- **Drag & Drop** - Reorder sections easily
-- **Media Library** - Upload and manage images
-- **Reservations** - View and manage table bookings
-- **Pages Management** - Create and edit multiple pages
+1. **Khách hàng**: Nhận dự toán nhanh hoặc đăng ký tư vấn trực tiếp
+2. **Chủ doanh nghiệp**: Toàn quyền kiểm soát đơn giá, vật dụng, hạng mục, hệ số - không cần code
+3. **Sẵn sàng**: Automation AI + Google Sheet + SEO trong tương lai
 
-### Landing Page (Port 4200)
-- **Dynamic Sections** - Hero, Featured Menu, Testimonials, Stats, Gallery, CTA, and more
-- **Responsive Design** - Mobile-first, looks great on all devices
-- **Online Reservations** - Built-in booking form
-- **SEO Optimized** - Fast loading, semantic HTML
+## 🏗️ Kiến trúc Monorepo (Nx)
 
-### API Server (Port 4202)
-- **RESTful API** - Clean, documented endpoints
-- **PostgreSQL Database** - Reliable data storage
-- **Authentication** - JWT-based auth system
-- **File Upload** - Image upload with validation
+```
+├── landing/     → Port 4200 (React + Vite) - Website khách hàng
+├── admin/       → Port 4201 (React + Vite) - Dashboard quản trị  
+├── api/         → Port 4202 (Hono + Prisma) - Backend API
+├── packages/    → Shared libraries (@app/shared, @app/ui)
+└── infra/       → Prisma schema + Database
+```
 
-## 📦 Tech Stack
-
-### Frontend
-- **React 18** with TypeScript
-- **Framer Motion** - Smooth animations
-- **Vite** - Lightning fast builds
-- **CSS-in-JS** - Component-scoped styling
-
-### Backend
-- **NestJS** - Enterprise Node.js framework
-- **Prisma** - Type-safe database ORM
-- **PostgreSQL** - Production database
-- **JWT** - Secure authentication
-
-### Monorepo
-- **Nx** - Smart monorepo tools
-- **Shared Libraries** - Design tokens, utilities
-- **Hot Reload** - Fast development workflow
-
-## 🛠️ Development
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- PostgreSQL database
+- Node.js 18+
+- pnpm
 
 ### Installation
 
 ```bash
 # Install dependencies
-cd ai-sales-agents-platform
-npm install
+pnpm install
 
 # Setup database
-cd api
-npx prisma migrate dev
-npx prisma db seed
-
-# Return to root
-cd ..
+pnpm db:generate
+pnpm db:push
+pnpm db:seed
 ```
 
-### Running the Stack
+### Development
 
-**Option 1: Run all services at once**
 ```bash
-npm run dev:all
-```
-
-**Option 2: Run services individually**
-
-Terminal 1 - API Server:
-```bash
-npm run dev:api
-# Runs on http://localhost:4202
-```
-
-Terminal 2 - Landing Page:
-```bash
-npm run dev:landing
-# Runs on http://localhost:4200
-```
-
-Terminal 3 - Admin Dashboard:
-```bash
-npm run dev:admin
-# Runs on http://localhost:4201
+# Start all services
+pnpm dev:api      # API Server (http://localhost:4202)
+pnpm dev:landing  # Landing Page (http://localhost:4200)
+pnpm dev:admin    # Admin Dashboard (http://localhost:4201)
 ```
 
 ### Default Admin Login
@@ -99,181 +51,111 @@ Email: admin@example.com
 Password: admin123
 ```
 
+## 📦 Tech Stack
+
+- **Frontend**: React 18 + TypeScript + Vite
+- **Backend**: Hono (lightweight web framework)
+- **Database**: SQLite + Prisma ORM
+- **Monorepo**: Nx
+- **Styling**: CSS-in-JS với design tokens
+
+## ✨ Tính năng chính
+
+### Landing Page
+- **Trang chủ**: Hero, giới thiệu dịch vụ
+- **Báo giá & Dự toán**: Chọn hạng mục → Nhập diện tích → Chọn vật dụng → Xem dự toán
+- **Blog**: Bài viết SEO
+- **Form đăng ký tư vấn**: Thu thập lead
+
+### Admin Panel
+- **Dashboard**: Thống kê tổng quan
+- **Cấu hình báo giá**: Đơn giá, Vật dụng, Công thức, Hạng mục
+- **Quản lý Lead**: Theo dõi khách hàng đăng ký
+- **Blog Manager**: Tạo/sửa bài viết
+- **Media Library**: Quản lý hình ảnh
+- **Settings**: Cấu hình hệ thống, CTA, Promo popup
+
+## 📐 Công thức tính báo giá
+
+```
+TỔNG = (Kết quả công thức × Hệ số hạng mục) + Tổng giá vật dụng
+
+Ví dụ:
+- Hạng mục: Sơn tường (hệ số 1.2)
+- Diện tích: 50 m²
+- Đơn giá sơn: 80,000 VNĐ/m²
+- Vật dụng: Sơn Dulux (500,000 VNĐ)
+
+Công thức: (50 × 80,000 × 1.2) + 500,000 = 5,300,000 VNĐ
+```
+
+## 🔧 Scripts
+
+```bash
+# Database
+pnpm db:generate    # Generate Prisma client
+pnpm db:push        # Push schema to database
+pnpm db:seed        # Seed sample data
+
+# Development
+pnpm dev:api        # Start API server
+pnpm dev:landing    # Start Landing page
+pnpm dev:admin      # Start Admin dashboard
+
+# Type checking
+pnpm nx run landing:typecheck
+pnpm nx run admin:typecheck
+pnpm nx run api:typecheck
+
+# Build
+pnpm nx run-many --target=build --all
+```
+
 ## 📁 Project Structure
 
 ```
-ai-sales-agents-platform/
-├── admin/              # Admin Dashboard (React + Vite)
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── components/  # Reusable UI components
-│   │   │   ├── pages/       # Page components
-│   │   │   ├── api.ts       # API client
-│   │   │   ├── store.ts     # State management
-│   │   │   └── types.ts     # TypeScript types
-│   │   └── main.tsx
-│   └── vite.config.ts
+anh-tho-xay/
+├── admin/              # Admin Dashboard
+│   └── src/app/
+│       ├── components/ # UI components
+│       ├── pages/      # Page components
+│       ├── api.ts      # API client
+│       └── types.ts    # TypeScript types
 │
-├── landing/            # Landing Page (React + Vite)
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── sections/    # Section components
-│   │   │   └── app.tsx
-│   │   └── main.tsx
-│   └── vite.config.ts
+├── landing/            # Landing Page
+│   └── src/app/
+│       ├── sections/   # Section components
+│       ├── pages/      # Page components
+│       ├── components/ # Shared components
+│       └── api.ts      # API client
 │
-├── api/                # Backend API (NestJS)
-│   ├── src/
-│   │   ├── modules/
-│   │   │   ├── auth/        # Authentication
-│   │   │   ├── pages/       # Pages CRUD
-│   │   │   ├── sections/    # Sections CRUD
-│   │   │   ├── media/       # File upload
-│   │   │   └── reservations/# Booking management
-│   │   ├── prisma/
-│   │   │   └── schema.prisma
-│   │   └── main.ts
-│   └── nest-cli.json
+├── api/                # Backend API (Hono)
+│   └── src/
+│       ├── main.ts     # Routes & handlers
+│       ├── schemas.ts  # Zod validation
+│       └── middleware.ts
 │
-└── shared/             # Shared code (Design tokens, utilities)
-    └── src/
-        └── tokens.ts   # Design system tokens
-
+├── packages/
+│   ├── shared/         # Design tokens, utilities
+│   └── ui/             # Shared UI components
+│
+└── infra/
+    └── prisma/
+        ├── schema.prisma  # Database schema
+        └── seed.ts        # Seed data
 ```
 
-## 🎨 Section Types
+## 👥 Phân quyền
 
-The CMS supports the following section types:
-
-1. **HERO** - Main banner with image, title, subtitle, and CTA
-2. **FEATURED_MENU** - Showcase menu items with images and prices
-3. **TESTIMONIALS** - Customer reviews carousel or grid
-4. **STATS** - Achievement numbers with icons
-5. **GALLERY** - Image gallery grid
-6. **CTA** - Call-to-action section
-7. **SPECIAL_OFFERS** - Promotional offers display
-8. **CONTACT_INFO** - Contact details and map
-9. **RESERVATION_FORM** - Table booking form
-10. **RICH_TEXT** - Custom HTML content
-11. **BANNER** - Announcement banner
-
-## 🔧 Configuration
-
-### Database
-Configure in `api/.env`:
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/restaurant_cms"
-JWT_SECRET="your-secret-key"
-```
-
-### Upload Directory
-Media uploads stored in: `api/uploads/`
-
-### CORS
-Admin and Landing pages are pre-configured in API CORS settings.
-
-## 📱 Live Preview Feature
-
-The Admin Dashboard includes a powerful **Live Preview** feature:
-
-1. Navigate to "Live Preview" in the sidebar
-2. See your Landing Page in an embedded iframe
-3. Switch between Desktop/Tablet/Mobile views
-4. Changes auto-refresh when you save sections
-5. Open in new tab for full testing
-
-## 🎯 Usage Guide
-
-### Creating a New Section
-
-1. Go to **Sections** page
-2. Click **Create Section**
-3. Choose section type
-4. Fill in the form (use Preview toggle to see live preview)
-5. Click **Create Section**
-6. Drag to reorder if needed
-
-### Managing Reservations
-
-1. Go to **Reservations** page
-2. View all bookings with status filters
-3. Click on a reservation to view details
-4. Change status: Pending → Confirmed/Cancelled
-5. Search and filter by date, name, or status
-
-### Uploading Media
-
-1. Go to **Media** page
-2. Click **Upload Media** or drag & drop files
-3. Images are automatically optimized
-4. Copy URL to use in sections
-5. Delete unused media to save space
-
-## 🚢 Production Deployment
-
-### Build for Production
-
-```bash
-# Build all apps
-npm run build
-
-# Or build individually
-npm run build:admin
-npm run build:landing
-npm run build:api
-```
-
-### Environment Variables
-
-**API (.env)**:
-```env
-NODE_ENV=production
-DATABASE_URL=your_production_db_url
-JWT_SECRET=strong_random_secret
-PORT=4202
-```
-
-**Admin & Landing**:
-Set `VITE_API_URL` in build environment or use proxy.
-
-### Deployment Platforms
-
-- **Frontend**: Vercel, Netlify, Cloudflare Pages
-- **Backend**: Railway, Render, DigitalOcean
-- **Database**: Supabase, Neon, Railway
-
-## 🐛 Troubleshooting
-
-### Port Already in Use
-```bash
-# Kill process on port (Windows)
-netstat -ano | findstr :4200
-taskkill /PID <PID> /F
-
-# Kill process on port (Mac/Linux)
-lsof -ti:4200 | xargs kill -9
-```
-
-### Database Connection Error
-1. Ensure PostgreSQL is running
-2. Check DATABASE_URL in `.env`
-3. Run migrations: `npx prisma migrate dev`
-
-### CORS Errors
-- Check API is running on port 4202
-- Verify CORS settings in `api/src/main.ts`
+| Role | Quyền |
+|------|-------|
+| **ADMIN** | Toàn quyền |
+| **QUẢN LÝ** | Xem/quản lý khách hàng, blog. Đề xuất sửa đơn giá/vật dụng (cần Admin duyệt) |
 
 ## 📝 License
 
 MIT
 
-## 👥 Support
-
-For issues or questions:
-- Check the docs above
-- Review code comments
-- Create an issue on GitHub
-
 ---
 
-**Built with ❤️ for restaurants by AI Sales Agents Platform**
+**Built with ❤️ for ANH THỢ XÂY**

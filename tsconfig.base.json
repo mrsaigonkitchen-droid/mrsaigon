@@ -15,7 +15,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@ai-sales-agents-platform/source": ["src/index.ts"],
       "@app/shared": ["packages/shared/src/index.ts"],
       "@app/ui": ["packages/ui/src/index.ts"]
     }
