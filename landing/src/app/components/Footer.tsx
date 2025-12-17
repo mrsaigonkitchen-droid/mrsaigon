@@ -39,35 +39,34 @@ interface FooterProps {
 }
 
 export function Footer({ config }: FooterProps) {
-  // Default config
+  // Default config - ANH THỢ XÂY
   const defaultConfig: FooterConfig = {
     brand: {
-      text: 'Restaurant',
-      icon: 'ri-restaurant-2-fill',
+      text: 'Anh Thợ Xây',
+      icon: 'ri-building-2-fill',
       description:
-        'Trải nghiệm ẩm thực tinh tế với không gian sang trọng và dịch vụ chuyên nghiệp.',
-      awards: ['🏆', '⭐', '🎖️'],
+        'Dịch vụ cải tạo nhà và căn hộ chuyên nghiệp. Báo giá minh bạch, thi công uy tín.',
+      awards: ['🏗️', '⭐', '✅'],
     },
     quickLinks: [
-      { label: 'Menu', href: '/menu' },
-      { label: 'About', href: '/about' },
-      { label: 'Gallery', href: '/gallery' },
-      { label: 'Contact', href: '/contact' },
+      { label: 'Trang chủ', href: '/' },
+      { label: 'Báo giá', href: '/bao-gia' },
+      { label: 'Blog', href: '/blog' },
+      { label: 'Chính sách', href: '/chinh-sach' },
     ],
     newsletter: {
       enabled: true,
-      title: 'Nhận ưu đãi',
-      description: 'Đăng ký để nhận thông tin khuyến mãi mới nhất',
+      title: 'Nhận tư vấn',
+      description: 'Đăng ký để nhận tư vấn và báo giá miễn phí',
       placeholder: 'Email của bạn',
     },
     socialLinks: [
       { platform: 'facebook', url: 'https://facebook.com', icon: 'ri-facebook-fill' },
-      { platform: 'instagram', url: 'https://instagram.com', icon: 'ri-instagram-fill' },
+      { platform: 'zalo', url: 'https://zalo.me', icon: 'ri-chat-3-fill' },
       { platform: 'youtube', url: 'https://youtube.com', icon: 'ri-youtube-fill' },
-      { platform: 'twitter', url: 'https://twitter.com', icon: 'ri-twitter-fill' },
     ],
     copyright: {
-      text: `© ${new Date().getFullYear()} Restaurant. All rights reserved.`,
+      text: `© ${new Date().getFullYear()} Anh Thợ Xây. All rights reserved.`,
     },
   };
 
@@ -122,7 +121,7 @@ export function Footer({ config }: FooterProps) {
               >
                 <img
                   src={`http://localhost:4202${brand.imageUrl}`}
-                  alt={brand.text || 'Restaurant Logo'}
+                  alt={brand.text || 'Anh Thợ Xây Logo'}
                   style={{
                     height: 70,
                     width: 'auto',

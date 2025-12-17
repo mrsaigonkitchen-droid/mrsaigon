@@ -1,7 +1,7 @@
 /**
  * Image Optimization Utilities
  * 
- * Provides comprehensive image handling for the restaurant platform:
+ * Provides comprehensive image handling for ANH THỢ XÂY platform:
  * - Responsive image URLs with srcset
  * - Modern format conversion (WebP/AVIF)
  * - Lazy loading support

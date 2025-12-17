@@ -250,7 +250,7 @@ export function NewsletterSignup({ variant = 'inline', className = '' }: Newslet
               lineHeight: 1.6,
               margin: 0
             }}>
-              Nhận những bài viết mới nhất, công thức nấu ăn và tips hữu ích qua email mỗi tuần
+              Nhận những bài viết mới nhất về cải tạo nhà và tips hữu ích qua email mỗi tuần
             </p>
           </div>
         </div>

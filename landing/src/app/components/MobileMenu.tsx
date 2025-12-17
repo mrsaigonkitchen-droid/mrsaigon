@@ -28,12 +28,12 @@ export function MobileMenu({ currentRoute }: MobileMenuProps) {
     };
   }, [isOpen]);
 
+  // ANH THỢ XÂY menu items
   const menuItems = [
     { route: '/', label: 'Trang chủ', icon: 'ri-home-fill' },
-    { route: '/menu', label: 'Thực đơn', icon: 'ri-restaurant-fill' },
-    { route: '/about', label: 'Về chúng tôi', icon: 'ri-information-fill' },
-    { route: '/gallery', label: 'Thư viện', icon: 'ri-gallery-fill' },
-    { route: '/contact', label: 'Liên hệ', icon: 'ri-phone-fill' },
+    { route: '/bao-gia', label: 'Báo giá', icon: 'ri-calculator-fill' },
+    { route: '/blog', label: 'Blog', icon: 'ri-article-fill' },
+    { route: '/chinh-sach', label: 'Chính sách', icon: 'ri-shield-check-fill' },
   ];
 
   return (
@@ -117,8 +117,8 @@ export function MobileMenu({ currentRoute }: MobileMenuProps) {
                   gap: 12,
                 }}
               >
-                <i className="ri-restaurant-2-fill" />
-                Restaurant
+                <i className="ri-building-2-fill" />
+                Anh Thợ Xây
               </motion.div>
 
               {/* Navigation Items */}
@@ -199,12 +199,12 @@ export function MobileMenu({ currentRoute }: MobileMenuProps) {
                   }}
                 >
                   <i className="ri-phone-fill" />
-                  Gọi đặt bàn ngay
+                  Liên hệ ngay
                 </a>
 
                 {/* Social Links */}
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 8 }}>
-                  {['facebook', 'instagram', 'youtube', 'twitter'].map((social) => (
+                  {['facebook', 'youtube', 'tiktok'].map((social) => (
                     <motion.a
                       key={social}
                       href={`https://${social}.com`}

@@ -28,8 +28,8 @@ const defaultMethods: ContactMethod[] = [
   {
     icon: 'ri-mail-fill',
     title: 'EMAIL',
-    value: 'info@restaurant.com',
-    href: 'mailto:info@restaurant.com',
+    value: 'info@anhthoxay.com',
+    href: 'mailto:info@anhthoxay.com',
     color: '#3b82f6',
   },
   {
@@ -41,8 +41,8 @@ const defaultMethods: ContactMethod[] = [
   },
   {
     icon: 'ri-time-fill',
-    title: 'GIỜ MỞ CỬA',
-    value: 'Thứ 2 - CN: 10:00 - 22:00',
+    title: 'GIỜ LÀM VIỆC',
+    value: 'Thứ 2 - Thứ 7: 8:00 - 18:00',
     color: tokens.color.primary,
   },
 ];

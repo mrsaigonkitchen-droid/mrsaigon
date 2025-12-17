@@ -121,6 +121,9 @@ inclusion: always
 - Comment code cũ thay vì xóa
 - Tạo utility rác trong component
 - Suppress warnings bằng eslint-disable mà không có lý do
+- **TỰ Ý push lên GitHub** - CHỈ push khi user yêu cầu
+- **TỰ Ý rollback/revert** - CHỈ rollback khi user yêu cầu
+- Thực hiện git operations (push, pull, reset, revert) mà không có sự đồng ý của user
 
 ## ✅ LUÔN LÀM
 - Kiểm tra code hiện tại trước

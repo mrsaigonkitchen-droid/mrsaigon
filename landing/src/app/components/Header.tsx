@@ -48,22 +48,21 @@ export function Header({ config, mobileMenuComponent }: HeaderProps) {
     ['0 0 0 rgba(0,0,0,0)', '0 4px 24px rgba(0,0,0,0.4)']
   );
 
-  // Default config
+  // Default config - ANH THỢ XÂY
   const defaultConfig: HeaderConfig = {
     logo: {
-      text: 'Restaurant',
-      icon: 'ri-restaurant-2-line',
+      text: 'Anh Thợ Xây',
+      icon: 'ri-building-2-line',
       animateIcon: true,
     },
     links: [
-      { href: '/menu', label: 'Menu', icon: 'ri-restaurant-line' },
-      { href: '/about', label: 'About', icon: 'ri-information-line' },
-      { href: '/gallery', label: 'Gallery', icon: 'ri-image-line' },
+      { href: '/', label: 'Trang chủ', icon: 'ri-home-line' },
+      { href: '/bao-gia', label: 'Báo giá', icon: 'ri-calculator-line' },
       { href: '/blog', label: 'Blog', icon: 'ri-article-line' },
-      { href: '/contact', label: 'Contact', icon: 'ri-map-pin-line' },
+      { href: '/chinh-sach', label: 'Chính sách', icon: 'ri-shield-check-line' },
     ],
     ctaButton: {
-      text: 'Đặt bàn ngay',
+      text: 'Liên hệ ngay',
       href: 'tel:+84123456789',
       icon: 'ri-phone-line',
     },
@@ -113,7 +112,7 @@ export function Header({ config, mobileMenuComponent }: HeaderProps) {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <img
                 src={`http://localhost:4202${logo.imageUrl}`}
-                alt={logo.text || 'Restaurant Logo'}
+                alt={logo.text || 'Anh Thợ Xây Logo'}
                 style={{
                   maxHeight: 50,
                   maxWidth: 200,
