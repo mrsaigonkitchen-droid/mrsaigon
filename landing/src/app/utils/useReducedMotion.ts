@@ -40,14 +40,14 @@ export function getAnimationConfig(shouldReduce: boolean) {
 
   return {
     // Allow normal animations
-    transition: { duration: 0.3, ease: 'easeOut' },
+    transition: { duration: 0.3, ease: 'easeOut' as const },
   };
 }
 
 /**
  * Throttle animation updates for better performance
  */
-export function useThrottledScroll(callback: () => void, delay: number = 100) {
+export function useThrottledScroll(callback: () => void, delay = 100) {
   useEffect(() => {
     let lastRun = 0;
     let timeout: NodeJS.Timeout;

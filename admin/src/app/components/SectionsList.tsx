@@ -189,7 +189,7 @@ export function SectionsList({
     }
   }
 
-  // Get category color for section
+  // Get category color for section - ATH Construction/Renovation categories
   function getCategoryColor(section: Section): string {
     switch (section.kind) {
       case 'HERO':
@@ -202,25 +202,19 @@ export function SectionsList({
       case 'MISSION_VISION':
       case 'CORE_VALUES':
         return categoryColors['Content'];
-      case 'GALLERY':
-      case 'GALLERY_SLIDESHOW':
-      case 'FEATURED_BLOG_POSTS':
-        return categoryColors['Gallery & Media'];
       case 'TESTIMONIALS':
         return categoryColors['Social Proof'];
       case 'CTA':
       case 'CALL_TO_ACTION':
         return categoryColors['Call to Action'];
-      case 'RESERVATION_FORM':
       case 'CONTACT_INFO':
-      case 'OPENING_HOURS':
       case 'SOCIAL_MEDIA':
       case 'FOOTER_SOCIAL':
       case 'QUICK_CONTACT':
         return categoryColors['Forms & Contact'];
-      case 'FEATURED_MENU':
-      case 'SPECIAL_OFFERS':
-        return categoryColors['Menu & Offers'];
+      case 'FEATURED_BLOG_POSTS':
+      case 'BLOG_LIST':
+        return categoryColors['Blog'];
       case 'FAB_ACTIONS':
         return '#f5d393'; // Gold color for floating actions
       default:

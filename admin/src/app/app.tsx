@@ -3,17 +3,20 @@ import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation, Navi
 import { motion, AnimatePresence } from 'framer-motion';
 import { LoginPage } from './components/LoginPage';
 import { Layout } from './components/Layout';
+import { ToastProvider } from './components/Toast';
 import { DashboardPage } from './pages/DashboardPage';
-import { PagesPage } from './pages/PagesPage';
+
 import { SectionsPage } from './pages/SectionsPage';
-import { MenuPage } from './pages/MenuPage';
 import { MediaPage } from './pages/MediaPage';
-import { ReservationsPage } from './pages/ReservationsPage';
 import { LivePreviewPage } from './pages/LivePreviewPage';
 import { BlogCategoriesPage } from './pages/BlogCategoriesPage';
 import { BlogPostsPage } from './pages/BlogPostsPage';
-import { SpecialOffersPage } from './pages/SpecialOffersPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { LeadsPage } from './pages/LeadsPage';
+import { ServiceCategoriesPage } from './pages/ServiceCategoriesPage';
+import { UnitPricesPage } from './pages/UnitPricesPage';
+import { MaterialsPage } from './pages/MaterialsPage';
+import { FormulasPage } from './pages/FormulasPage';
 import { useUser, store } from './store';
 import { authApi } from './api';
 import type { RouteType } from './types';
@@ -30,7 +33,7 @@ function AppContent() {
     authApi
       .me()
       .then((userData) => {
-        store.setUser(userData as any);
+        store.setUser(userData as Parameters<typeof store.setUser>[0]);
       })
       .catch(() => {
         // Not logged in
@@ -113,11 +116,13 @@ function AppContent() {
             {/* Legacy routes for backward compatibility */}
             <Route path="/sections/:slug" element={<SectionsPageWrapper />} />
             <Route path="/sections" element={<Navigate to="/pages/home" replace />} />
-            <Route path="/menu" element={<MenuPage />} />
+            <Route path="/leads" element={<LeadsPage />} />
+            <Route path="/service-categories" element={<ServiceCategoriesPage />} />
+            <Route path="/unit-prices" element={<UnitPricesPage />} />
+            <Route path="/materials" element={<MaterialsPage />} />
+            <Route path="/formulas" element={<FormulasPage />} />
             <Route path="/media" element={<MediaPage />} />
-            <Route path="/reservations" element={<ReservationsPage />} />
             <Route path="/preview" element={<LivePreviewPage />} />
-            <Route path="/offers" element={<SpecialOffersPage />} />
             <Route path="/blog-categories" element={<BlogCategoriesPage />} />
             <Route path="/blog-posts" element={<BlogPostsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
@@ -139,7 +144,9 @@ function SectionsPageWrapper() {
 export function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </BrowserRouter>
   );
 }

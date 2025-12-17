@@ -1,34 +1,12 @@
 import { useState, useEffect, useRef, CSSProperties } from 'react';
 
 /**
- * Generate srcset string from image URL
- * Assumes API generates: {id}-sm.webp (400w), {id}-md.webp (800w), {id}-lg.webp (1200w), {id}-xl.webp (1920w)
+ * Helper to get full image URL
  */
-function generateSrcSet(src: string): string {
-  if (!src || !src.includes('/media/')) return '';
-  
-  // Extract base URL and filename
-  const parts = src.split('/');
-  const filename = parts[parts.length - 1];
-  const baseUrl = parts.slice(0, -1).join('/');
-  
-  // Remove extension and size suffix if present
-  const filenameWithoutExt = filename.replace(/\.(webp|jpg|jpeg|png|gif)$/i, '');
-  const baseId = filenameWithoutExt.replace(/-(sm|md|lg|xl)$/, '');
-  
-  // Generate srcset with all available sizes
-  const sizes = [
-    { suffix: 'sm', width: 400 },
-    { suffix: 'md', width: 800 },
-    { suffix: 'lg', width: 1200 },
-    { suffix: 'xl', width: 1920 },
-  ];
-  
-  const srcsetEntries = sizes.map(
-    ({ suffix, width }) => `${baseUrl}/${baseId}-${suffix}.webp ${width}w`
-  );
-  
-  return srcsetEntries.join(', ');
+function getFullImageUrl(src: string): string {
+  if (!src) return '';
+  if (src.startsWith('http')) return src;
+  return `http://localhost:4202${src}`;
 }
 
 interface OptimizedImageProps {
@@ -42,7 +20,6 @@ interface OptimizedImageProps {
   onMouseLeave?: (e: React.MouseEvent<HTMLImageElement>) => void;
   loading?: 'lazy' | 'eager';
   blurDataURL?: string; // Optional blur placeholder
-  sizes?: string; // Optional sizes attribute for responsive images
 }
 
 /**
@@ -65,16 +42,15 @@ export function OptimizedImage({
   onMouseLeave,
   loading = 'lazy',
   blurDataURL,
-  sizes = '(max-width: 640px) 400px, (max-width: 1024px) 800px, (max-width: 1536px) 1200px, 1920px',
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(loading === 'eager');
   const [hasError, setHasError] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for lazy loading with better performance
   useEffect(() => {
-    if (loading === 'eager' || !imgRef.current) return;
+    if (loading === 'eager' || !containerRef.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -94,7 +70,7 @@ export function OptimizedImage({
       }
     );
 
-    observer.observe(imgRef.current);
+    observer.observe(containerRef.current);
 
     return () => observer.disconnect();
   }, [loading]);
@@ -114,12 +90,12 @@ export function OptimizedImage({
 
   const placeholderColor = blurDataURL || defaultBlurDataURL;
   
-  // Generate srcset for responsive images
-  const srcset = generateSrcSet(src);
+  // Get full image URL
+  const fullSrc = getFullImageUrl(src);
 
   return (
     <div
-      ref={imgRef as any}
+      ref={containerRef}
       style={{
         position: 'relative',
         overflow: 'hidden',
@@ -139,12 +115,10 @@ export function OptimizedImage({
         />
       )}
 
-      {/* Actual Image with srcset */}
+      {/* Actual Image */}
       {isInView && !hasError && (
         <img
-          src={src}
-          srcSet={srcset || undefined}
-          sizes={sizes}
+          src={fullSrc}
           alt={alt}
           onLoad={handleLoad}
           onError={handleError}

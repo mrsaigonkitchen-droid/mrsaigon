@@ -8,7 +8,7 @@ interface MobileMenuProps {
   onNavigate: (route: string) => void;
 }
 
-export function MobileMenu({ currentRoute, onNavigate }: MobileMenuProps) {
+export function MobileMenu({ currentRoute }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Close menu when route changes

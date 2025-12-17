@@ -1,6 +1,33 @@
+import { Component, ReactNode } from 'react';
 import { renderSection } from '../sections/render';
 import { LazySection } from '../components/LazySection';
 import type { PageData } from '../types';
+
+// Error boundary to catch section render errors
+class SectionErrorBoundary extends Component<
+  { children: ReactNode; sectionId: string },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; sectionId: string }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error(`Section ${this.props.sectionId} error:`, error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+    return this.props.children;
+  }
+}
 
 export function BlogPage({ page }: { page?: PageData }) {
   return (
@@ -15,18 +42,20 @@ export function BlogPage({ page }: { page?: PageData }) {
           ?.filter((s) => s.kind !== 'FAB_ACTIONS') // FAB rendered separately in app.tsx
           .sort((a, b) => (a.order || 0) - (b.order || 0))
           .map((s, index) => {
-            const rendered = renderSection(s);
-            if (!rendered) return null;
-            
             // Lazy load sections after first 2
             const shouldLazy = index >= 2;
+            const content = (
+              <SectionErrorBoundary sectionId={s.id}>
+                <div style={{ marginBottom: 40 }}>{renderSection(s)}</div>
+              </SectionErrorBoundary>
+            );
             
             return shouldLazy ? (
               <LazySection key={s.id} rootMargin="300px">
-                <div style={{ marginBottom: 40 }}>{rendered}</div>
+                {content}
               </LazySection>
             ) : (
-              <div key={s.id} style={{ marginBottom: 40 }}>{rendered}</div>
+              <div key={s.id}>{content}</div>
             );
           })}
       </div>

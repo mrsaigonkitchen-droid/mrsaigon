@@ -52,7 +52,7 @@ export function NewsletterSignup({ variant = 'inline', className = '' }: Newslet
         setStatus('idle');
         setMessage('');
       }, 5000);
-    } catch (error) {
+    } catch {
       setStatus('error');
       setMessage('Có lỗi xảy ra. Vui lòng thử lại.');
       

@@ -83,7 +83,7 @@ export function OptimizedImage({
 
   return (
     <div
-      ref={imgRef as any}
+      ref={imgRef as React.RefObject<HTMLDivElement>}
       style={{
         position: 'relative',
         overflow: 'hidden',

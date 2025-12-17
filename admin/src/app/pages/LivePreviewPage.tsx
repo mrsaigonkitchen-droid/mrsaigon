@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { tokens } from '@app/shared';
-import { Card } from '../components/Card';
+
 import { Button } from '../components/Button';
 
 export function LivePreviewPage() {
@@ -20,7 +20,6 @@ export function LivePreviewPage() {
   }
 
   const iframeWidth = isMobile ? '375px' : isTablet ? '768px' : '100%';
-  const iframeHeight = '100%';
 
   return (
     <div style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', gap: 16 }}>

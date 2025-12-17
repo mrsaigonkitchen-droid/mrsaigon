@@ -9,8 +9,10 @@ import { SectionEditor } from '../components/SectionEditor';
 import { SectionTypePicker } from '../components/SectionTypePicker';
 import { SectionsList } from '../components/SectionsList';
 import { PageSelectorBar } from '../components/PageSelectorBar';
+import { useToast } from '../components/Toast';
 
 export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
+  const toast = useToast();
   const [pages, setPages] = useState<Page[]>([]);
   const [page, setPage] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,15 +66,24 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
   }
 
   async function handleCreatePage(data: { slug: string; title: string }) {
-    await pagesApi.create(data);
+    const newPage = await pagesApi.create(data);
+    // Refresh pages list and select the new page
+    await loadPages();
+    if (newPage) {
+      await loadPage(newPage.slug);
+    }
   }
 
   async function handleEditPage(slug: string, data: { title: string }) {
     await pagesApi.update(slug, data);
+    // Refresh pages list to show updated title
+    await loadPages();
   }
 
   async function handleDeletePage(slug: string) {
     await pagesApi.delete(slug);
+    // Refresh pages list after deletion
+    await loadPages();
   }
 
   async function handleDeleteSection(sectionId: string) {
@@ -101,12 +112,12 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
     }
   }
 
-  async function handleSaveSection(sectionId: string | null, data: unknown) {
+  async function handleSaveSection(sectionId: string | null, data: unknown, syncAll?: boolean) {
     if (!page) return;
     try {
       if (sectionId) {
-        // Update existing section
-        await sectionsApi.update(sectionId, { data });
+        // Update existing section (with optional sync to all sections of same kind)
+        await sectionsApi.update(sectionId, { data, syncAll });
       } else if (creatingSection) {
         // Create new section
         await sectionsApi.create(page.slug, { kind: creatingSection, data });
@@ -116,12 +127,11 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
       setPreviewKey(prev => prev + 1);
       setEditingSection(null);
       setCreatingSection(null);
+      toast.success(syncAll ? 'Section đã được lưu và đồng bộ!' : 'Section đã được lưu!');
     } catch (error) {
       console.error('Failed to save section:', error);
-      // Show error to user
       const errorMessage = error instanceof Error ? error.message : 'Failed to save section';
-      alert(`Error: ${errorMessage}\n\nPlease check the console for more details.`);
-      // Re-throw to prevent modal from closing
+      toast.error(`Lỗi: ${errorMessage}`);
       throw error;
     }
   }
@@ -138,32 +148,25 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
     setPreviewKey(prev => prev + 1);
   }
 
+  // ATH Construction/Renovation section types
   const sectionTypes: Array<{ kind: SectionKind; icon: string; label: string; description: string }> = [
-    { kind: 'HEADER', icon: 'ri-layout-top-2-line', label: 'Header', description: 'Navigation header with logo & links' },
-    { kind: 'FOOTER', icon: 'ri-layout-bottom-2-line', label: 'Footer', description: 'Footer with brand info & links' },
-    { kind: 'HERO', icon: 'ri-layout-top-line', label: 'Hero Section', description: 'Main banner with CTA' },
-    { kind: 'HERO_SIMPLE', icon: 'ri-layout-top-fill', label: 'Simple Hero', description: 'Lightweight hero for secondary pages' },
-    { kind: 'GALLERY', icon: 'ri-gallery-line', label: 'Gallery Grid', description: 'Image grid with lightbox' },
-    { kind: 'GALLERY_SLIDESHOW', icon: 'ri-slideshow-line', label: 'Gallery Slideshow', description: 'Auto-playing slideshow' },
-    { kind: 'FEATURED_MENU', icon: 'ri-restaurant-2-line', label: 'Featured Menu', description: 'Showcase signature dishes' },
-    { kind: 'FEATURED_BLOG_POSTS', icon: 'ri-article-line', label: 'Featured Blog Posts', description: 'Latest blog posts' },
-    { kind: 'TESTIMONIALS', icon: 'ri-message-3-line', label: 'Testimonials', description: 'Customer reviews' },
-    { kind: 'STATS', icon: 'ri-bar-chart-line', label: 'Statistics', description: 'Display key numbers' },
-    { kind: 'FEATURES', icon: 'ri-star-line', label: 'Features', description: 'Key features/values' },
-    { kind: 'MISSION_VISION', icon: 'ri-flag-line', label: 'Mission & Vision', description: 'Company mission/vision' },
-    { kind: 'CORE_VALUES', icon: 'ri-heart-3-line', label: 'Core Values', description: 'Display core values and principles' },
-    { kind: 'CTA', icon: 'ri-megaphone-line', label: 'Call to Action', description: 'Action button' },
-    { kind: 'CALL_TO_ACTION', icon: 'ri-megaphone-fill', label: 'Call to Action', description: 'CTA with primary and secondary buttons' },
-    { kind: 'CONTACT_INFO', icon: 'ri-contacts-line', label: 'Contact Info', description: 'Contact details' },
-    { kind: 'OPENING_HOURS', icon: 'ri-time-line', label: 'Opening Hours', description: 'Business hours' },
-    { kind: 'SOCIAL_MEDIA', icon: 'ri-share-line', label: 'Social Media', description: 'Social links' },
-    { kind: 'RESERVATION_FORM', icon: 'ri-calendar-line', label: 'Reservation Form', description: 'Booking form' },
-    { kind: 'SPECIAL_OFFERS', icon: 'ri-price-tag-3-line', label: 'Special Offers', description: 'Promotional deals' },
-    { kind: 'FAB_ACTIONS', icon: 'ri-customer-service-line', label: 'Floating Buttons', description: 'Corner action buttons' },
-    { kind: 'FOOTER_SOCIAL', icon: 'ri-share-forward-line', label: 'Footer Social', description: 'Footer social links' },
-    { kind: 'QUICK_CONTACT', icon: 'ri-contacts-fill', label: 'Quick Contact', description: 'Quick contact cards' },
-    { kind: 'RICH_TEXT', icon: 'ri-text', label: 'Rich Text', description: 'Custom markdown content' },
-    { kind: 'BANNER', icon: 'ri-notification-line', label: 'Banner', description: 'Notice banner' },
+    { kind: 'HERO', icon: 'ri-layout-top-line', label: 'Hero Banner', description: 'Banner chính với CTA' },
+    { kind: 'HERO_SIMPLE', icon: 'ri-layout-top-fill', label: 'Hero Đơn Giản', description: 'Hero nhẹ cho trang phụ' },
+    { kind: 'FEATURED_BLOG_POSTS', icon: 'ri-article-line', label: 'Bài Viết Nổi Bật', description: 'Hiển thị bài blog mới nhất' },
+    { kind: 'TESTIMONIALS', icon: 'ri-message-3-line', label: 'Đánh Giá Khách Hàng', description: 'Phản hồi từ khách hàng' },
+    { kind: 'STATS', icon: 'ri-bar-chart-line', label: 'Thống Kê', description: 'Hiển thị số liệu nổi bật' },
+    { kind: 'FEATURES', icon: 'ri-star-line', label: 'Tính Năng/Dịch Vụ', description: 'Các dịch vụ cải tạo nhà' },
+    { kind: 'MISSION_VISION', icon: 'ri-flag-line', label: 'Sứ Mệnh & Tầm Nhìn', description: 'Giới thiệu công ty' },
+    { kind: 'CORE_VALUES', icon: 'ri-heart-3-line', label: 'Giá Trị Cốt Lõi', description: 'Cam kết chất lượng' },
+    { kind: 'CTA', icon: 'ri-megaphone-line', label: 'Kêu Gọi Hành Động', description: 'Nút CTA đơn giản' },
+    { kind: 'CALL_TO_ACTION', icon: 'ri-megaphone-fill', label: 'CTA Đầy Đủ', description: 'CTA với 2 nút' },
+    { kind: 'CONTACT_INFO', icon: 'ri-contacts-line', label: 'Thông Tin Liên Hệ', description: 'Địa chỉ, SĐT, email' },
+    { kind: 'SOCIAL_MEDIA', icon: 'ri-share-line', label: 'Mạng Xã Hội', description: 'Link social media' },
+    { kind: 'FAB_ACTIONS', icon: 'ri-customer-service-line', label: 'Nút Nổi', description: 'Nút liên hệ nhanh góc màn hình' },
+    { kind: 'FOOTER_SOCIAL', icon: 'ri-share-forward-line', label: 'Footer Social', description: 'Social links ở footer' },
+    { kind: 'QUICK_CONTACT', icon: 'ri-contacts-fill', label: 'Liên Hệ Nhanh', description: 'Card liên hệ nhanh' },
+    { kind: 'RICH_TEXT', icon: 'ri-text', label: 'Nội Dung Tùy Chỉnh', description: 'Markdown/HTML content' },
+    { kind: 'BANNER', icon: 'ri-notification-line', label: 'Thông Báo', description: 'Banner thông báo' },
   ];
 
   if (loading) {
@@ -278,8 +281,7 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
                 categoryColors={{
                   'Hero & Banners': '#f5d393',
                   'Content': '#3B82F6',
-                  'Menu & Offers': '#10B981',
-                  'Gallery & Media': '#8B5CF6',
+                  'Blog': '#8B5CF6',
                   'Social Proof': '#F59E0B',
                   'Call to Action': '#EF4444',
                   'Forms & Contact': '#06B6D4',
@@ -349,7 +351,7 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
             </div>
             <iframe
               key={previewKey}
-              src="http://localhost:4200"
+              src={`http://localhost:4200/${page?.slug === 'home' ? '' : page?.slug || ''}`}
               style={{
                 flex: 1,
                 border: 'none',
@@ -382,7 +384,7 @@ export function SectionsPage({ pageSlug = 'home' }: { pageSlug?: string }) {
             key={editingSection?.id || `new-${creatingSection}`}
             section={editingSection}
             kind={creatingSection || editingSection?.kind || 'HERO'}
-            onSave={(data) => handleSaveSection(editingSection?.id || null, data)}
+            onSave={(data, syncAll) => handleSaveSection(editingSection?.id || null, data, syncAll)}
             onCancel={() => {
               setEditingSection(null);
               setCreatingSection(null);

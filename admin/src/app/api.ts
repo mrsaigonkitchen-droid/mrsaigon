@@ -1,8 +1,26 @@
-// API Client for Admin Dashboard
+// API Client for Admin Dashboard - ANH THỢ XÂY
+import type { 
+  Page, 
+  Section, 
+  MediaAsset, 
+  BlogCategory, 
+  BlogPost,
+  CustomerLead,
+  ServiceCategory,
+  UnitPrice,
+  Material,
+  Formula,
+} from './types';
+
 const API_BASE = 'http://localhost:4202';
 
-interface FetchOptions extends RequestInit {
+interface FetchOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;
+}
+
+interface ValidationDetail {
+  field: string;
+  message: string;
 }
 
 async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
@@ -13,9 +31,15 @@ async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promis
   };
 
   const config: RequestInit = {
-    ...options,
     headers,
     credentials: 'include', // Important for cookies
+    method: options.method,
+    cache: options.cache,
+    mode: options.mode,
+    redirect: options.redirect,
+    referrer: options.referrer,
+    referrerPolicy: options.referrerPolicy,
+    signal: options.signal,
   };
 
   if (options.body && typeof options.body !== 'string') {
@@ -30,8 +54,8 @@ async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promis
     // Format validation errors if present
     let errorMessage = error.error || error.message || `HTTP ${response.status}: ${response.statusText}`;
     if (error.details && Array.isArray(error.details)) {
-      const validationErrors = error.details
-        .map((detail: any) => `${detail.field}: ${detail.message}`)
+      const validationErrors = (error.details as ValidationDetail[])
+        .map((detail) => `${detail.field}: ${detail.message}`)
         .join('\n');
       errorMessage = `${errorMessage}\n\nValidation Errors:\n${validationErrors}`;
     }
@@ -66,28 +90,28 @@ export const authApi = {
 // Pages API
 export const pagesApi = {
   list: () =>
-    apiFetch<any[]>('/pages'),
+    apiFetch<Page[]>('/pages'),
 
   get: (slug: string) =>
-    apiFetch<any>(`/pages/${slug}`),
+    apiFetch<Page>(`/pages/${slug}`),
 
   create: (data: { slug: string; title: string }) =>
-    apiFetch<any>('/pages', { method: 'POST', body: data }),
+    apiFetch<Page>('/pages', { method: 'POST', body: data }),
 
   update: (slug: string, data: { title?: string; headerConfig?: string; footerConfig?: string }) =>
-    apiFetch<any>(`/pages/${slug}`, { method: 'PUT', body: data }),
+    apiFetch<Page>(`/pages/${slug}`, { method: 'PUT', body: data }),
 
   delete: (slug: string) =>
-    apiFetch<any>(`/pages/${slug}`, { method: 'DELETE' }),
+    apiFetch<{ ok: boolean }>(`/pages/${slug}`, { method: 'DELETE' }),
 };
 
 // Sections API
 export const sectionsApi = {
   create: (pageSlug: string, data: { kind: string; data: unknown; order?: number }) =>
-    apiFetch<any>(`/pages/${pageSlug}/sections`, { method: 'POST', body: data }),
+    apiFetch<Section>(`/pages/${pageSlug}/sections`, { method: 'POST', body: data }),
 
-  update: (id: string, data: { data?: unknown; order?: number }) =>
-    apiFetch<any>(`/sections/${id}`, { method: 'PUT', body: data }),
+  update: (id: string, data: { data?: unknown; order?: number; syncAll?: boolean }) =>
+    apiFetch<Section>(`/sections/${id}`, { method: 'PUT', body: data }),
 
   delete: (id: string) =>
     apiFetch<{ ok: boolean }>(`/sections/${id}`, { method: 'DELETE' }),
@@ -96,7 +120,7 @@ export const sectionsApi = {
     // Update each section's order
     await Promise.all(
       sections.map((section) =>
-        apiFetch<any>(`/sections/${section.id}`, {
+        apiFetch<Section>(`/sections/${section.id}`, {
           method: 'PUT',
           body: { order: section.order },
         })
@@ -109,7 +133,7 @@ export const sectionsApi = {
 // Media API
 export const mediaApi = {
   list: () =>
-    apiFetch<any[]>('/media'),
+    apiFetch<MediaAsset[]>('/media'),
 
   upload: async (formDataOrFile: FormData | File) => {
     const formData = formDataOrFile instanceof FormData ? formDataOrFile : (() => {
@@ -129,128 +153,208 @@ export const mediaApi = {
       throw new Error(errorData.error || errorData.details || 'Upload failed');
     }
 
-    return response.json();
+    return response.json() as Promise<MediaAsset>;
   },
 
   delete: (id: string) =>
     apiFetch<{ ok: boolean }>(`/media/${id}`, { method: 'DELETE' }),
 };
 
-// Reservations API
-export const reservationsApi = {
+// ========== ATH: CUSTOMER LEADS ==========
+export const leadsApi = {
   list: () =>
-    apiFetch<any[]>('/reservations'),
+    apiFetch<CustomerLead[]>('/leads'),
+
+  update: (id: string, data: { status?: string; notes?: string }) =>
+    apiFetch<CustomerLead>(`/leads/${id}`, { method: 'PUT', body: data }),
+
+  delete: (id: string) =>
+    apiFetch<{ ok: boolean }>(`/leads/${id}`, { method: 'DELETE' }),
+};
+
+// ========== ATH: SERVICE CATEGORIES ==========
+interface ServiceCategoryInput {
+  name: string;
+  slug?: string;
+  description?: string;
+  coefficient?: number;
+  allowMaterials?: boolean;
+  formulaId?: string | null;
+  order?: number;
+  isActive?: boolean;
+}
+
+export const serviceCategoriesApi = {
+  list: () =>
+    apiFetch<ServiceCategory[]>('/service-categories'),
 
   get: (id: string) =>
-    apiFetch<any>(`/reservations/${id}`),
+    apiFetch<ServiceCategory>(`/service-categories/${id}`),
 
-  update: (id: string, data: { status?: string }) =>
-    apiFetch<any>(`/reservations/${id}`, { method: 'PUT', body: data }),
+  create: (data: ServiceCategoryInput) =>
+    apiFetch<ServiceCategory>('/service-categories', { method: 'POST', body: data }),
+
+  update: (id: string, data: Partial<ServiceCategoryInput>) =>
+    apiFetch<ServiceCategory>(`/service-categories/${id}`, { method: 'PUT', body: data }),
 
   delete: (id: string) =>
-    apiFetch<{ ok: boolean }>(`/reservations/${id}`, { method: 'DELETE' }),
+    apiFetch<{ ok: boolean }>(`/service-categories/${id}`, { method: 'DELETE' }),
 };
 
-// Menu API
-export const menuCategoriesApi = {
+// ========== ATH: UNIT PRICES ==========
+interface UnitPriceInput {
+  category: string;
+  name: string;
+  price: number;
+  tag: string;
+  unit: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export const unitPricesApi = {
   list: () =>
-    apiFetch<any[]>('/menu-categories'),
+    apiFetch<UnitPrice[]>('/unit-prices'),
 
-  create: (data: any) =>
-    apiFetch<any>('/menu-categories', { method: 'POST', body: data }),
+  create: (data: UnitPriceInput) =>
+    apiFetch<UnitPrice>('/unit-prices', { method: 'POST', body: data }),
 
-  update: (id: string, data: any) =>
-    apiFetch<any>(`/menu-categories/${id}`, { method: 'PUT', body: data }),
+  update: (id: string, data: Partial<UnitPriceInput>) =>
+    apiFetch<UnitPrice>(`/unit-prices/${id}`, { method: 'PUT', body: data }),
 
   delete: (id: string) =>
-    apiFetch<{ ok: boolean }>(`/menu-categories/${id}`, { method: 'DELETE' }),
+    apiFetch<{ ok: boolean }>(`/unit-prices/${id}`, { method: 'DELETE' }),
 };
 
-export const menuApi = {
+// ========== ATH: MATERIALS ==========
+interface MaterialInput {
+  name: string;
+  category: string;
+  price: number;
+  imageUrl?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export const materialsApi = {
   list: () =>
-    apiFetch<any[]>('/menu'),
+    apiFetch<Material[]>('/materials'),
 
-  create: (data: any) =>
-    apiFetch<any>('/menu', { method: 'POST', body: data }),
+  create: (data: MaterialInput) =>
+    apiFetch<Material>('/materials', { method: 'POST', body: data }),
 
-  update: (id: string, data: any) =>
-    apiFetch<any>(`/menu/${id}`, { method: 'PUT', body: data }),
+  update: (id: string, data: Partial<MaterialInput>) =>
+    apiFetch<Material>(`/materials/${id}`, { method: 'PUT', body: data }),
 
   delete: (id: string) =>
-    apiFetch<{ ok: boolean }>(`/menu/${id}`, { method: 'DELETE' }),
+    apiFetch<{ ok: boolean }>(`/materials/${id}`, { method: 'DELETE' }),
 };
 
-// Special Offers API
-export const offersApi = {
+// ========== ATH: FORMULAS ==========
+interface FormulaInput {
+  name: string;
+  expression: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export const formulasApi = {
   list: () =>
-    apiFetch<any[]>('/special-offers'),
+    apiFetch<Formula[]>('/formulas'),
 
-  create: (data: any) =>
-    apiFetch<any>('/special-offers', { method: 'POST', body: data }),
+  create: (data: FormulaInput) =>
+    apiFetch<Formula>('/formulas', { method: 'POST', body: data }),
 
-  update: (id: string, data: any) =>
-    apiFetch<any>(`/special-offers/${id}`, { method: 'PUT', body: data }),
+  update: (id: string, data: Partial<FormulaInput>) =>
+    apiFetch<Formula>(`/formulas/${id}`, { method: 'PUT', body: data }),
+};
 
-  delete: (id: string) =>
-    apiFetch<{ ok: boolean }>(`/special-offers/${id}`, { method: 'DELETE' }),
+// ========== SETTINGS ==========
+export const settingsApi = {
+  get: (key: string) =>
+    apiFetch<Record<string, unknown>>(`/settings/${key}`),
+
+  update: (key: string, data: Record<string, unknown>) =>
+    apiFetch<Record<string, unknown>>(`/settings/${key}`, { method: 'PUT', body: data }),
 };
 
 // Blog Categories API
+interface BlogCategoryInput {
+  name: string;
+  slug: string;
+  description?: string;
+  color?: string;
+}
+
 export const blogCategoriesApi = {
   list: () =>
-    apiFetch<any[]>('/blog/categories'),
+    apiFetch<BlogCategory[]>('/blog/categories'),
 
   get: (slug: string) =>
-    apiFetch<any>(`/blog/categories/${slug}`),
+    apiFetch<BlogCategory>(`/blog/categories/${slug}`),
 
-  create: (data: { name: string; slug: string; description?: string; color?: string }) =>
-    apiFetch<any>('/blog/categories', { method: 'POST', body: data }),
+  create: (data: BlogCategoryInput) =>
+    apiFetch<BlogCategory>('/blog/categories', { method: 'POST', body: data }),
 
-  update: (id: string, data: any) =>
-    apiFetch<any>(`/blog/categories/${id}`, { method: 'PUT', body: data }),
+  update: (id: string, data: Partial<BlogCategoryInput>) =>
+    apiFetch<BlogCategory>(`/blog/categories/${id}`, { method: 'PUT', body: data }),
 
   delete: (id: string) =>
     apiFetch<{ ok: boolean }>(`/blog/categories/${id}`, { method: 'DELETE' }),
 };
 
 // Blog Posts API
+interface BlogPostInput {
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content: string;
+  featuredImage?: string;
+  categoryId: string;
+  tags?: string;
+  status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  isFeatured?: boolean;
+}
+
 export const blogPostsApi = {
   list: (params?: { status?: string; categoryId?: string; search?: string }) => {
-    const query = new URLSearchParams(params as any).toString();
-    return apiFetch<any[]>(`/blog/posts${query ? '?' + query : ''}`);
+    const query = params ? new URLSearchParams(
+      Object.entries(params).filter(([, v]) => v !== undefined) as [string, string][]
+    ).toString() : '';
+    return apiFetch<BlogPost[]>(`/blog/posts${query ? '?' + query : ''}`);
   },
 
   get: (slug: string) =>
-    apiFetch<any>(`/blog/posts/${slug}`),
+    apiFetch<BlogPost>(`/blog/posts/${slug}`),
 
-  create: (data: {
-    title: string;
-    slug: string;
-    excerpt?: string;
-    content: string;
-    featuredImage?: string;
-    categoryId: string;
-    tags?: string;
-    status?: string;
-  }) =>
-    apiFetch<any>('/blog/posts', { method: 'POST', body: data }),
+  create: (data: BlogPostInput) =>
+    apiFetch<BlogPost>('/blog/posts', { method: 'POST', body: data }),
 
-  update: (id: string, data: any) =>
-    apiFetch<any>(`/blog/posts/${id}`, { method: 'PUT', body: data }),
+  update: (id: string, data: Partial<BlogPostInput>) =>
+    apiFetch<BlogPost>(`/blog/posts/${id}`, { method: 'PUT', body: data }),
 
   delete: (id: string) =>
     apiFetch<{ ok: boolean }>(`/blog/posts/${id}`, { method: 'DELETE' }),
 };
 
 // Blog Comments API
+interface BlogComment {
+  id: string;
+  postId: string;
+  name: string;
+  email: string;
+  content: string;
+  status: string;
+  createdAt: string;
+}
+
 export const blogCommentsApi = {
   create: (postId: string, data: { name: string; email: string; content: string }) =>
-    apiFetch<any>(`/blog/posts/${postId}/comments`, { method: 'POST', body: data }),
+    apiFetch<BlogComment>(`/blog/posts/${postId}/comments`, { method: 'POST', body: data }),
 
   update: (id: string, data: { status: string }) =>
-    apiFetch<any>(`/blog/comments/${id}`, { method: 'PUT', body: data }),
+    apiFetch<BlogComment>(`/blog/comments/${id}`, { method: 'PUT', body: data }),
 
   delete: (id: string) =>
     apiFetch<{ ok: boolean }>(`/blog/comments/${id}`, { method: 'DELETE' }),
 };
-

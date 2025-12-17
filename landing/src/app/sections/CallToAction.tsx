@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { tokens } from '@app/shared';
+import { useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 
 interface CallToActionData {
   title?: string;
@@ -19,6 +21,16 @@ interface CallToActionData {
 }
 
 export function CallToAction({ data }: { data: CallToActionData }) {
+  const navigate = useNavigate();
+
+  const handleLinkClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+    // Internal links - use React Router
+    if (link.startsWith('/')) {
+      e.preventDefault();
+      navigate(link);
+    }
+    // External links (http://, https://, tel:, mailto:) - let browser handle
+  }, [navigate]);
   return (
     <section
       style={{
@@ -104,7 +116,8 @@ export function CallToAction({ data }: { data: CallToActionData }) {
         >
           {data.primaryButton && (
             <motion.a
-              href={data.primaryButton.link.startsWith('/') ? `#${data.primaryButton.link}` : data.primaryButton.link}
+              href={data.primaryButton.link}
+              onClick={(e) => handleLinkClick(e, data.primaryButton?.link || '')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               style={{
@@ -131,7 +144,8 @@ export function CallToAction({ data }: { data: CallToActionData }) {
 
           {data.secondaryButton && (
             <motion.a
-              href={data.secondaryButton.link.startsWith('/') ? `#${data.secondaryButton.link}` : data.secondaryButton.link}
+              href={data.secondaryButton.link}
+              onClick={(e) => handleLinkClick(e, data.secondaryButton?.link || '')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               style={{

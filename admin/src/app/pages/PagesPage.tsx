@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { tokens } from '@app/shared';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { pagesApi } from '../api';
 import type { Page } from '../types';
+import { useToast } from '../components/Toast';
 
 export function PagesPage({ onNavigateToSections }: { onNavigateToSections: (slug: string) => void }) {
+  const toast = useToast();
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -37,14 +39,16 @@ export function PagesPage({ onNavigateToSections }: { onNavigateToSections: (slu
     try {
       if (editingPage) {
         await pagesApi.update(editingPage.slug, { title: formData.title });
+        toast.success('Trang đã được cập nhật!');
       } else {
         await pagesApi.create({ slug: formData.slug, title: formData.title });
+        toast.success('Trang mới đã được tạo!');
       }
       await loadPages();
       handleCloseModal();
     } catch (error) {
       console.error('Failed to save page:', error);
-      alert('Failed to save page');
+      toast.error('Lưu trang thất bại');
     }
   }
 
@@ -53,9 +57,10 @@ export function PagesPage({ onNavigateToSections }: { onNavigateToSections: (slu
     try {
       await pagesApi.delete(slug);
       await loadPages();
+      toast.success('Trang đã được xóa!');
     } catch (error) {
       console.error('Failed to delete page:', error);
-      alert('Failed to delete page');
+      toast.error('Xóa trang thất bại');
     }
   }
 

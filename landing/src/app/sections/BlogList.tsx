@@ -1,38 +1,16 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { CardImage } from '../components/OptimizedImage';
 import { blogAPI } from '../api';
 
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string | null;
-  featuredImage: string | null;
-  category: {
-    name: string;
-    slug: string;
-    color: string | null;
-  };
-  author: {
-    name: string;
-  };
-  publishedAt: string;
-  _count: {
-    comments: number;
-  };
-}
-
-interface BlogCategory {
-  id: string;
-  name: string;
-  slug: string;
-  color: string | null;
-  _count: {
-    posts: number;
-  };
-}
+// Helper to get full image URL
+const getImageUrl = (url: string | null) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `http://localhost:4202${url}`;
+};
 
 interface BlogListData {
   title?: string;
@@ -68,10 +46,10 @@ export function BlogList({ data }: { data: BlogListData }) {
   // Filter posts based on selected category
   const filteredPosts = selectedCategory === 'all' 
     ? posts 
-    : posts.filter(post => post.category.slug === selectedCategory);
+    : posts.filter(post => post.categoryId === selectedCategory);
 
   // Categories for filter (including 'all')
-  const filterCategories = ['all', ...categories.map(c => c.slug)];
+  const filterCategories = ['all', ...categories.map(c => c.id)];
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px' }}>
@@ -128,19 +106,19 @@ export function BlogList({ data }: { data: BlogListData }) {
                 flexWrap: 'wrap' 
               }}
             >
-              {filterCategories.map((slug) => {
-                const category = slug === 'all' 
-                  ? { slug: 'all', name: 'All', color: null }
-                  : categories.find(c => c.slug === slug);
+              {filterCategories.map((catId) => {
+                const category = catId === 'all' 
+                  ? { id: 'all', name: 'All', color: null }
+                  : categories.find(c => c.id === catId);
                 
                 if (!category) return null;
 
-                const isActive = selectedCategory === slug;
+                const isActive = selectedCategory === catId;
 
                 return (
                   <motion.button
-                    key={slug}
-                    onClick={() => setSelectedCategory(slug)}
+                    key={catId}
+                    onClick={() => setSelectedCategory(catId)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     style={{
@@ -214,7 +192,7 @@ export function BlogList({ data }: { data: BlogListData }) {
               const aspectRatio = aspectRatios[idx % aspectRatios.length];
 
               return (
-                <motion.a
+                <motion.div
                   key={post.id}
                   layout
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -222,9 +200,7 @@ export function BlogList({ data }: { data: BlogListData }) {
                   exit={{ opacity: 0, scale: 0.9 }}
                   whileHover={{ scale: 1.02 }}
                   transition={{ duration: 0.3, ease: 'easeOut' }}
-                  href={`#/blog/${post.slug}`}
                   style={{
-                    textDecoration: 'none',
                     position: 'relative',
                     cursor: 'pointer',
                     borderRadius: 16,
@@ -237,6 +213,13 @@ export function BlogList({ data }: { data: BlogListData }) {
                     transform: 'translateZ(0)',
                   }}
                 >
+                  <Link
+                    to={`/blog/${post.slug}`}
+                    style={{
+                      textDecoration: 'none',
+                      display: 'block',
+                    }}
+                  >
                   {/* Image */}
                   <div 
                     style={{
@@ -256,7 +239,7 @@ export function BlogList({ data }: { data: BlogListData }) {
                   >
                     {post.featuredImage ? (
                       <CardImage
-                        src={post.featuredImage}
+                        src={getImageUrl(post.featuredImage)}
                         alt={post.title}
                         style={{ aspectRatio }}
                       />
@@ -274,21 +257,26 @@ export function BlogList({ data }: { data: BlogListData }) {
                     )}
 
                     {/* Category Badge */}
-                    <div style={{
-                      position: 'absolute',
-                      top: 12,
-                      left: 12,
-                      padding: '6px 12px',
-                      background: post.category.color || '#F5D393',
-                      color: '#111',
-                      borderRadius: 6,
-                      fontSize: 12,
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                    }}>
-                      {post.category.name}
-                    </div>
+                    {(() => {
+                      const cat = categories.find(c => c.id === post.categoryId);
+                      return cat ? (
+                        <div style={{
+                          position: 'absolute',
+                          top: 12,
+                          left: 12,
+                          padding: '6px 12px',
+                          background: cat.color || '#F5D393',
+                          color: '#111',
+                          borderRadius: 6,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                        }}>
+                          {cat.name}
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
 
                   {/* Content Overlay */}
@@ -340,20 +328,19 @@ export function BlogList({ data }: { data: BlogListData }) {
                       color: 'rgba(255,255,255,0.5)',
                     }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <i className="ri-user-line" />
-                        {post.author.name}
-                      </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <i className="ri-time-line" />
                         {calculateReadTime(post.excerpt)} min
                       </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <i className="ri-chat-3-line" />
-                        {post._count.comments}
-                      </span>
+                      {post.publishedAt && (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <i className="ri-calendar-line" />
+                          {new Date(post.publishedAt).toLocaleDateString('vi-VN')}
+                        </span>
+                      )}
                     </div>
                   </div>
-                </motion.a>
+                  </Link>
+                </motion.div>
               );
             })}
           </AnimatePresence>

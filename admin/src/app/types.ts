@@ -16,11 +16,11 @@ export interface Section {
   updatedAt?: string;
 }
 
+// Section types - includes legacy types for backward compatibility
 export type SectionKind = 
+  // ATH Core sections
   | 'HERO'
   | 'HERO_SIMPLE'
-  | 'GALLERY'
-  | 'FEATURED_MENU'
   | 'TESTIMONIALS'
   | 'CTA'
   | 'CALL_TO_ACTION'
@@ -28,18 +28,29 @@ export type SectionKind =
   | 'BANNER'
   | 'STATS'
   | 'CONTACT_INFO'
-  | 'RESERVATION_FORM'
-  | 'SPECIAL_OFFERS'
-  | 'GALLERY_SLIDESHOW'
   | 'FEATURED_BLOG_POSTS'
-  | 'OPENING_HOURS'
+  | 'BLOG_LIST'
   | 'SOCIAL_MEDIA'
   | 'FEATURES'
+  | 'SERVICES'
   | 'MISSION_VISION'
   | 'FAB_ACTIONS'
   | 'FOOTER_SOCIAL'
   | 'QUICK_CONTACT'
-  | 'CORE_VALUES';
+  | 'CORE_VALUES'
+  | 'QUOTE_FORM'
+  | 'QUOTE_CALCULATOR'
+  | 'ABOUT'
+  | 'FAQ'
+  // Legacy sections (kept for backward compatibility, not shown in UI)
+  | 'GALLERY'
+  | 'GALLERY_SLIDESHOW'
+  | 'FEATURED_MENU'
+  | 'RESERVATION_FORM'
+  | 'SPECIAL_OFFERS'
+  | 'OPENING_HOURS'
+  | 'TEAM'
+  | 'VIDEO';
 
 export interface Page {
   id: string;
@@ -70,28 +81,64 @@ export interface MediaAsset {
   updatedAt?: string;
 }
 
-export interface Reservation {
+// ATH Business Types
+export interface CustomerLead {
   id: string;
   name: string;
-  email: string;
   phone: string;
-  date: string;
-  time: string;
-  partySize: number;
-  specialRequest: string | null;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+  email: string | null;
+  content: string;
+  status: 'NEW' | 'CONTACTED' | 'CONVERTED' | 'CANCELLED';
+  source: string;
+  quoteData: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface SpecialOffer {
+export interface ServiceCategory {
   id: string;
-  title: string;
-  description: string;
-  discount: number | null;
-  validFrom: string;
-  validUntil: string;
-  imageId: string | null;
+  name: string;
+  slug: string;
+  description: string | null;
+  coefficient: number;
+  allowMaterials: boolean;
+  formulaId: string | null;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UnitPrice {
+  id: string;
+  category: string;
+  name: string;
+  price: number;
+  tag: string;
+  unit: string;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Material {
+  id: string;
+  name: string;
+  category: string;
+  imageUrl: string | null;
+  price: number;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Formula {
+  id: string;
+  name: string;
+  expression: string;
+  description: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -107,42 +154,7 @@ export interface HeroData {
   overlayOpacity?: number;
 }
 
-export interface FeaturedMenuData {
-  title: string;
-  subtitle?: string;
-  items: MenuItem[];
-}
-
-export interface MenuCategory {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  order?: number;
-  icon?: string;
-  color?: string;
-  _count?: { items: number };
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface MenuItem {
-  id?: string;
-  name: string;
-  description: string;
-  price: string | number;
-  imageUrl: string;
-  categoryId?: string;
-  category?: MenuCategory;
-  tags?: string[];  // Tags for filtering (e.g. "Healthy", "Spicy", "New")
-  isVegetarian?: boolean;
-  isSpicy?: boolean;
-  popular?: boolean;
-  available?: boolean;
-  order?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
+// FeaturedMenuData, MenuCategory, MenuItem removed - not needed for ATH project
 
 export interface TestimonialsData {
   title?: string;
@@ -212,16 +224,7 @@ export interface BannerData {
   href?: string;
 }
 
-export interface OpeningHoursData {
-  title?: string;
-  subtitle?: string;
-  schedule: Array<{
-    day: string;
-    hours: string;
-    special?: boolean;
-  }>;
-  note?: string;
-}
+// OpeningHoursData removed - not needed for ATH project
 
 export interface SocialMediaData {
   title?: string;
@@ -335,14 +338,14 @@ export interface BlogComment {
 }
 
 // Settings Types
-export interface RestaurantSettings {
+export interface CompanySettings {
   name: string;
   description: string;
   address: string;
   phone: string;
   email: string;
   website: string;
-  openingHours: string;
+  workingHours: string;
 }
 
 export interface ThemeSettings {
@@ -366,11 +369,13 @@ export type RouteType =
   | 'dashboard'
   | 'pages'
   | 'sections'
-  | 'menu'
   | 'media'
-  | 'reservations'
   | 'preview'
-  | 'offers'
   | 'blog-categories'
   | 'blog-posts'
-  | 'settings';
+  | 'settings'
+  | 'leads'
+  | 'service-categories'
+  | 'unit-prices'
+  | 'materials'
+  | 'formulas';

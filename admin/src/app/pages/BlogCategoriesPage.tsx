@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { tokens } from '@app/shared';
-import { Card } from '../components/Card';
+
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { blogCategoriesApi } from '../api';
 import { BlogCategory } from '../types';
+import { useToast } from '../components/Toast';
 
 export function BlogCategoriesPage() {
+  const toast = useToast();
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -40,14 +42,16 @@ export function BlogCategoriesPage() {
     try {
       if (editingCategory) {
         await blogCategoriesApi.update(editingCategory.id, formData);
+        toast.success('Category đã được cập nhật!');
       } else {
         await blogCategoriesApi.create(formData);
+        toast.success('Category mới đã được tạo!');
       }
       await loadCategories();
       handleCloseModal();
     } catch (error) {
       console.error('Failed to save category:', error);
-      alert('Failed to save category');
+      toast.error('Lưu category thất bại');
     }
   };
 
@@ -56,9 +60,10 @@ export function BlogCategoriesPage() {
     try {
       await blogCategoriesApi.delete(id);
       await loadCategories();
+      toast.success('Category đã được xóa!');
     } catch (error) {
       console.error('Failed to delete category:', error);
-      alert('Failed to delete category');
+      toast.error('Xóa category thất bại');
     }
   };
 

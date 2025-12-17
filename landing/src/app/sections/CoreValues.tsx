@@ -11,6 +11,13 @@ interface CoreValuesData {
 }
 
 export function CoreValues({ data }: { data: CoreValuesData }) {
+  // Defensive check for values array
+  const values = Array.isArray(data?.values) ? data.values : [];
+  
+  if (values.length === 0) {
+    return null; // Don't render if no values
+  }
+
   return (
     <div style={{ maxWidth: 1200, margin: '80px auto', padding: '0 24px' }}>
       <motion.div
@@ -61,7 +68,7 @@ export function CoreValues({ data }: { data: CoreValuesData }) {
             gap: 24,
           }}
         >
-          {data.values.map((value, idx) => (
+          {values.map((value, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, scale: 0.9 }}

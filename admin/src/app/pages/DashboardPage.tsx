@@ -3,17 +3,18 @@ import { motion } from 'framer-motion';
 import { tokens } from '@app/shared';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { reservationsApi } from '../api';
-import type { Reservation } from '../types';
+import type { CustomerLead } from '../types';
+
+const API_URL = 'http://localhost:4202';
 
 export function DashboardPage() {
   const [stats, setStats] = useState({
-    totalReservations: 0,
-    pendingReservations: 0,
-    totalSections: 0,
-    mediaAssets: 0,
+    totalLeads: 0,
+    newLeads: 0,
+    totalCategories: 0,
+    totalMaterials: 0,
   });
-  const [recentReservations, setRecentReservations] = useState<Reservation[]>([]);
+  const [recentLeads, setRecentLeads] = useState<CustomerLead[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,13 +23,22 @@ export function DashboardPage() {
 
   async function loadDashboardData() {
     try {
-      const reservations = await reservationsApi.list();
-      setRecentReservations(reservations.slice(0, 5));
+      const [leadsRes, categoriesRes, materialsRes] = await Promise.all([
+        fetch(`${API_URL}/leads`, { credentials: 'include' }),
+        fetch(`${API_URL}/service-categories`, { credentials: 'include' }),
+        fetch(`${API_URL}/materials`, { credentials: 'include' }),
+      ]);
+
+      const leads = leadsRes.ok ? await leadsRes.json() : [];
+      const categories = categoriesRes.ok ? await categoriesRes.json() : [];
+      const materials = materialsRes.ok ? await materialsRes.json() : [];
+
+      setRecentLeads(leads.slice(0, 5));
       setStats({
-        totalReservations: reservations.length,
-        pendingReservations: reservations.filter((r) => r.status === 'PENDING').length,
-        totalSections: 0, // Will be populated later
-        mediaAssets: 0, // Will be populated later
+        totalLeads: leads.length,
+        newLeads: leads.filter((l: CustomerLead) => l.status === 'NEW').length,
+        totalCategories: categories.length,
+        totalMaterials: materials.length,
       });
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -38,21 +48,35 @@ export function DashboardPage() {
   }
 
   const statCards = [
-    { icon: 'ri-calendar-check-line', label: 'Total Reservations', value: stats.totalReservations, color: tokens.color.primary },
-    { icon: 'ri-time-line', label: 'Pending', value: stats.pendingReservations, color: '#f59e0b' },
-    { icon: 'ri-layout-grid-line', label: 'Sections', value: stats.totalSections, color: '#8b5cf6' },
-    { icon: 'ri-image-2-line', label: 'Media Assets', value: stats.mediaAssets, color: '#10b981' },
+    { icon: 'ri-contacts-book-line', label: 'Tổng khách hàng', value: stats.totalLeads, color: tokens.color.primary },
+    { icon: 'ri-user-add-line', label: 'Khách mới', value: stats.newLeads, color: '#f59e0b' },
+    { icon: 'ri-tools-line', label: 'Hạng mục', value: stats.totalCategories, color: '#8b5cf6' },
+    { icon: 'ri-paint-brush-line', label: 'Vật dụng', value: stats.totalMaterials, color: '#10b981' },
   ];
+
+  const statusColors: Record<string, { bg: string; text: string }> = {
+    NEW: { bg: 'rgba(59,130,246,0.2)', text: '#3b82f6' },
+    CONTACTED: { bg: 'rgba(245,158,11,0.2)', text: '#f59e0b' },
+    CONVERTED: { bg: 'rgba(16,185,129,0.2)', text: '#10b981' },
+    CANCELLED: { bg: 'rgba(239,68,68,0.2)', text: '#ef4444' },
+  };
+
+  const statusLabels: Record<string, string> = {
+    NEW: 'Mới',
+    CONTACTED: 'Đã liên hệ',
+    CONVERTED: 'Đã chuyển đổi',
+    CANCELLED: 'Đã hủy',
+  };
 
   return (
     <div>
       <div style={{ marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h2 style={{ color: tokens.color.text, fontSize: 28, fontWeight: 700, margin: '0 0 8px' }}>
-            Welcome to Admin Dashboard
+            Chào mừng đến Admin Dashboard
           </h2>
           <p style={{ color: tokens.color.muted, fontSize: 16 }}>
-            Manage your restaurant website content, reservations, and more.
+            Quản lý website Anh Thợ Xây - Dịch vụ cải tạo nhà chuyên nghiệp
           </p>
         </div>
         <motion.div
@@ -117,8 +141,8 @@ export function DashboardPage() {
         ))}
       </div>
 
-      {/* Recent Reservations */}
-      <Card title="Recent Reservations" icon="ri-calendar-check-line">
+      {/* Recent Leads */}
+      <Card title="Khách hàng gần đây" icon="ri-contacts-book-line">
         {loading ? (
           <div style={{ textAlign: 'center', padding: 40, color: tokens.color.muted }}>
             <motion.i
@@ -127,77 +151,70 @@ export function DashboardPage() {
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
               style={{ fontSize: 32, display: 'block', marginBottom: 12 }}
             />
-            Loading...
+            Đang tải...
           </div>
-        ) : recentReservations.length === 0 ? (
+        ) : recentLeads.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 40, color: tokens.color.muted }}>
-            <i className="ri-calendar-line" style={{ fontSize: 48, display: 'block', marginBottom: 12, opacity: 0.5 }} />
-            No reservations yet
+            <i className="ri-user-line" style={{ fontSize: 48, display: 'block', marginBottom: 12, opacity: 0.5 }} />
+            Chưa có khách hàng nào
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {recentReservations.map((reservation) => (
-              <motion.div
-                key={reservation.id}
-                whileHover={{ x: 4 }}
-                style={{
-                  padding: 16,
-                  background: 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${tokens.color.border}`,
-                  borderRadius: tokens.radius.md,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <div
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '50%',
-                      background: tokens.color.primary,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 18,
-                      color: '#111',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {reservation.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div style={{ color: tokens.color.text, fontWeight: 500 }}>{reservation.name}</div>
-                    <div style={{ color: tokens.color.muted, fontSize: 13 }}>
-                      {new Date(reservation.date).toLocaleDateString()} · {reservation.time} · {reservation.partySize} guests
-                    </div>
-                  </div>
-                </div>
-                <div
+            {recentLeads.map((lead) => {
+              const colors = statusColors[lead.status] || statusColors.NEW;
+              return (
+                <motion.div
+                  key={lead.id}
+                  whileHover={{ x: 4 }}
                   style={{
-                    padding: '4px 12px',
-                    borderRadius: tokens.radius.pill,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    background:
-                      reservation.status === 'PENDING'
-                        ? 'rgba(245,158,11,0.2)'
-                        : reservation.status === 'CONFIRMED'
-                        ? 'rgba(16,185,129,0.2)'
-                        : 'rgba(239,68,68,0.2)',
-                    color:
-                      reservation.status === 'PENDING'
-                        ? '#f59e0b'
-                        : reservation.status === 'CONFIRMED'
-                        ? '#10b981'
-                        : '#ef4444',
+                    padding: 16,
+                    background: 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${tokens.color.border}`,
+                    borderRadius: tokens.radius.md,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  {reservation.status}
-                </div>
-              </motion.div>
-            ))}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        background: tokens.color.primary,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 18,
+                        color: '#111',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {lead.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ color: tokens.color.text, fontWeight: 500 }}>{lead.name}</div>
+                      <div style={{ color: tokens.color.muted, fontSize: 13 }}>
+                        {lead.phone} · {new Date(lead.createdAt).toLocaleDateString('vi-VN')}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      padding: '4px 12px',
+                      borderRadius: tokens.radius.pill,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      background: colors.bg,
+                      color: colors.text,
+                    }}
+                  >
+                    {statusLabels[lead.status] || lead.status}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </Card>
@@ -205,10 +222,10 @@ export function DashboardPage() {
       {/* Quick Actions */}
       <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
         {[
-          { icon: 'ri-add-circle-line', label: 'Add Section', color: tokens.color.primary },
-          { icon: 'ri-image-add-line', label: 'Upload Media', color: '#8b5cf6' },
-          { icon: 'ri-calendar-line', label: 'View Reservations', color: '#f59e0b' },
-          { icon: 'ri-percent-line', label: 'Create Offer', color: '#10b981' },
+          { icon: 'ri-contacts-book-line', label: 'Xem khách hàng', color: tokens.color.primary },
+          { icon: 'ri-calculator-line', label: 'Quản lý công thức', color: '#8b5cf6' },
+          { icon: 'ri-tools-line', label: 'Hạng mục dịch vụ', color: '#f59e0b' },
+          { icon: 'ri-article-line', label: 'Viết bài blog', color: '#10b981' },
         ].map((action) => (
           <Button key={action.label} variant="secondary" icon={action.icon} fullWidth>
             {action.label}
@@ -218,4 +235,3 @@ export function DashboardPage() {
     </div>
   );
 }
-

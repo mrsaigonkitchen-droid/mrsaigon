@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { tokens } from '@app/shared';
 import { Button } from './Button';
 import { Input } from './Input';
+import { useToast } from './Toast';
 import type { Page } from '../types';
 
 interface PageSelectorBarProps {
@@ -24,6 +25,7 @@ export function PageSelectorBar({
   onDeletePage,
   onRefresh,
 }: PageSelectorBarProps) {
+  const toast = useToast();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
@@ -58,14 +60,16 @@ export function PageSelectorBar({
     try {
       if (modalMode === 'create') {
         await onCreatePage({ slug: formData.slug, title: formData.title });
+        toast.success('Trang mới đã được tạo!');
       } else if (selectedPage) {
         await onEditPage(selectedPage.slug, { title: formData.title });
+        toast.success('Trang đã được cập nhật!');
       }
       handleCloseModal();
       onRefresh();
     } catch (error) {
       console.error('Failed to save page:', error);
-      alert('Failed to save page');
+      toast.error('Lưu trang thất bại');
     } finally {
       setSaving(false);
     }
@@ -74,7 +78,7 @@ export function PageSelectorBar({
   async function handleDelete() {
     if (!selectedPage) return;
     if (selectedPage.slug === 'home') {
-      alert('Cannot delete home page');
+      toast.warning('Không thể xóa trang chủ');
       return;
     }
     if (!confirm(`Delete page "${selectedPage.title || selectedPage.slug}"? All sections will be deleted!`)) return;
@@ -82,6 +86,7 @@ export function PageSelectorBar({
     try {
       await onDeletePage(selectedPage.slug);
       onRefresh();
+      toast.success('Trang đã được xóa!');
       // Select first available page
       const remainingPages = pages.filter(p => p.slug !== selectedPage.slug);
       if (remainingPages.length > 0) {
@@ -89,7 +94,7 @@ export function PageSelectorBar({
       }
     } catch (error) {
       console.error('Failed to delete page:', error);
-      alert('Failed to delete page');
+      toast.error('Xóa trang thất bại');
     }
   }
 

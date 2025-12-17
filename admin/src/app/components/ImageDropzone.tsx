@@ -8,9 +8,12 @@ interface ImageDropzoneProps {
   value?: string;
   onChange: (url: string) => void;
   onRemove?: () => void;
+  onPickExisting?: () => void;
   label?: string;
   height?: number;
 }
+
+export type { ImageDropzoneProps };
 
 // Smart image processing utility
 async function processImage(file: File, maxWidth = 1920, maxHeight = 1080, quality = 0.85): Promise<Blob> {
@@ -282,7 +285,7 @@ export function ImageDropzone({ value, onChange, onRemove, label, height = 200 }
               style={{ position: 'relative', borderRadius: tokens.radius.md, overflow: 'hidden' }}
             >
               <img
-                src={value}
+                src={value.startsWith('http') ? value : `http://localhost:4202${value}`}
                 alt="Uploaded"
                 style={{
                   width: '100%',

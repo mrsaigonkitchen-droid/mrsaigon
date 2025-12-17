@@ -34,7 +34,7 @@ export function SocialShareButtons({ title, url, excerpt }: SocialShareProps) {
 
   const shareButtons = [
     { id: 'facebook', icon: 'ri-facebook-fill', label: 'Facebook', color: '#1877F2', href: shareLinks.facebook },
-    { id: 'twitter', icon: 'ri-twitter-x-line', label: 'Twitter', color: '#000000', href: shareLinks.twitter },
+    { id: 'twitter', icon: 'ri-twitter-x-line', label: 'Twitter', color: '#FFFFFF', href: shareLinks.twitter },
     { id: 'linkedin', icon: 'ri-linkedin-fill', label: 'LinkedIn', color: '#0A66C2', href: shareLinks.linkedin },
     { id: 'email', icon: 'ri-mail-line', label: 'Email', color: '#EA4335', href: shareLinks.email },
   ];
@@ -163,93 +163,90 @@ export function SocialShareButtons({ title, url, excerpt }: SocialShareProps) {
  * FloatingSocialShare Component
  * 
  * Floating sidebar with share buttons (desktop only)
+ * Enhanced with better contrast colors
  */
 export function FloatingSocialShare({ title, url }: SocialShareProps) {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useState(() => {
-    const handleScroll = () => {
-      setIsVisible(window.scrollY > 400);
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  });
-
   const shareButtons = [
     { id: 'facebook', icon: 'ri-facebook-fill', color: '#1877F2', href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
-    { id: 'twitter', icon: 'ri-twitter-x-line', color: '#000000', href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}` },
+    { id: 'twitter', icon: 'ri-twitter-x-line', color: '#FFFFFF', href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}` },
     { id: 'linkedin', icon: 'ri-linkedin-fill', color: '#0A66C2', href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}` },
   ];
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      style={{
+        position: 'fixed',
+        left: '16px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        zIndex: 100,
+        display: 'none',
+        flexDirection: 'column',
+        gap: '8px',
+        padding: '14px 10px',
+        background: 'rgba(30,32,38,0.95)',
+        backdropFilter: 'blur(16px)',
+        borderRadius: '14px',
+        border: '1px solid rgba(255,255,255,0.12)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+      }}
+      className="floating-share"
+    >
+      <div style={{
+        fontSize: '10px',
+        fontWeight: 700,
+        color: 'rgba(255,255,255,0.6)',
+        textTransform: 'uppercase',
+        letterSpacing: '0.15em',
+        textAlign: 'center',
+        marginBottom: '2px',
+      }}>
+        SHARE
+      </div>
+      {shareButtons.map((button) => (
+        <motion.a
+          key={button.id}
+          href={button.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
           style={{
-            position: 'fixed',
-            left: '24px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 100,
+            width: '44px',
+            height: '44px',
+            borderRadius: '10px',
+            background: 'rgba(50,52,58,0.9)',
+            border: '1px solid rgba(255,255,255,0.1)',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '12px'
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+            transition: 'all 0.2s',
+            textDecoration: 'none'
           }}
-          className="hidden lg:flex"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = `${button.color}25`;
+            e.currentTarget.style.borderColor = `${button.color}50`;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(50,52,58,0.9)';
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+          }}
         >
-          <div style={{
-            fontSize: '11px',
-            fontWeight: 600,
-            color: 'rgba(255,255,255,0.5)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            marginBottom: '8px',
-            textAlign: 'center'
-          }}>
-            Share
-          </div>
-          {shareButtons.map((button) => (
-            <motion.a
-              key={button.id}
-              href={button.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.1, x: 4 }}
-              whileTap={{ scale: 0.9 }}
-              style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                background: 'rgba(18,18,22,0.95)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-                transition: 'all 0.3s',
-                textDecoration: 'none'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = `${button.color}20`;
-                e.currentTarget.style.borderColor = `${button.color}60`;
-                e.currentTarget.style.boxShadow = `0 8px 24px ${button.color}40`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(18,18,22,0.95)';
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)';
-              }}
-            >
-              <i className={button.icon} style={{ fontSize: '20px', color: button.color }} />
-            </motion.a>
-          ))}
-        </motion.div>
-      )}
-    </AnimatePresence>
+          <i className={button.icon} style={{ fontSize: '20px', color: button.color }} />
+        </motion.a>
+      ))}
+      
+      {/* CSS for responsive */}
+      <style>{`
+        @media (min-width: 1200px) {
+          .floating-share {
+            display: flex !important;
+          }
+        }
+      `}</style>
+    </motion.div>
   );
 }

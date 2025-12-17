@@ -19,7 +19,7 @@ export function LoginPage() {
 
     try {
       const response = await authApi.login(email, password);
-      store.setUser(response.user as any);
+      store.setUser(response.user as Parameters<typeof store.setUser>[0]);
     } catch (err) {
       setError((err as Error).message || 'Login failed');
     } finally {

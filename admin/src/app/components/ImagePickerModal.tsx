@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { tokens } from '@app/shared';
 import { mediaApi } from '../api';
 import type { MediaAsset } from '../types';
 import { Button } from './Button';
+import { useToast } from './Toast';
 
 const API_BASE = 'http://localhost:4202';
 
@@ -68,7 +69,8 @@ interface ImagePickerModalProps {
 }
 
 export function ImagePickerModal({ onSelect, onCancel, onClose, currentUrl }: ImagePickerModalProps) {
-  const handleClose = onClose || onCancel || (() => {});
+  const toast = useToast();
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const handleCancel = onCancel || onClose || (() => {});
   const [media, setMedia] = useState<MediaAsset[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,9 +110,10 @@ export function ImagePickerModal({ onSelect, onCancel, onClose, currentUrl }: Im
         await mediaApi.upload(processedFile);
       }
       await loadMedia();
+      toast.success('Upload thành công!');
     } catch (error) {
       console.error('Failed to upload:', error);
-      alert('Upload failed. Please try a different image.');
+      toast.error('Upload thất bại. Vui lòng thử ảnh khác.');
     } finally {
       setUploading(false);
     }
@@ -274,7 +277,7 @@ export function ImagePickerModal({ onSelect, onCancel, onClose, currentUrl }: Im
             <input
               ref={(input) => {
                 if (input) {
-                  (window as any).__fileInput = input;
+                  (window as unknown as Record<string, HTMLInputElement>).__fileInput = input;
                 }
               }}
               type="file"
@@ -292,15 +295,11 @@ export function ImagePickerModal({ onSelect, onCancel, onClose, currentUrl }: Im
               size="small"
               icon={uploading ? 'ri-loader-4-line' : 'ri-upload-2-line'}
               loading={uploading}
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                console.log('[ImagePickerModal] Upload button clicked');
-                const input = (window as any).__fileInput;
+              onClick={(e) => {
+                e?.stopPropagation();
+                const input = (window as unknown as Record<string, unknown>).__fileInput as HTMLInputElement | undefined;
                 if (input && !uploading) {
-                  console.log('[ImagePickerModal] Triggering file input click');
                   input.click();
-                } else {
-                  console.log('[ImagePickerModal] Input not ready or uploading:', { input: !!input, uploading });
                 }
               }}
             >

@@ -4,11 +4,15 @@ import { tokens } from '@app/shared';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
+import { Select } from '../components/Select';
 import { OptimizedImageUpload } from '../components/OptimizedImageUpload';
-import { blogPostsApi, blogCategoriesApi } from '../api';
+import { MarkdownEditor } from '../components/MarkdownEditor';
+import { blogPostsApi, blogCategoriesApi, mediaApi } from '../api';
 import { BlogPost, BlogCategory } from '../types';
+import { useToast } from '../components/Toast';
 
 export function BlogPostsPage() {
+  const toast = useToast();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +41,7 @@ export function BlogPostsPage() {
   const loadPosts = async () => {
     try {
       setLoading(true);
-      const params: any = {};
+      const params: { status?: string; categoryId?: string; search?: string } = {};
       if (filterStatus) params.status = filterStatus;
       if (filterCategory) params.categoryId = filterCategory;
       if (searchTerm) params.search = searchTerm;
@@ -64,14 +68,16 @@ export function BlogPostsPage() {
     try {
       if (editingPost) {
         await blogPostsApi.update(editingPost.id, formData);
+        toast.success('Bài viết đã được cập nhật!');
       } else {
         await blogPostsApi.create(formData);
+        toast.success('Bài viết mới đã được tạo!');
       }
       await loadPosts();
       handleCloseEditor();
     } catch (error) {
       console.error('Failed to save post:', error);
-      alert('Failed to save post');
+      toast.error('Lưu bài viết thất bại');
     }
   };
 
@@ -80,9 +86,10 @@ export function BlogPostsPage() {
     try {
       await blogPostsApi.delete(id);
       await loadPosts();
+      toast.success('Bài viết đã được xóa!');
     } catch (error) {
       console.error('Failed to delete post:', error);
-      alert('Failed to delete post');
+      toast.error('Xóa bài viết thất bại');
     }
   };
 
@@ -136,14 +143,7 @@ export function BlogPostsPage() {
     });
   };
 
-  const getStatusBadge = (status: string) => {
-    const styles = {
-      DRAFT: 'bg-gray-700 text-gray-300',
-      PUBLISHED: 'bg-green-700 text-green-300',
-      ARCHIVED: 'bg-orange-700 text-orange-300',
-    };
-    return styles[status as keyof typeof styles] || styles.DRAFT;
-  };
+  // Status badge styles are now inline in the JSX
 
   if (loading && posts.length === 0) {
     return (
@@ -214,47 +214,27 @@ export function BlogPostsPage() {
             />
           </div>
 
-          <select
+          <Select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            style={{
-              padding: '10px 16px',
-              background: 'rgba(255,255,255,0.03)',
-              border: `1px solid ${tokens.color.border}`,
-              borderRadius: tokens.radius.md,
-              color: tokens.color.text,
-              fontSize: 14,
-              outline: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <option value="">Tất cả trạng thái</option>
-            <option value="DRAFT">Draft</option>
-            <option value="PUBLISHED">Published</option>
-            <option value="ARCHIVED">Archived</option>
-          </select>
+            onChange={setFilterStatus}
+            options={[
+              { value: '', label: 'Tất cả trạng thái' },
+              { value: 'DRAFT', label: 'Draft' },
+              { value: 'PUBLISHED', label: 'Published' },
+              { value: 'ARCHIVED', label: 'Archived' },
+            ]}
+            fullWidth={false}
+          />
 
-          <select
+          <Select
             value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            style={{
-              padding: '10px 16px',
-              background: 'rgba(255,255,255,0.03)',
-              border: `1px solid ${tokens.color.border}`,
-              borderRadius: tokens.radius.md,
-              color: tokens.color.text,
-              fontSize: 14,
-              outline: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <option value="">Tất cả categories</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            onChange={setFilterCategory}
+            options={[
+              { value: '', label: 'Tất cả categories' },
+              ...categories.map((cat) => ({ value: cat.id, label: cat.name }))
+            ]}
+            fullWidth={false}
+          />
         </div>
       </Card>
 
@@ -265,7 +245,7 @@ export function BlogPostsPage() {
             <div style={{ display: 'flex', gap: 20 }}>
               {post.featuredImage && (
                 <img
-                  src={post.featuredImage}
+                  src={post.featuredImage.startsWith('http') ? post.featuredImage : `http://localhost:4202${post.featuredImage}`}
                   alt={post.title}
                   style={{
                     width: 140,
@@ -401,7 +381,7 @@ export function BlogPostsPage() {
             background: 'rgba(0,0,0,0.8)',
             backdropFilter: 'blur(16px)',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
             zIndex: 1300,
             padding: 24,
@@ -530,41 +510,14 @@ export function BlogPostsPage() {
                   <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: tokens.color.text, marginBottom: 8 }}>
                     Category *
                   </label>
-                  <select
+                  <Select
                     value={formData.categoryId}
-                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      background: 'rgba(12,12,16,0.6)',
-                      backdropFilter: 'blur(10px)',
-                      border: `1px solid ${tokens.color.border}`,
-                      borderRadius: '12px',
-                      color: tokens.color.text,
-                      fontSize: 14,
-                      fontWeight: 400,
-                      outline: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = tokens.color.primary;
-                      e.target.style.boxShadow = '0 4px 16px rgba(245,211,147,0.2)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = tokens.color.border;
-                      e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                    }}
-                  >
-                    <option value="" style={{ background: '#1a1b20', color: tokens.color.text }}>Chọn category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id} style={{ background: '#1a1b20', color: tokens.color.text }}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, categoryId: val })}
+                    options={[
+                      { value: '', label: 'Chọn category' },
+                      ...categories.map((cat) => ({ value: cat.id, label: cat.name }))
+                    ]}
+                  />
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -607,41 +560,23 @@ export function BlogPostsPage() {
                   <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: tokens.color.text, marginBottom: 8 }}>
                     Nội dung *
                   </label>
-                  <textarea
+                  <MarkdownEditor
                     value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Nội dung bài viết (Markdown supported)..."
-                    rows={12}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '16px 20px',
-                      background: 'rgba(12,12,16,0.6)',
-                      backdropFilter: 'blur(10px)',
-                      border: `1px solid ${tokens.color.border}`,
-                      borderRadius: '12px',
-                      color: tokens.color.text,
-                      fontSize: 13,
-                      fontFamily: tokens.font.mono,
-                      outline: 'none',
-                      resize: 'vertical',
-                      lineHeight: '1.6',
-                      transition: 'all 0.3s',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = tokens.color.primary;
-                      e.target.style.boxShadow = '0 4px 16px rgba(245,211,147,0.2)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = tokens.color.border;
-                      e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                    onChange={(value) => setFormData({ ...formData, content: value })}
+                    placeholder="Viết nội dung bài viết..."
+                    minHeight={350}
+                    onImageUpload={async (file) => {
+                      const formData = new FormData();
+                      formData.append('file', file);
+                      const response = await fetch('http://localhost:4202/media/upload', {
+                        method: 'POST',
+                        body: formData,
+                      });
+                      if (!response.ok) throw new Error('Upload failed');
+                      const data = await response.json();
+                      return data.url;
                     }}
                   />
-                  <p style={{ fontSize: 12, color: tokens.color.muted, marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span>💡</span>
-                    <span>Hỗ trợ Markdown: **bold**, *italic*, # Heading, - List, [link](url)</span>
-                  </p>
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -667,29 +602,15 @@ export function BlogPostsPage() {
                   <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: tokens.color.text, marginBottom: 8 }}>
                     Trạng thái
                   </label>
-                  <select
+                  <Select
                     value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      background: 'rgba(12,12,16,0.6)',
-                      backdropFilter: 'blur(10px)',
-                      border: `1px solid ${tokens.color.border}`,
-                      borderRadius: '12px',
-                      color: tokens.color.text,
-                      fontSize: 14,
-                      fontWeight: 400,
-                      outline: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    }}
-                  >
-                    <option value="DRAFT">Draft</option>
-                    <option value="PUBLISHED">Published</option>
-                    <option value="ARCHIVED">Archived</option>
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, status: val as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' })}
+                    options={[
+                      { value: 'DRAFT', label: 'Draft' },
+                      { value: 'PUBLISHED', label: 'Published' },
+                      { value: 'ARCHIVED', label: 'Archived' },
+                    ]}
+                  />
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>

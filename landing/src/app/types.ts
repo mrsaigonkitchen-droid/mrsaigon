@@ -1,33 +1,40 @@
-// Type definitions for Landing app
+// Type definitions for Landing app - ANH THỢ XÂY
 
-export type RouteType = 'home' | 'menu' | 'about' | 'gallery' | 'contact' | 'blog' | 'test-hover';
+export type RouteType = 'home' | 'bao-gia' | 'about' | 'contact' | 'blog' | 'chinh-sach';
 
 export type SectionKind = 
+  // ATH Core sections
   | 'HERO'
   | 'HERO_SIMPLE'
-  | 'GALLERY'
-  | 'FEATURED_MENU'
   | 'TESTIMONIALS'
   | 'CTA'
-  | 'CALL_TO_ACTION' // Alias for CTA
+  | 'CALL_TO_ACTION'
   | 'RICH_TEXT'
   | 'BANNER'
   | 'STATS'
-  | 'STATISTICS' // Alias for STATS
+  | 'STATISTICS'
   | 'CONTACT_INFO'
-  | 'RESERVATION_FORM'
-  | 'SPECIAL_OFFERS'
-  | 'GALLERY_SLIDESHOW'
   | 'FEATURED_BLOG_POSTS'
   | 'BLOG_LIST'
-  | 'OPENING_HOURS'
   | 'SOCIAL_MEDIA'
   | 'FEATURES'
+  | 'SERVICES'
   | 'MISSION_VISION'
   | 'FAB_ACTIONS'
   | 'FOOTER_SOCIAL'
   | 'QUICK_CONTACT'
-  | 'CORE_VALUES';
+  | 'CORE_VALUES'
+  | 'QUOTE_FORM'
+  | 'QUOTE_CALCULATOR'
+  | 'ABOUT'
+  | 'FAQ'
+  // Legacy sections (kept for backward compatibility)
+  | 'GALLERY'
+  | 'GALLERY_SLIDESHOW'
+  | 'FEATURED_MENU'
+  | 'RESERVATION_FORM'
+  | 'SPECIAL_OFFERS'
+  | 'OPENING_HOURS';
 
 export interface Section {
   id: string;

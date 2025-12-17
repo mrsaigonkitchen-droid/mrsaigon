@@ -1,28 +1,27 @@
 // Uncomment this line to use CSS modules
 // import styles from './app.module.css';
 import { tokens } from '@app/shared';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { staggerChildren } from '@app/ui';
+import { motion, useScroll } from 'framer-motion';
 import { useEffect, useState, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastContainer, useToast } from './components/Toast';
+import { ToastProvider, useToast } from './components/Toast';
 import { MobileMenu } from './components/MobileMenu';
 import { ScrollProgress } from './components/ScrollProgress';
 import { FloatingActions } from './sections/FloatingActions';
 import { Header, type HeaderConfig } from './components/Header';
 import { Footer, type FooterConfig } from './components/Footer';
-import type { PageData, PageMeta, RouteType } from './types';
+import type { PageData } from './types';
 
 // Lazy load all pages for better performance
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
-const MenuPage = lazy(() => import('./pages/MenuPage').then(m => ({ default: m.MenuPage })));
-const GalleryPage = lazy(() => import('./pages/GalleryPage').then(m => ({ default: m.GalleryPage })));
+const QuotePage = lazy(() => import('./pages/QuotePage').then(m => ({ default: m.QuotePage })));
+// GalleryPage removed - không còn sử dụng
 const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
 const BlogPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPage })));
 const BlogDetailPage = lazy(() => import('./pages/BlogDetailPage').then(m => ({ default: m.BlogDetailPage })));
-const ImageHoverTest = lazy(() => import('./pages/ImageHoverTest').then(m => ({ default: m.ImageHoverTest })));
+const DynamicPage = lazy(() => import('./pages/DynamicPage').then(m => ({ default: m.DynamicPage })));
 
 // Create QueryClient instance for API caching
 const queryClient = new QueryClient({
@@ -40,12 +39,10 @@ const queryClient = new QueryClient({
 function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
-  const params = useParams();
   
   const [page, setPage] = useState<PageData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { toasts, showToast, removeToast } = useToast();
 
   // Load header and footer config from localStorage as fallback (admin settings)
   const [headerConfigFromSettings, setHeaderConfigFromSettings] = useState<HeaderConfig | null>(null);
@@ -84,9 +81,9 @@ function AppContent() {
     }
   }, [page]);
 
-  // Load restaurant settings for background image
+  // Load company settings for background image
   useEffect(() => {
-    fetch('http://localhost:4202/settings/restaurant')
+    fetch('http://localhost:4202/settings/company')
       .then((res) => res.json())
       .then((data) => {
         const settings = data.value || data; // Handle both {key, value} and direct object
@@ -109,7 +106,7 @@ function AppContent() {
         }
       })
       .catch((err) => {
-        console.error('Failed to load restaurant settings:', err);
+        console.error('Failed to load company settings:', err);
       });
   }, []);
 
@@ -124,10 +121,10 @@ function AppContent() {
       document.body.style.backgroundPosition = 'center';
       document.body.style.backgroundAttachment = 'fixed';
     } else {
-      // Default background
+      // Default background - construction/renovation theme
       document.body.style.backgroundImage = `
         linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.6) 100%),
-        url("https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=30")
+        url("https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=30")
       `;
       document.body.style.backgroundSize = 'cover';
       document.body.style.backgroundPosition = 'center';
@@ -143,7 +140,7 @@ function AppContent() {
     const mockData = {
       id: '1',
       slug: 'home',
-      title: 'Nhà Hàng Sang Trọng',
+      title: 'Anh Thợ Xây - Dịch vụ cải tạo nhà chuyên nghiệp',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       sections: [
@@ -152,38 +149,25 @@ function AppContent() {
           kind: 'HERO',
           order: 1,
           data: {
-            title: 'Trải Nghiệm Ẩm Thực Đỉnh Cao',
-            subtitle: 'Khám phá hương vị tinh tế với không gian sang trọng và dịch vụ chuyên nghiệp',
-            imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200',
-            ctaText: 'Đặt Bàn Ngay',
-            ctaLink: '/contact'
+            title: 'Anh Thợ Xây',
+            subtitle: 'Dịch vụ cải tạo nhà & căn hộ chuyên nghiệp - Báo giá minh bạch, thi công uy tín',
+            imageUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1200',
+            ctaText: 'Báo Giá Ngay',
+            ctaLink: '/bao-gia'
           }
         },
         {
           id: '2',
-          kind: 'FEATURED_MENU',
+          kind: 'SERVICES',
           order: 2,
           data: {
-            title: 'Thực Đơn Nổi Bật',
-            items: [
-              {
-                name: 'Bò Bít Tết Úc',
-                description: 'Thịt bò nhập khẩu, nướng hoàn hảo với sốt tiêu đen',
-                price: '450.000đ',
-                imageUrl: 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=500'
-              },
-              {
-                name: 'Hải Sản Nướng Bơ',
-                description: 'Tôm hùm, sò điệp, cá hồi tươi nướng bơ tỏi',
-                price: '650.000đ',
-                imageUrl: 'https://images.unsplash.com/photo-1559737558-2fca2a4fb401?w=500'
-              },
-              {
-                name: 'Pasta Truffle',
-                description: 'Mì Ý sốt kem nấm truffle cao cấp',
-                price: '380.000đ',
-                imageUrl: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=500'
-              }
+            title: 'Dịch Vụ Của Chúng Tôi',
+            subtitle: 'Giải pháp toàn diện cho ngôi nhà của bạn',
+            services: [
+              { icon: 'ri-paint-brush-line', title: 'Sơn tường', description: 'Sơn mới, sơn lại với nhiều màu sắc' },
+              { icon: 'ri-layout-grid-line', title: 'Ốp lát', description: 'Ốp gạch, lát sàn chuyên nghiệp' },
+              { icon: 'ri-drop-line', title: 'Chống thấm', description: 'Xử lý chống thấm hiệu quả' },
+              { icon: 'ri-lightbulb-line', title: 'Điện nước', description: 'Sửa chữa, lắp đặt điện nước' }
             ]
           }
         },
@@ -192,10 +176,10 @@ function AppContent() {
           kind: 'CTA',
           order: 3,
           data: {
-            title: 'Đặt Bàn Ngay Hôm Nay',
-            description: 'Trải nghiệm ẩm thực đẳng cấp với ưu đãi đặc biệt cho khách hàng mới',
-            buttonText: 'Liên Hệ Ngay',
-            buttonLink: '/contact'
+            title: 'Nhận Báo Giá Miễn Phí',
+            description: 'Chỉ cần nhập diện tích và chọn hạng mục, hệ thống sẽ tự động tính toán chi phí dự kiến',
+            buttonText: 'Báo Giá Ngay',
+            buttonLink: '/bao-gia'
           }
         }
       ],
@@ -216,7 +200,7 @@ function AppContent() {
         console.error('Failed to fetch page data:', err);
         setError(err.message);
         // Use mock data as fallback
-        setPage(mockData);
+        setPage(mockData as PageData);
       })
       .finally(() => {
         setLoading(false);
@@ -273,12 +257,8 @@ function AppContent() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  const { scrollYProgress } = useScroll();
-  const backgroundColor = useTransform(
-    scrollYProgress,
-    [0, 0.2],
-    ['rgba(11, 12, 15, 0)', 'rgba(11, 12, 15, 0.95)']
-  );
+  // Scroll progress for potential future use
+  useScroll();
 
   if (loading) {
     return (
@@ -358,16 +338,16 @@ function AppContent() {
                 : page.headerConfig)
             : (headerConfigFromSettings ?? {
                 logo: {
-                  text: page?.title ?? 'Restaurant',
-                  icon: 'ri-restaurant-2-fill',
+                  text: page?.title ?? 'Anh Thợ Xây',
+                  icon: 'ri-building-2-fill',
                 },
                 navigation: [
-                  { label: 'Home', path: '/' },
-                  { label: 'Menu', path: '/menu' },
-                  { label: 'Gallery', path: '/gallery' },
-                  { label: 'About', path: '/about' },
+                  { label: 'Trang chủ', path: '/' },
+                  { label: 'Báo giá', path: '/bao-gia' },
+                  { label: 'Dự án', path: '/gallery' },
+                  { label: 'Giới thiệu', path: '/about' },
                   { label: 'Blog', path: '/blog' },
-                  { label: 'Contact', path: '/contact' },
+                  { label: 'Liên hệ', path: '/contact' },
                 ],
               });
           return headerConfig;
@@ -403,13 +383,14 @@ function AppContent() {
         >
           <Routes>
             <Route path="/" element={page ? <HomePage page={page} /> : null} />
-            <Route path="/menu" element={<MenuPage page={currentPage || undefined} />} />
-            <Route path="/gallery" element={<GalleryPage page={currentPage || undefined} />} />
+            <Route path="/bao-gia" element={<QuotePage />} />
+            {/* Gallery page removed */}
             <Route path="/about" element={currentPage ? <AboutPage page={currentPage} /> : null} />
             <Route path="/contact" element={currentPage ? <ContactPage page={currentPage} /> : null} />
             <Route path="/blog" element={<BlogPage page={currentPage || undefined} />} />
             <Route path="/blog/:slug" element={<BlogDetailPage />} />
-            <Route path="/test-hover" element={<ImageHoverTest />} />
+            {/* Dynamic page route - loads any page from database by slug */}
+            <Route path="/:slug" element={<DynamicPage />} />
             {/* 404 fallback */}
             <Route path="*" element={page ? <HomePage page={page} /> : null} />
           </Routes>
@@ -426,11 +407,11 @@ function AppContent() {
                 : page.footerConfig)
             : (footerConfigFromSettings ?? {
                 brand: {
-                  text: page?.title ?? 'Restaurant',
-                  icon: 'ri-restaurant-2-fill',
+                  text: page?.title ?? 'Anh Thợ Xây',
+                  icon: 'ri-building-2-fill',
                 },
                 copyright: {
-                  text: `© ${new Date().getFullYear()} ${page?.title ?? 'Restaurant'}. All rights reserved.`,
+                  text: `© ${new Date().getFullYear()} ${page?.title ?? 'Anh Thợ Xây'}. All rights reserved.`,
                 },
               });
 
@@ -469,8 +450,7 @@ function AppContent() {
         </>
       )}
 
-      {/* Toast Notifications */}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      {/* Toast Notifications - rendered by ToastProvider */}
     </div>
   );
 }
@@ -480,7 +460,9 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AppContent />
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );

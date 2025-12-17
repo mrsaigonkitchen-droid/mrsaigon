@@ -38,8 +38,8 @@ export function fixSectionImageUrls<T>(data: T): T {
     return data.map(item => fixSectionImageUrls(item)) as T;
   }
   
-  const result: any = {};
-  for (const [key, value] of Object.entries(data)) {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
     // Convert known image URL fields
     if ((key === 'imageUrl' || key === 'url' || key === 'backgroundUrl') && typeof value === 'string') {
       result[key] = toAbsoluteUrl(value);

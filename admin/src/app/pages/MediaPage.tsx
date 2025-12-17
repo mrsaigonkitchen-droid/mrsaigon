@@ -1,15 +1,22 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion, Reorder } from 'framer-motion';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { tokens } from '@app/shared';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { mediaApi } from '../api';
 import { MediaAsset } from '../types';
 import { OptimizedImage } from '../components/OptimizedImage';
+import { useToast } from '../components/Toast';
 
-type MediaFilter = 'all' | 'gallery' | 'system';
+type MediaFilter = 'all' | 'materials' | 'blog' | 'sections' | 'unused';
+
+interface MediaUsageInfo {
+  usedIn: string[];
+  count: number;
+}
 
 export function MediaPage() {
+  const toast = useToast();
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mediaFiles, setMediaFiles] = useState<MediaAsset[]>([]);
@@ -21,15 +28,15 @@ export function MediaPage() {
   const [editFormData, setEditFormData] = useState({
     alt: '',
     caption: '',
-    isGalleryImage: false,
-    isFeatured: false,
-    displayOrder: 0,
     tags: '',
   });
+  const [mediaUsage, setMediaUsage] = useState<Record<string, MediaUsageInfo>>({});
+  const [usageSummary, setUsageSummary] = useState({ total: 0, materials: 0, blog: 0, sections: 0, unused: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadMedia();
+    loadMediaUsage();
   }, []);
 
   const loadMedia = async () => {
@@ -44,6 +51,19 @@ export function MediaPage() {
     }
   };
 
+  const loadMediaUsage = async () => {
+    try {
+      const res = await fetch('http://localhost:4202/media/usage', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setMediaUsage(data.usage || {});
+        setUsageSummary(data.summary || { total: 0, materials: 0, blog: 0, sections: 0, unused: 0 });
+      }
+    } catch (error) {
+      console.error('Failed to load media usage:', error);
+    }
+  };
+
   async function handleFileUpload(files: FileList | null) {
     if (!files || files.length === 0) return;
 
@@ -52,9 +72,10 @@ export function MediaPage() {
       const uploadPromises = Array.from(files).map(file => mediaApi.upload(file));
       const results = await Promise.all(uploadPromises);
       setMediaFiles((prev) => [...results, ...prev]);
-      alert(`✅ ${results.length} file(s) uploaded successfully!`);
+      toast.success(`${results.length} file(s) uploaded successfully!`);
+      loadMediaUsage(); // Refresh usage data
     } catch (error) {
-      alert('❌ Upload failed: ' + (error as Error).message);
+      toast.error('Upload failed: ' + (error as Error).message);
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -68,26 +89,24 @@ export function MediaPage() {
     try {
       await mediaApi.delete(id);
       setMediaFiles((prev) => prev.filter((f) => f.id !== id));
-      alert('✅ Đã xóa thành công!');
+      toast.success('Đã xóa thành công!');
+      loadMediaUsage(); // Refresh usage data
     } catch (error) {
-      alert('❌ Delete failed: ' + (error as Error).message);
+      toast.error('Delete failed: ' + (error as Error).message);
     }
   }
 
-  const handleEditClick = (file: MediaAsset) => {
+  const handleEditClick = useCallback((file: MediaAsset) => {
     setSelectedFile(file);
     setEditFormData({
       alt: file.alt || '',
       caption: file.caption || '',
-      isGalleryImage: file.isGalleryImage || false,
-      isFeatured: file.isFeatured || false,
-      displayOrder: file.displayOrder || 0,
       tags: file.tags || '',
     });
     setShowEditModal(true);
-  };
+  }, []);
 
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = useCallback(async () => {
     if (!selectedFile) return;
     try {
       const response = await fetch(`http://localhost:4202/media/${selectedFile.id}`, {
@@ -101,7 +120,6 @@ export function MediaPage() {
       
       const updated = await response.json();
       
-      // Update local state
       setMediaFiles((prev) =>
         prev.map((f) =>
           f.id === selectedFile.id ? { ...f, ...updated } : f
@@ -110,44 +128,24 @@ export function MediaPage() {
       
       setShowEditModal(false);
       setSelectedFile(null);
-      alert('✅ Metadata updated successfully!');
-      await loadMedia(); // Reload to get fresh data
+      toast.success('Metadata updated successfully!');
     } catch (error) {
-      alert('❌ Save failed: ' + (error as Error).message);
+      toast.error('Save failed: ' + (error as Error).message);
     }
-  };
+  }, [selectedFile, editFormData, toast]);
 
-  const copyToClipboard = (url: string) => {
+  const copyToClipboard = useCallback((url: string) => {
     const fullUrl = url.startsWith('http') ? url : `http://localhost:4202${url}`;
     navigator.clipboard.writeText(fullUrl);
-    alert('📋 URL copied to clipboard!');
-  };
+    toast.info('URL copied to clipboard!');
+  }, [toast]);
 
-  const handleReorder = async (newOrder: MediaAsset[]) => {
-    // Update displayOrder for gallery images only
-    const galleryImages = newOrder.filter(img => img.isGalleryImage);
-    
-    try {
-      await Promise.all(
-        galleryImages.map((img, index) =>
-          fetch(`http://localhost:4202/media/${img.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ displayOrder: index }),
-          })
-        )
-      );
-      
-      setMediaFiles(newOrder);
-      alert('✅ Order updated!');
-    } catch (error) {
-      console.error('Failed to reorder:', error);
-      alert('❌ Reorder failed');
-    }
-  };
+  // Get usage info for a file
+  const getUsageInfo = useCallback((fileId: string): MediaUsageInfo => {
+    return mediaUsage[fileId] || { usedIn: [], count: 0 };
+  }, [mediaUsage]);
 
-  // Filtering logic
+  // Filtering logic based on usage
   const filteredFiles = mediaFiles.filter(file => {
     // Search filter
     const matchesSearch = 
@@ -158,16 +156,26 @@ export function MediaPage() {
     
     if (!matchesSearch) return false;
     
-    // Type filter
-    if (filter === 'gallery') return file.isGalleryImage === true;
-    if (filter === 'system') return !file.isGalleryImage || file.isGalleryImage === false;
-    return true; // 'all'
+    // Usage filter
+    if (filter === 'all') return true;
+    
+    const usage = mediaUsage[file.id];
+    if (!usage) {
+      return filter === 'unused';
+    }
+    
+    if (filter === 'materials') return usage.usedIn.includes('materials');
+    if (filter === 'blog') return usage.usedIn.includes('blog');
+    if (filter === 'sections') return usage.usedIn.includes('sections');
+    if (filter === 'unused') return usage.count === 0;
+    
+    return true;
   });
 
-  // Sort gallery images by displayOrder
-  const sortedFiles = filter === 'gallery'
-    ? [...filteredFiles].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
-    : filteredFiles;
+  // Sort by createdAt desc
+  const sortedFiles = [...filteredFiles].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
   const totalSize = mediaFiles.reduce((acc, file) => acc + (file.size || 0), 0);
   const formatBytes = (bytes: number) => {
@@ -177,9 +185,6 @@ export function MediaPage() {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
-
-  const galleryCount = mediaFiles.filter(f => f.isGalleryImage).length;
-  const systemCount = mediaFiles.filter(f => !f.isGalleryImage).length;
 
   if (loading) {
     return (
@@ -247,7 +252,7 @@ export function MediaPage() {
                 Media Library
               </h1>
               <p style={{ color: tokens.color.muted, fontSize: 15, margin: '4px 0 0 0' }}>
-                {mediaFiles.length} files • {galleryCount} gallery • {systemCount} system • {formatBytes(totalSize)}
+                {usageSummary.total} files • {formatBytes(totalSize)}
               </p>
             </div>
           </div>
@@ -286,11 +291,13 @@ export function MediaPage() {
           </div>
 
           {/* Filter Buttons */}
-          <div style={{ display: 'flex', gap: 8, background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: 4 }}>
+          <div style={{ display: 'flex', gap: 8, background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: 4, flexWrap: 'wrap' }}>
             {[
-              { value: 'all' as MediaFilter, label: 'All', icon: 'ri-image-line', count: mediaFiles.length },
-              { value: 'gallery' as MediaFilter, label: 'Gallery', icon: 'ri-gallery-line', count: galleryCount },
-              { value: 'system' as MediaFilter, label: 'System', icon: 'ri-folder-image-line', count: systemCount },
+              { value: 'all' as MediaFilter, label: 'Tất cả', icon: 'ri-image-line', count: usageSummary.total },
+              { value: 'materials' as MediaFilter, label: 'Vật dụng', icon: 'ri-tools-line', count: usageSummary.materials },
+              { value: 'blog' as MediaFilter, label: 'Blog', icon: 'ri-article-line', count: usageSummary.blog },
+              { value: 'sections' as MediaFilter, label: 'Sections', icon: 'ri-layout-line', count: usageSummary.sections },
+              { value: 'unused' as MediaFilter, label: 'Chưa dùng', icon: 'ri-question-line', count: usageSummary.unused },
             ].map(({ value, label, icon, count }) => (
               <motion.button
                 key={value}
@@ -362,7 +369,12 @@ export function MediaPage() {
         <div style={{ textAlign: 'center', padding: 60, background: 'rgba(12,12,16,0.5)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <i className="ri-gallery-line" style={{ fontSize: 64, color: tokens.color.border, marginBottom: 16, display: 'block' }} />
           <p style={{ color: tokens.color.muted, marginBottom: 20, fontSize: 15 }}>
-            {searchQuery ? 'Không tìm thấy file nào' : filter === 'gallery' ? 'Chưa có gallery images' : filter === 'system' ? 'Chưa có system images' : 'Chưa có file nào. Upload để bắt đầu!'}
+            {searchQuery ? 'Không tìm thấy file nào' : 
+              filter === 'materials' ? 'Chưa có ảnh nào dùng trong Vật dụng' :
+              filter === 'blog' ? 'Chưa có ảnh nào dùng trong Blog' :
+              filter === 'sections' ? 'Chưa có ảnh nào dùng trong Sections' :
+              filter === 'unused' ? 'Không có ảnh nào chưa sử dụng' :
+              'Chưa có file nào. Upload để bắt đầu!'}
           </p>
           {!searchQuery && filter === 'all' && (
             <Button onClick={() => fileInputRef.current?.click()} icon="ri-upload-cloud-line" variant="secondary">
@@ -370,31 +382,6 @@ export function MediaPage() {
             </Button>
           )}
         </div>
-      ) : filter === 'gallery' && viewMode === 'grid' ? (
-        // Reorderable gallery grid
-        <Reorder.Group
-          axis="y"
-          values={sortedFiles}
-          onReorder={handleReorder}
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 20 }}
-        >
-          {sortedFiles.map((file, index) => (
-            <Reorder.Item
-              key={file.id}
-              value={file}
-              style={{ position: 'relative' }}
-            >
-              <MediaCard
-                file={file}
-                index={index}
-                onEdit={handleEditClick}
-                onDelete={handleDelete}
-                onCopy={copyToClipboard}
-                isDraggable
-              />
-            </Reorder.Item>
-          ))}
-        </Reorder.Group>
       ) : viewMode === 'grid' ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 20 }}>
           {sortedFiles.map((file, index) => (
@@ -402,6 +389,7 @@ export function MediaPage() {
               key={file.id}
               file={file}
               index={index}
+              usageInfo={getUsageInfo(file.id)}
               onEdit={handleEditClick}
               onDelete={handleDelete}
               onCopy={copyToClipboard}
@@ -435,16 +423,7 @@ export function MediaPage() {
                   <div style={{ fontSize: 14, color: tokens.color.text, fontWeight: 600 }}>
                     {file.alt || 'Untitled'}
                   </div>
-                  {file.isGalleryImage && (
-                    <span style={{ padding: '2px 8px', background: 'rgba(245,211,147,0.2)', borderRadius: '6px', fontSize: 11, color: tokens.color.primary, fontWeight: 600 }}>
-                      GALLERY
-                    </span>
-                  )}
-                  {file.isFeatured && (
-                    <span style={{ padding: '2px 8px', background: 'rgba(245,158,11,0.2)', borderRadius: '6px', fontSize: 11, color: '#f59e0b', fontWeight: 600 }}>
-                      ⭐ FEATURED
-                    </span>
-                  )}
+                  <UsageBadges usedIn={getUsageInfo(file.id).usedIn} />
                 </div>
                 <div style={{ fontSize: 12, color: tokens.color.muted }}>
                   {file.width && file.height ? `${file.width} × ${file.height}` : 'Unknown'} • {new Date(file.createdAt).toLocaleDateString('vi-VN')}
@@ -523,17 +502,66 @@ export function MediaPage() {
   );
 }
 
+// UsageBadges Component
+interface UsageBadgesProps {
+  usedIn: string[];
+}
+
+function UsageBadges({ usedIn }: UsageBadgesProps) {
+  const badgeConfig: Record<string, { label: string; icon: string; bg: string; color: string }> = {
+    materials: { label: 'Vật dụng', icon: 'ri-tools-line', bg: 'rgba(16,185,129,0.2)', color: '#10b981' },
+    blog: { label: 'Blog', icon: 'ri-article-line', bg: 'rgba(59,130,246,0.2)', color: '#3b82f6' },
+    sections: { label: 'Sections', icon: 'ri-layout-line', bg: 'rgba(168,85,247,0.2)', color: '#a855f7' },
+  };
+
+  if (usedIn.length === 0) {
+    return (
+      <span style={{ padding: '2px 8px', background: 'rgba(239,68,68,0.2)', borderRadius: '6px', fontSize: 11, color: '#ef4444', fontWeight: 600 }}>
+        Chưa dùng
+      </span>
+    );
+  }
+
+  return (
+    <>
+      {usedIn.map(usage => {
+        const config = badgeConfig[usage];
+        if (!config) return null;
+        return (
+          <span
+            key={usage}
+            style={{
+              padding: '2px 8px',
+              background: config.bg,
+              borderRadius: '6px',
+              fontSize: 11,
+              color: config.color,
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <i className={config.icon} style={{ fontSize: 10 }} />
+            {config.label}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 // MediaCard Component
 interface MediaCardProps {
   file: MediaAsset;
   index: number;
+  usageInfo: MediaUsageInfo;
   onEdit: (file: MediaAsset) => void;
   onDelete: (id: string) => void;
   onCopy: (url: string) => void;
-  isDraggable?: boolean;
 }
 
-function MediaCard({ file, index, onEdit, onDelete, onCopy, isDraggable }: MediaCardProps) {
+function MediaCard({ file, index, usageInfo, onEdit, onDelete, onCopy }: MediaCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -544,37 +572,15 @@ function MediaCard({ file, index, onEdit, onDelete, onCopy, isDraggable }: Media
         position: 'relative',
         background: 'rgba(12,12,16,0.7)',
         backdropFilter: 'blur(20px)',
-        border: file.isFeatured ? '2px solid rgba(245,158,11,0.5)' : '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: '16px',
         overflow: 'hidden',
-        boxShadow: file.isFeatured ? '0 8px 32px rgba(245,158,11,0.3)' : '0 4px 16px rgba(0,0,0,0.2)',
-        cursor: isDraggable ? 'grab' : 'default',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
       }}
     >
-      {/* Drag handle */}
-      {isDraggable && (
-        <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 10, background: 'rgba(0,0,0,0.6)', borderRadius: '8px', padding: '4px 8px' }}>
-          <i className="ri-drag-move-2-line" style={{ color: tokens.color.muted, fontSize: 16 }} />
-        </div>
-      )}
-
-      {/* Badges */}
+      {/* Usage Badges */}
       <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {file.isGalleryImage && (
-          <span style={{ padding: '4px 10px', background: 'rgba(245,211,147,0.9)', borderRadius: '8px', fontSize: 11, fontWeight: 700, color: '#0b0c0f' }}>
-            GALLERY
-          </span>
-        )}
-        {file.isFeatured && (
-          <span style={{ padding: '4px 10px', background: 'rgba(245,158,11,0.9)', borderRadius: '8px', fontSize: 11, fontWeight: 700, color: '#0b0c0f', display: 'flex', alignItems: 'center', gap: 4 }}>
-            ⭐ FEATURED
-          </span>
-        )}
-        {file.displayOrder !== undefined && file.displayOrder > 0 && (
-          <span style={{ padding: '4px 10px', background: 'rgba(59,130,246,0.9)', borderRadius: '8px', fontSize: 11, fontWeight: 700, color: '#fff' }}>
-            #{file.displayOrder + 1}
-          </span>
-        )}
+        <UsageBadges usedIn={usageInfo.usedIn} />
       </div>
 
       {/* Image */}
@@ -665,17 +671,16 @@ function MediaCard({ file, index, onEdit, onDelete, onCopy, isDraggable }: Media
 }
 
 // Edit Modal Component
+interface EditMediaFormData {
+  alt: string;
+  caption: string;
+  tags: string;
+}
+
 interface EditMediaModalProps {
   file: MediaAsset;
-  formData: {
-    alt: string;
-    caption: string;
-    isGalleryImage: boolean;
-    isFeatured: boolean;
-    displayOrder: number;
-    tags: string;
-  };
-  onFormChange: (data: any) => void;
+  formData: EditMediaFormData;
+  onFormChange: (data: EditMediaFormData) => void;
   onSave: () => void;
   onClose: () => void;
 }
@@ -788,56 +793,12 @@ function EditMediaModal({ file, formData, onFormChange, onSave, onClose }: EditM
               </div>
 
               <Input
-                label="Tags (comma-separated)"
+                label="Tags (phân cách bằng dấu phẩy)"
                 value={formData.tags}
                 onChange={(value) => onFormChange({ ...formData, tags: value })}
-                placeholder="food, menu, special..."
+                placeholder="vật dụng, sơn, gạch..."
                 fullWidth
               />
-
-              <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: tokens.color.text, marginBottom: 12 }}>
-                  Settings
-                </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: tokens.radius.md, cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.isGalleryImage}
-                      onChange={(e) => onFormChange({ ...formData, isGalleryImage: e.target.checked })}
-                      style={{ width: 18, height: 18, accentColor: tokens.color.primary, cursor: 'pointer' }}
-                    />
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: tokens.color.text }}>Gallery Image</div>
-                      <div style={{ fontSize: 12, color: tokens.color.muted }}>Include this image in gallery sections</div>
-                    </div>
-                  </label>
-
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: tokens.radius.md, cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.isFeatured}
-                      onChange={(e) => onFormChange({ ...formData, isFeatured: e.target.checked })}
-                      style={{ width: 18, height: 18, accentColor: tokens.color.primary, cursor: 'pointer' }}
-                    />
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: tokens.color.text }}>⭐ Featured</div>
-                      <div style={{ fontSize: 12, color: tokens.color.muted }}>Highlight this image in gallery</div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              {formData.isGalleryImage && (
-                <Input
-                  label="Display Order"
-                  type="number"
-                  value={formData.displayOrder.toString()}
-                  onChange={(value) => onFormChange({ ...formData, displayOrder: parseInt(value) || 0 })}
-                  placeholder="0"
-                  fullWidth
-                />
-              )}
 
               <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.02)', borderRadius: tokens.radius.md, fontSize: 12, color: tokens.color.muted }}>
                 <div><strong>URL:</strong> {file.url}</div>

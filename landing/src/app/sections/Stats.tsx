@@ -14,6 +14,13 @@ interface StatsData {
 }
 
 export function Stats({ data }: { data: StatsData }) {
+  // Defensive check for stats array
+  const stats = Array.isArray(data?.stats) ? data.stats : [];
+  
+  if (stats.length === 0) {
+    return null; // Don't render if no stats
+  }
+
   return (
     <div style={{ maxWidth: 1200, margin: '80px auto', padding: '0 24px' }}>
       {(data.title || data.subtitle) && (
@@ -63,7 +70,7 @@ export function Stats({ data }: { data: StatsData }) {
           gap: 24,
         }}
       >
-        {data.stats.map((stat, index) => (
+        {stats.map((stat, index) => (
           <StatCard
             key={index}
             icon={stat.icon}

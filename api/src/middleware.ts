@@ -137,17 +137,17 @@ export function sanitizeString(str: string): string {
 /**
  * Sanitize object recursively
  */
-export function sanitizeObject<T extends Record<string, any>>(obj: T): T {
-  const sanitized: any = {};
+export function sanitizeObject<T extends Record<string, unknown>>(obj: T): T {
+  const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
       sanitized[key] = sanitizeString(value);
     } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      sanitized[key] = sanitizeObject(value);
+      sanitized[key] = sanitizeObject(value as Record<string, unknown>);
     } else {
       sanitized[key] = value;
     }
   }
-  return sanitized;
+  return sanitized as T;
 }
 

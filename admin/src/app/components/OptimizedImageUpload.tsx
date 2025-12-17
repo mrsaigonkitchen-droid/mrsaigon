@@ -93,7 +93,7 @@ export function OptimizedImageUpload({
           }}
         >
           <img
-            src={value}
+            src={value.startsWith('http') ? value : `http://localhost:4202${value}`}
             alt="Preview"
             style={{
               width: '100%',

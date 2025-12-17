@@ -4,6 +4,12 @@
   "sourceRoot": "api/src",
   "projectType": "application",
   "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["api/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
     "build": {
       "executor": "@nx/esbuild:esbuild",
       "outputs": ["{options.outputPath}"],

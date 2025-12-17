@@ -1,32 +1,25 @@
 import { lazy, Suspense } from 'react';
 import type { Section } from '../types';
 import { tokens } from '@app/shared';
-import ReactMarkdown from 'react-markdown'; // Keep for BlogPost content
 import { SimpleMarkdown } from '../utils/simpleMarkdown'; // Lightweight for RICH_TEXT
 
 // Lazy load all sections for better performance
 const EnhancedHero = lazy(() => import('./EnhancedHero').then(m => ({ default: m.EnhancedHero })));
 const HeroSimple = lazy(() => import('./HeroSimple').then(m => ({ default: m.HeroSimple })));
 const EnhancedTestimonials = lazy(() => import('./EnhancedTestimonials').then(m => ({ default: m.EnhancedTestimonials })));
-const StatsSection = lazy(() => import('./StatsSection').then(m => ({ default: m.StatsSection })));
-const SpecialOffers = lazy(() => import('./SpecialOffers').then(m => ({ default: m.SpecialOffers })));
-const ReservationForm = lazy(() => import('./ReservationForm').then(m => ({ default: m.ReservationForm })));
 const ContactInfo = lazy(() => import('./ContactInfo').then(m => ({ default: m.ContactInfo })));
-const GallerySlideshow = lazy(() => import('./GallerySlideshow').then(m => ({ default: m.GallerySlideshow })));
-const Gallery = lazy(() => import('./Gallery').then(m => ({ default: m.Gallery })));
-const FeaturedMenu = lazy(() => import('./FeaturedMenu').then(m => ({ default: m.FeaturedMenu })));
 const FeaturedBlogPosts = lazy(() => import('./FeaturedBlogPosts').then(m => ({ default: m.FeaturedBlogPosts })));
-const OpeningHours = lazy(() => import('./OpeningHours').then(m => ({ default: m.OpeningHours })));
 const SocialMedia = lazy(() => import('./SocialMedia').then(m => ({ default: m.SocialMedia })));
 const Features = lazy(() => import('./Features').then(m => ({ default: m.Features })));
 const FooterSocial = lazy(() => import('./FooterSocial').then(m => ({ default: m.FooterSocial })));
 const QuickContact = lazy(() => import('./QuickContact').then(m => ({ default: m.QuickContact })));
-// New sections
 const Stats = lazy(() => import('./Stats').then(m => ({ default: m.Stats })));
 const MissionVision = lazy(() => import('./MissionVision').then(m => ({ default: m.MissionVision })));
 const CoreValues = lazy(() => import('./CoreValues').then(m => ({ default: m.CoreValues })));
 const CallToAction = lazy(() => import('./CallToAction').then(m => ({ default: m.CallToAction })));
 const BlogList = lazy(() => import('./BlogList').then(m => ({ default: m.BlogList })));
+const QuoteFormSection = lazy(() => import('./QuoteFormSection').then(m => ({ default: m.QuoteFormSection })));
+const QuoteCalculatorSection = lazy(() => import('./QuoteCalculatorSection').then(m => ({ default: m.QuoteCalculatorSection })));
 
 // Loading fallback component
 const SectionLoader = () => (
@@ -74,18 +67,9 @@ export function renderSection(section: Section) {
       );
 
     case 'GALLERY':
-      return (
-        <Suspense key={section.id} fallback={<SectionLoader />}>
-          <Gallery data={data} />
-        </Suspense>
-      );
-
     case 'FEATURED_MENU':
-      return (
-        <Suspense key={section.id} fallback={<SectionLoader />}>
-          <FeaturedMenu data={data} />
-        </Suspense>
-      );
+      // These sections have been removed - not needed for ATH project
+      return null;
 
     case 'TESTIMONIALS':
       return (
@@ -103,18 +87,9 @@ export function renderSection(section: Section) {
       );
 
     case 'SPECIAL_OFFERS':
-      return (
-        <Suspense key={section.id} fallback={<SectionLoader />}>
-          <SpecialOffers data={data} />
-        </Suspense>
-      );
-
     case 'RESERVATION_FORM':
-      return (
-        <Suspense key={section.id} fallback={<SectionLoader />}>
-          <ReservationForm data={data} />
-        </Suspense>
-      );
+      // These sections have been removed - not needed for ATH project
+      return null;
 
     case 'CONTACT_INFO':
       return (
@@ -124,11 +99,8 @@ export function renderSection(section: Section) {
       );
 
     case 'GALLERY_SLIDESHOW':
-      return (
-        <Suspense key={section.id} fallback={<SectionLoader />}>
-          <GallerySlideshow data={data} />
-        </Suspense>
-      );
+      // This section has been removed - not needed for ATH project
+      return null;
 
     case 'FEATURED_BLOG_POSTS':
       return (
@@ -145,11 +117,8 @@ export function renderSection(section: Section) {
       );
 
     case 'OPENING_HOURS':
-      return (
-        <Suspense key={section.id} fallback={<SectionLoader />}>
-          <OpeningHours data={data} />
-        </Suspense>
-      );
+      // This section has been removed - not needed for ATH project
+      return null;
 
     case 'SOCIAL_MEDIA':
       return (
@@ -159,6 +128,7 @@ export function renderSection(section: Section) {
       );
 
     case 'FEATURES':
+    case 'SERVICES': // Alias - use Features component for services
       return (
         <Suspense key={section.id} fallback={<SectionLoader />}>
           <Features data={data} />
@@ -203,6 +173,20 @@ export function renderSection(section: Section) {
       return (
         <Suspense key={section.id} fallback={<SectionLoader />}>
           <CallToAction data={data} />
+        </Suspense>
+      );
+
+    case 'QUOTE_FORM':
+      return (
+        <Suspense key={section.id} fallback={<SectionLoader />}>
+          <QuoteFormSection data={data} />
+        </Suspense>
+      );
+
+    case 'QUOTE_CALCULATOR':
+      return (
+        <Suspense key={section.id} fallback={<SectionLoader />}>
+          <QuoteCalculatorSection data={data} />
         </Suspense>
       );
 
@@ -380,73 +364,6 @@ export function renderSection(section: Section) {
           ) : (
             data.text
           )}
-        </div>
-      );
-
-    case 'CTA':
-      return (
-        <div key={section.id} style={{ maxWidth: 1200, margin: '80px auto', padding: '0 16px' }}>
-          <div
-            style={{
-              padding: '60px 40px',
-              background: `linear-gradient(135deg, ${tokens.color.surface}, rgba(19,19,22,0.8))`,
-              borderRadius: tokens.radius.xl,
-              border: `2px solid ${tokens.color.primary}40`,
-              textAlign: 'center',
-            }}
-          >
-          {data.title && (
-            <h2
-              style={{
-                fontSize: 'clamp(24px, 4vw, 36px)',
-                color: tokens.color.primary,
-                marginBottom: 16,
-                fontWeight: 700,
-              }}
-            >
-              {data.title}
-            </h2>
-          )}
-          {data.description && (
-            <p
-              style={{
-                fontSize: 18,
-                color: tokens.color.muted,
-                marginBottom: 32,
-                maxWidth: 600,
-                margin: '0 auto 32px',
-                lineHeight: 1.7,
-              }}
-            >
-              {data.description}
-            </p>
-          )}
-          {data.buttonText && (
-            <a
-              href={data.buttonLink || '#'}
-              style={{
-                display: 'inline-block',
-                padding: '16px 40px',
-                background: `linear-gradient(135deg, ${tokens.color.primary}, ${tokens.color.accent})`,
-                color: '#111',
-                textDecoration: 'none',
-                borderRadius: tokens.radius.pill,
-                fontSize: 18,
-                fontWeight: 700,
-                boxShadow: tokens.shadow.lg,
-                transition: 'transform 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-            >
-              {data.buttonText}
-            </a>
-          )}
-          </div>
         </div>
       );
 

@@ -27,6 +27,13 @@ export const EnhancedTestimonials = memo(function EnhancedTestimonials({ data }:
   const shouldReduce = useReducedMotion();
   const title = data.title || 'What Our Guests Say';
   const layout = data.layout || 'carousel';
+  
+  // Defensive check for items array
+  const items = Array.isArray(data?.items) ? data.items : [];
+  
+  if (items.length === 0) {
+    return null; // Don't render if no testimonials
+  }
 
   const renderStars = (rating = 5) => {
     return (
@@ -160,12 +167,12 @@ export const EnhancedTestimonials = memo(function EnhancedTestimonials({ data }:
         <ScrollSnapCarousel
           autoplay={data.autoplay}
           autoplayDelay={5000}
-          showNavigation={data.items.length > 3}
+          showNavigation={items.length > 3}
           showPagination={true}
           slidesPerView={{ mobile: 1, tablet: 2, desktop: 3 }}
           gap={20}
         >
-          {data.items.map((item, idx) => renderTestimonialCard(item, idx))}
+          {items.map((item, idx) => renderTestimonialCard(item, idx))}
         </ScrollSnapCarousel>
       ) : (
         <div
@@ -175,7 +182,7 @@ export const EnhancedTestimonials = memo(function EnhancedTestimonials({ data }:
             gap: 20,
           }}
         >
-          {data.items.map((item, idx) => renderTestimonialCard(item, idx))}
+          {items.map((item, idx) => renderTestimonialCard(item, idx))}
         </div>
       )}
 

@@ -1,149 +1,194 @@
+import { useState, useCallback, createContext, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { tokens } from '@app/shared';
-import { useState, useEffect } from 'react';
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+// Toast types
+export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
-interface ToastProps {
+export interface Toast {
+  id: string;
+  type: ToastType;
   message: string;
-  type?: ToastType;
   duration?: number;
-  onClose?: () => void;
 }
 
-const toastIcons: Record<ToastType, { icon: string; color: string }> = {
-  success: { icon: 'ri-checkbox-circle-fill', color: '#10b981' },
-  error: { icon: 'ri-error-warning-fill', color: '#ef4444' },
-  info: { icon: 'ri-information-fill', color: '#3b82f6' },
-  warning: { icon: 'ri-alert-fill', color: '#f59e0b' },
-};
+interface ToastContextType {
+  toasts: Toast[];
+  addToast: (type: ToastType, message: string, duration?: number) => void;
+  removeToast: (id: string) => void;
+  success: (message: string, duration?: number) => void;
+  error: (message: string, duration?: number) => void;
+  warning: (message: string, duration?: number) => void;
+  info: (message: string, duration?: number) => void;
+}
 
-export function Toast({ message, type = 'info', duration = 3000, onClose }: ToastProps) {
-  const [isVisible, setIsVisible] = useState(true);
-  const config = toastIcons[type];
+const ToastContext = createContext<ToastContextType | null>(null);
 
-  useEffect(() => {
+// Toast Provider
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const addToast = useCallback((type: ToastType, message: string, duration = 4000) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    setToasts(prev => [...prev, { id, type, message, duration }]);
+    
     if (duration > 0) {
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-        setTimeout(() => onClose?.(), 300);
-      }, duration);
-      return () => clearTimeout(timer);
+      setTimeout(() => removeToast(id), duration);
     }
-  }, [duration, onClose]);
+  }, [removeToast]);
 
-  if (!isVisible) return null;
+  const success = useCallback((message: string, duration?: number) => addToast('success', message, duration), [addToast]);
+  const error = useCallback((message: string, duration?: number) => addToast('error', message, duration), [addToast]);
+  const warning = useCallback((message: string, duration?: number) => addToast('warning', message, duration), [addToast]);
+  const info = useCallback((message: string, duration?: number) => addToast('info', message, duration), [addToast]);
 
   return (
+    <ToastContext.Provider value={{ toasts, addToast, removeToast, success, error, warning, info }}>
+      {children}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+    </ToastContext.Provider>
+  );
+}
+
+// Hook to use toast
+export function useToast() {
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error('useToast must be used within a ToastProvider');
+  }
+  return context;
+}
+
+// Toast icons and colors
+const toastConfig: Record<ToastType, { icon: string; bg: string; border: string; iconColor: string }> = {
+  success: {
+    icon: 'ri-checkbox-circle-fill',
+    bg: 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1))',
+    border: 'rgba(16,185,129,0.4)',
+    iconColor: '#10b981',
+  },
+  error: {
+    icon: 'ri-error-warning-fill',
+    bg: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.1))',
+    border: 'rgba(239,68,68,0.4)',
+    iconColor: '#ef4444',
+  },
+  warning: {
+    icon: 'ri-alert-fill',
+    bg: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.1))',
+    border: 'rgba(245,158,11,0.4)',
+    iconColor: '#f59e0b',
+  },
+  info: {
+    icon: 'ri-information-fill',
+    bg: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.1))',
+    border: 'rgba(59,130,246,0.4)',
+    iconColor: '#3b82f6',
+  },
+};
+
+// Single Toast Item
+function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: () => void }) {
+  const config = toastConfig[toast.type];
+  
+  return (
     <motion.div
-      initial={{ opacity: 0, x: 100, scale: 0.95 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 100, scale: 0.95 }}
+      initial={{ opacity: 0, y: -50, scale: 0.8 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -30, scale: 0.9 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
       style={{
-        maxWidth: 400,
-        background: 'rgba(11,12,15,0.95)',
-        backdropFilter: 'blur(20px)',
-        borderRadius: tokens.radius.lg,
-        border: `1px solid ${config.color}`,
+        background: 'rgba(20, 20, 24, 0.95)',
+        backdropFilter: 'blur(24px)',
+        border: `2px solid ${config.border}`,
+        borderRadius: 16,
         padding: '16px 20px',
-        boxShadow: `0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px ${config.color}40`,
         display: 'flex',
         alignItems: 'center',
-        gap: 16,
-        marginBottom: 12,
+        gap: 12,
+        boxShadow: `0 20px 60px rgba(0,0,0,0.5), 0 0 40px ${config.iconColor}30`,
+        minWidth: 280,
+        maxWidth: 420,
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       {/* Icon */}
-      <div
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: '50%',
-          background: `${config.color}20`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
+      <motion.div
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.1 }}
       >
-        <i className={config.icon} style={{ fontSize: 20, color: config.color }} />
-      </div>
+        <i className={config.icon} style={{ fontSize: 24, color: config.iconColor }} />
+      </motion.div>
 
       {/* Message */}
-      <div style={{ flex: 1, color: tokens.color.text, fontSize: 15, lineHeight: 1.5 }}>
-        {message}
-      </div>
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
+        style={{ flex: 1 }}
+      >
+        <span style={{
+          fontWeight: 600,
+          color: tokens.color.text,
+          fontSize: 14,
+          lineHeight: 1.4,
+        }}>
+          {toast.message}
+        </span>
+      </motion.div>
 
-      {/* Close Button */}
+      {/* Close button */}
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        onClick={() => {
-          setIsVisible(false);
-          setTimeout(() => onClose?.(), 300);
-        }}
+        onClick={onRemove}
         style={{
-          background: 'transparent',
+          background: 'rgba(255,255,255,0.1)',
           border: 'none',
-          color: tokens.color.muted,
-          cursor: 'pointer',
-          fontSize: 20,
-          padding: 4,
+          borderRadius: '50%',
+          width: 24,
+          height: 24,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          cursor: 'pointer',
+          color: tokens.color.muted,
         }}
       >
-        <i className="ri-close-line" />
+        <i className="ri-close-line" style={{ fontSize: 14 }} />
       </motion.button>
     </motion.div>
   );
 }
 
-// Toast Container để quản lý nhiều toast
-interface ToastMessage {
-  id: string;
-  message: string;
-  type: ToastType;
-  duration?: number;
-}
-
-interface ToastContainerProps {
-  toasts: ToastMessage[];
-  onRemove: (id: string) => void;
-}
-
-export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
+// Toast Container
+export function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: string) => void }) {
   return (
-    <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 10001, display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div style={{
+      position: 'fixed',
+      top: 24,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 99999,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 12,
+      pointerEvents: 'none',
+    }}>
       <AnimatePresence mode="popLayout">
-        {toasts.map((toast) => (
-          <Toast
-            key={toast.id}
-            message={toast.message}
-            type={toast.type}
-            duration={toast.duration}
-            onClose={() => onRemove(toast.id)}
-          />
+        {toasts.map(toast => (
+          <div key={toast.id} style={{ pointerEvents: 'auto' }}>
+            <ToastItem toast={toast} onRemove={() => onRemove(toast.id)} />
+          </div>
         ))}
       </AnimatePresence>
     </div>
   );
 }
-
-// Hook để sử dụng toast
-export function useToast() {
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  const showToast = (message: string, type: ToastType = 'info', duration = 3000) => {
-    const id = Date.now().toString();
-    setToasts((prev) => [...prev, { id, message, type, duration }]);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  return { toasts, showToast, removeToast };
-}
-

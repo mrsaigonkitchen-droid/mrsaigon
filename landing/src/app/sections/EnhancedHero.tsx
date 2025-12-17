@@ -1,6 +1,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { tokens } from '@app/shared';
-import { useRef, useState, useEffect, memo } from 'react';
+import { useRef, useState, useEffect, memo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { shouldEnableParallax } from '../utils/deviceDetection';
 
 interface HeroData {
@@ -17,12 +18,21 @@ interface HeroData {
 
 export const EnhancedHero = memo(function EnhancedHero({ data }: { data: HeroData }) {
   const ref = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   const [enableParallax, setEnableParallax] = useState(false);
   
   // Check device capabilities on mount
   useEffect(() => {
     setEnableParallax(shouldEnableParallax());
   }, []);
+
+  // Handle link click - use React Router for internal links
+  const handleLinkClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+    if (link.startsWith('/')) {
+      e.preventDefault();
+      navigate(link);
+    }
+  }, [navigate]);
   
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -185,6 +195,7 @@ export const EnhancedHero = memo(function EnhancedHero({ data }: { data: HeroDat
         {ctaLabel && ctaHref && (
           <motion.a
             href={ctaHref}
+            onClick={(e) => handleLinkClick(e, ctaHref)}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.4, ease: tokens.motion.ease.outExpo }}

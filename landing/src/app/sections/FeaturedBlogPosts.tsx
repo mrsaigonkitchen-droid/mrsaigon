@@ -10,26 +10,6 @@ interface FeaturedBlogPostsData {
   limit?: number; // max posts to show, default 3
 }
 
-interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string | null;
-  featuredImage: string | null;
-  category: {
-    name: string;
-    slug: string;
-    color: string | null;
-  };
-  author: {
-    name: string;
-  };
-  publishedAt: string;
-  _count: {
-    comments: number;
-  };
-}
-
 export const FeaturedBlogPosts = memo(function FeaturedBlogPosts({ data }: { data: FeaturedBlogPostsData }) {
   const limit = data.limit || 3;
 
@@ -50,7 +30,8 @@ export const FeaturedBlogPosts = memo(function FeaturedBlogPosts({ data }: { dat
     return `http://localhost:4202${url}`;
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('vi-VN', { 
       year: 'numeric', 
@@ -169,10 +150,8 @@ export const FeaturedBlogPosts = memo(function FeaturedBlogPosts({ data }: { dat
                   display: 'inline-block',
                   padding: '4px 12px',
                   borderRadius: tokens.radius.pill,
-                  background: post.category.color 
-                    ? `${post.category.color}20`
-                    : 'rgba(245,211,147,0.1)',
-                  color: post.category.color || tokens.color.primary,
+                  background: 'rgba(245,211,147,0.1)',
+                  color: tokens.color.primary,
                   fontSize: 12,
                   fontWeight: 600,
                   marginBottom: 12,
@@ -180,7 +159,7 @@ export const FeaturedBlogPosts = memo(function FeaturedBlogPosts({ data }: { dat
                   letterSpacing: '0.5px',
                 }}
               >
-                {post.category.name}
+                Blog
               </div>
 
               {/* Title */}
@@ -223,29 +202,19 @@ export const FeaturedBlogPosts = memo(function FeaturedBlogPosts({ data }: { dat
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
+                  justifyContent: 'flex-end',
                   paddingTop: 16,
                   borderTop: `1px solid ${tokens.color.border}`,
                   fontSize: 13,
                   color: tokens.color.muted,
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <i className="ri-user-line" />
-                  <span>{post.author.name}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                {post.publishedAt && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <i className="ri-calendar-line" />
                     <span>{formatDate(post.publishedAt)}</span>
                   </div>
-                  {post._count.comments > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <i className="ri-chat-3-line" />
-                      <span>{post._count.comments}</span>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           </article>

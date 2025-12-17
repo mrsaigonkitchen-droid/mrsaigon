@@ -8,9 +8,10 @@ describe('App', () => {
     expect(baseElement).toBeTruthy();
   });
 
-  it('should render restaurant header', () => {
+  it('should render ATH header', () => {
     const { getAllByText } = render(<App />);
-    const elements = getAllByText(/Restaurant/i);
+    // Check for ATH branding - "Anh Thợ Xây" or similar
+    const elements = getAllByText(/Anh Thợ Xây|ATH/i);
     expect(elements.length).toBeGreaterThan(0);
   });
 });

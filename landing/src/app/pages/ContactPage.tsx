@@ -1,9 +1,36 @@
+import { Component, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { tokens } from '@app/shared';
 import { fadeInUp } from '@app/ui';
 import { LazySection } from '../components/LazySection';
 import { renderSection } from '../sections/render';
 import type { PageData } from '../types';
+
+// Error boundary to catch section render errors
+class SectionErrorBoundary extends Component<
+  { children: ReactNode; sectionId: string },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; sectionId: string }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error(`Section ${this.props.sectionId} error:`, error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+    return this.props.children;
+  }
+}
 
 export function ContactPage({ page }: { page: PageData }) {
   return (
@@ -15,18 +42,20 @@ export function ContactPage({ page }: { page: PageData }) {
         )
         .sort((a, b) => (a.order || 0) - (b.order || 0))
         .map((s, index) => {
-          const rendered = renderSection(s);
-          if (!rendered) return null;
-          
           // Lazy load sections after first one
           const shouldLazy = index >= 1;
+          const content = (
+            <SectionErrorBoundary sectionId={s.id}>
+              <section>{renderSection(s)}</section>
+            </SectionErrorBoundary>
+          );
           
           return shouldLazy ? (
             <LazySection key={s.id} rootMargin="300px">
-              <section>{rendered}</section>
+              {content}
             </LazySection>
           ) : (
-            <section key={s.id}>{rendered}</section>
+            <div key={s.id}>{content}</div>
           );
         })}
 
@@ -46,7 +75,7 @@ export function ContactPage({ page }: { page: PageData }) {
           Kết Nối Với Chúng Tôi
         </h3>
         <p style={{ color: tokens.color.muted, marginBottom: 32, fontSize: 16 }}>
-          Theo dõi chúng tôi trên mạng xã hội để cập nhật những món ăn mới và ưu đãi đặc biệt
+          Theo dõi chúng tôi trên mạng xã hội để cập nhật dự án mới và ưu đãi đặc biệt
         </p>
         <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
           {['facebook', 'instagram', 'youtube', 'twitter', 'tiktok'].map((social, idx) => (

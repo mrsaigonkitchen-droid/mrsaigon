@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 
@@ -116,52 +116,56 @@ describe('Validation Schemas', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should validate reservation schema', async () => {
-    const { createReservationSchema } = await import('./schemas');
+  it('should validate lead schema', async () => {
+    const { createLeadSchema } = await import('./schemas');
     
     const validData = {
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+1234567890',
-      date: '2025-12-25',
-      time: '19:00',
-      partySize: 4,
-      specialRequest: 'Window seat please',
+      name: 'Nguyễn Văn A',
+      phone: '+84901234567',
+      email: 'test@example.com',
+      content: 'Tôi muốn sơn lại căn hộ 50m2',
+      source: 'QUOTE_FORM',
     };
     
-    const result = createReservationSchema.safeParse(validData);
+    const result = createLeadSchema.safeParse(validData);
     expect(result.success).toBe(true);
   });
 
   it('should reject invalid phone number', async () => {
-    const { createReservationSchema } = await import('./schemas');
+    const { createLeadSchema } = await import('./schemas');
     
     const invalidData = {
-      name: 'John Doe',
-      email: 'john@example.com',
+      name: 'Nguyễn Văn A',
       phone: 'invalid-phone',
-      date: '2025-12-25',
-      time: '19:00',
-      partySize: 4,
+      content: 'Tôi muốn sơn lại căn hộ 50m2',
     };
     
-    const result = createReservationSchema.safeParse(invalidData);
+    const result = createLeadSchema.safeParse(invalidData);
     expect(result.success).toBe(false);
   });
 
-  it('should reject invalid time format', async () => {
-    const { createReservationSchema } = await import('./schemas');
+  it('should validate quote calculation schema', async () => {
+    const { calculateQuoteSchema } = await import('./schemas');
     
-    const invalidData = {
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+1234567890',
-      date: '2025-12-25',
-      time: '25:00', // Invalid hour
-      partySize: 4,
+    const validData = {
+      categoryId: 'cat-123',
+      area: 50,
+      materialIds: ['mat-1', 'mat-2'],
     };
     
-    const result = createReservationSchema.safeParse(invalidData);
+    const result = calculateQuoteSchema.safeParse(validData);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject negative area', async () => {
+    const { calculateQuoteSchema } = await import('./schemas');
+    
+    const invalidData = {
+      categoryId: 'cat-123',
+      area: -10, // Invalid
+    };
+    
+    const result = calculateQuoteSchema.safeParse(invalidData);
     expect(result.success).toBe(false);
   });
 });

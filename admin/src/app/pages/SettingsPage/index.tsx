@@ -1,0 +1,192 @@
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { tokens } from '@app/shared';
+import { useToast } from '../../components/Toast';
+import { LayoutTab } from './LayoutTab';
+import { CompanyTab } from './CompanyTab';
+import { ThemeTab } from './ThemeTab';
+import { NotificationsTab } from './NotificationsTab';
+import {
+  type SettingsTab,
+  type CompanySettings,
+  type ThemeSettings,
+  type NotificationSettings,
+  type HeaderConfig,
+  type FooterConfig,
+  defaultCompanySettings,
+  defaultThemeSettings,
+  defaultNotificationSettings,
+  defaultHeaderConfig,
+  defaultFooterConfig,
+  API_URL,
+  glass,
+} from './types';
+
+const TABS: Array<{ id: SettingsTab; label: string; icon: string }> = [
+  { id: 'layout', label: 'Layout', icon: 'ri-layout-line' },
+  { id: 'company', label: 'Công ty', icon: 'ri-building-2-line' },
+  { id: 'theme', label: 'Theme', icon: 'ri-palette-line' },
+  { id: 'notifications', label: 'Thông báo', icon: 'ri-notification-3-line' },
+];
+
+export function SettingsPage() {
+  const toast = useToast();
+  const [activeTab, setActiveTab] = useState<SettingsTab>('layout');
+
+  // State
+  const [companySettings, setCompanySettings] = useState<CompanySettings>(defaultCompanySettings);
+  const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(defaultNotificationSettings);
+  const [headerConfig, setHeaderConfig] = useState<HeaderConfig>(defaultHeaderConfig);
+  const [footerConfig, setFooterConfig] = useState<FooterConfig>(defaultFooterConfig);
+
+  // Fetch settings on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const [companyRes, themeRes] = await Promise.all([
+          fetch(`${API_URL}/settings/company`, { credentials: 'include' }),
+          fetch(`${API_URL}/settings/theme`, { credentials: 'include' }),
+        ]);
+
+        if (companyRes.ok) {
+          const data = await companyRes.json();
+          if (data.value) setCompanySettings((prev) => ({ ...prev, ...data.value }));
+        }
+
+        if (themeRes.ok) {
+          const data = await themeRes.json();
+          if (data.value) setThemeSettings((prev) => ({ ...prev, ...data.value }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
+  // Show floating toast message
+  const showSavedMessage = useCallback((message: string) => {
+    toast.success(message);
+  }, [toast]);
+
+  // Error handler
+  const handleError = useCallback((message: string) => {
+    toast.error(message);
+  }, [toast]);
+
+  return (
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 20px' }}>
+      {/* Header */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
+          <div style={{
+            width: 48,
+            height: 48,
+            borderRadius: tokens.radius.lg,
+            background: `linear-gradient(135deg, ${tokens.color.primary}, ${tokens.color.accent})`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 24,
+            color: '#111',
+          }}>
+            <i className="ri-settings-3-line" />
+          </div>
+          <div>
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: tokens.color.text, margin: 0 }}>
+              Cài Đặt
+            </h1>
+            <p style={{ color: tokens.color.muted, fontSize: 14, margin: 0 }}>
+              Quản lý cấu hình website và thông tin công ty
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        marginBottom: 32,
+        padding: 8,
+        background: glass.background,
+        borderRadius: tokens.radius.lg,
+        border: glass.border,
+      }}>
+        {TABS.map((tab) => (
+          <motion.button
+            key={tab.id}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              background: activeTab === tab.id ? tokens.color.primary : 'transparent',
+              border: 'none',
+              borderRadius: tokens.radius.md,
+              color: activeTab === tab.id ? '#111' : tokens.color.text,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              transition: 'all 0.2s',
+            }}
+          >
+            <i className={tab.icon} />
+            {tab.label}
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <AnimatePresence mode="wait">
+        {activeTab === 'layout' && (
+          <LayoutTab
+            key="layout"
+            headerConfig={headerConfig}
+            footerConfig={footerConfig}
+            onHeaderChange={setHeaderConfig}
+            onFooterChange={setFooterConfig}
+            onShowMessage={showSavedMessage}
+            onError={handleError}
+          />
+        )}
+
+        {activeTab === 'company' && (
+          <CompanyTab
+            key="company"
+            settings={companySettings}
+            onChange={setCompanySettings}
+            onShowMessage={showSavedMessage}
+            onError={handleError}
+          />
+        )}
+
+        {activeTab === 'theme' && (
+          <ThemeTab
+            key="theme"
+            settings={themeSettings}
+            onChange={setThemeSettings}
+            onShowMessage={showSavedMessage}
+            onError={handleError}
+          />
+        )}
+
+        {activeTab === 'notifications' && (
+          <NotificationsTab
+            key="notifications"
+            settings={notificationSettings}
+            onChange={setNotificationSettings}
+            onShowMessage={showSavedMessage}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
