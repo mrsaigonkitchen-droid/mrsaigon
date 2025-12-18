@@ -24,6 +24,7 @@ import { securityHeaders } from './middleware/security-headers';
 import { correlationId } from './middleware/correlation-id';
 import { errorHandler } from './middleware/error-handler';
 import { createCorsMiddleware } from './config/cors';
+import { successResponse } from './utils/response';
 
 // Route imports
 import { createAuthRoutes } from './routes/auth.routes';
@@ -132,11 +133,12 @@ app.use('*', rateLimit({ windowMs: 60 * 1000, max: isDev ? 1000 : 200 }));
 // HEALTH CHECK & ROOT
 // ============================================
 
-app.get('/health', (c) => c.json({ ok: true, service: 'ath-api', host: hostname() }));
+app.get('/health', (c) => 
+  successResponse(c, { ok: true, service: 'ath-api', host: hostname() })
+);
 
 app.get('/', (c) =>
-  c.json({
-    ok: true,
+  successResponse(c, {
     message: 'Anh Thợ Xây API',
     endpoints: ['/health', '/api/auth/login', '/pages/:slug', '/service-categories', '/materials', '/leads'],
   })

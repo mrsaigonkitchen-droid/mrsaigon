@@ -638,7 +638,7 @@ export const blogCommentsApi = {
     apiFetch<BlogComment>(`/blog/posts/${postId}/comments`, { method: 'POST', body: data }),
 
   // Update comment status (approve/reject) - Admin/Manager only
-  updateStatus: (id: string, status: 'APPROVED' | 'REJECTED' | 'PENDING' | 'SPAM') =>
+  updateStatus: (id: string, status: 'APPROVED' | 'REJECTED') =>
     apiFetch<BlogComment>(`/blog/comments/${id}/status`, { method: 'PUT', body: { status } }),
 
   // Delete a comment - Admin/Manager only

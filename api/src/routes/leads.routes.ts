@@ -236,11 +236,19 @@ export function createLeadsRoutes(prisma: PrismaClient) {
    * @description Export leads to CSV
    * @access Admin, Manager
    */
-  app.get('/export', authenticate(), requireRole('ADMIN', 'MANAGER'), async (c) => {
+  app.get('/export', 
+    authenticate(), 
+    requireRole('ADMIN', 'MANAGER'),
+    validateQuery(z.object({
+      search: z.string().optional(),
+      status: z.enum(['NEW', 'CONTACTED', 'CONVERTED', 'CANCELLED']).optional(),
+    })),
+    async (c) => {
     try {
       // Apply same filters as list
-      const search = c.req.query('search')?.toLowerCase();
-      const status = c.req.query('status');
+      const query = getValidatedQuery<{ search?: string; status?: string }>(c);
+      const search = query.search?.toLowerCase();
+      const status = query.status;
 
       const where: Prisma.CustomerLeadWhereInput = {};
       if (status) where.status = status;

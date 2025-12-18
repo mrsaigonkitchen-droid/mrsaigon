@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import type { PrismaClient } from '@prisma/client';
+import type { Context } from 'hono';
 import { AuthService, AuthError, type Role } from '../services/auth.service';
 import { createAuthMiddleware, getUser } from '../middleware/auth.middleware';
 import { loginRateLimiter, resetLimit, clearAllLimits } from '../middleware/rate-limiter';
@@ -43,24 +44,13 @@ function getClientIp(c: { req: { header: (name: string) => string | undefined } 
   );
 }
 
-function handleError(c: { json: (data: unknown, status: number) => Response; get: (key: string) => unknown }, error: unknown): Response {
+function handleError(c: Context, error: unknown): Response {
   if (error instanceof z.ZodError) {
     const firstError = error.issues[0];
-    // Use errorResponse for consistent format with correlationId
-    const correlationId = (c.get('correlationId') as string) || 'unknown';
-    return c.json({ 
-      success: false, 
-      error: { code: 'VALIDATION_ERROR', message: firstError?.message || 'Validation failed' },
-      correlationId 
-    }, 400);
+    return errorResponse(c, 'VALIDATION_ERROR', firstError?.message || 'Validation failed', 400);
   }
   if (error instanceof AuthError) {
-    const correlationId = (c.get('correlationId') as string) || 'unknown';
-    return c.json({ 
-      success: false, 
-      error: { code: error.code, message: error.message },
-      correlationId 
-    }, error.statusCode);
+    return errorResponse(c, error.code, error.message, error.statusCode);
   }
   throw error;
 }

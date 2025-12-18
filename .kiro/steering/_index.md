@@ -2,34 +2,10 @@
 inclusion: always
 ---
 
-# 📚 Steering Files Index - ANH THỢ XÂY
+# 📚 ANH THỢ XÂY - Steering Guide
 
-## 🎯 Mục đích
-Hướng dẫn AI đọc đúng thứ tự các steering files để vibe code hiệu quả.
-
-## 📖 THỨ TỰ ĐỌC (Quan trọng → Chi tiết)
-
-### 1. LUÔN ĐỌC TRƯỚC
-| File | Khi nào | Nội dung |
-|------|---------|----------|
-| `cursor-rules.md` | Mọi lúc | Rules chính, checklist, KHÔNG BAO GIỜ/LUÔN LÀM |
-| `security-checklist.md` | Khi tạo/sửa API | Auth, roles, rate limiting |
-
-### 2. ĐỌC THEO CONTEXT
-| File | Khi nào | Trigger |
-|------|---------|---------|
-| `react-patterns.md` | Code React | Files trong `landing/`, `admin/` |
-| `api-patterns.md` | Code API | Files trong `api/` |
-| `prisma-patterns.md` | Sửa schema | Files trong `infra/prisma/` |
-
-### 3. THAM KHẢO KHI CẦN
-| File | Nội dung |
-|------|----------|
-| `ath-business-logic.md` | Business logic, công thức tính giá, roles |
-| `coding-standards.md` | Standards chi tiết |
-| `common-mistakes.md` | Lỗi thường gặp |
-| `development-workflow.md` | Quy trình dev |
-| `project-rules.md` | Tổng quan dự án |
+## 🎯 MỤC TIÊU
+Đảm bảo code nhất quán, tránh trùng lặp, dễ maintain khi vibe-code lâu dài.
 
 ## 🔑 QUICK REFERENCE
 
@@ -45,7 +21,7 @@ admin/    → Port 4201 (Admin dashboard)
 api/      → Port 4202 (Backend API)
 ```
 
-### Commands thường dùng
+### Commands
 ```bash
 pnpm dev:api          # Start API
 pnpm dev:landing      # Start Landing
@@ -54,13 +30,12 @@ pnpm db:generate      # Generate Prisma
 pnpm db:push          # Push schema
 ```
 
-### ⚠️ Commands kiểm tra code (BẮT BUỘC chạy đủ 3)
+### ⚠️ KIỂM TRA CODE (BẮT BUỘC chạy đủ 3)
 ```bash
-pnpm nx run-many --target=lint --all      # ESLint errors/warnings
-pnpm nx run-many --target=typecheck --all # TypeScript errors
-pnpm nx run-many --target=test --all      # Unit tests (nếu có)
+pnpm nx run-many --target=lint --all      # ESLint
+pnpm nx run-many --target=typecheck --all # TypeScript
+pnpm nx run-many --target=test --all      # Unit tests
 ```
-**LƯU Ý:** `pnpm nx run api:test` CHỈ chạy unit tests, KHÔNG kiểm tra lint!
 
 ### Import paths
 ```typescript
@@ -68,37 +43,75 @@ import { tokens, API_URL, resolveMediaUrl } from '@app/shared';
 // KHÔNG import cross-app!
 ```
 
-## ⚠️ CRITICAL REMINDERS
+## 🚫 KHÔNG BAO GIỜ
 
-1. **Lint + Typecheck**: Phải pass CẢ HAI commands → 0 errors, 0 warnings
-2. **Security**: Mọi API endpoint admin/manager PHẢI có auth middleware
-3. **Validation**: Mọi input PHẢI validate với Zod
-4. **No hardcode**: Dùng constants từ `@app/shared`
-5. **No cross-app import**: Dùng shared packages
+- Tạo file mới nếu đã có file tương tự
+- Hardcode strings/numbers, URLs
+- Dùng `any` trong TypeScript
+- Comment code cũ thay vì xóa
+- Suppress warnings bằng eslint-disable mà không có lý do
+- **TỰ Ý push/rollback** - CHỈ khi user yêu cầu
+- **🔐 Tạo API endpoint admin/manager mà KHÔNG có auth middleware**
+- **🔐 Bypass auth hoặc hardcode user ID**
 
-## 📋 CHECKLIST NHANH
+## ✅ LUÔN LÀM
 
-Trước khi code:
-- [ ] Đọc `cursor-rules.md`
-- [ ] Nếu API → đọc `security-checklist.md`
+- Kiểm tra code hiện tại trước khi tạo mới
+- Follow patterns hiện có
+- Validate input với Zod
+- Fix errors/warnings ngay khi phát hiện
+- **🔐 Kiểm tra auth khi tạo/sửa API endpoint**
+- **🔐 Cập nhật Protected Routes Registry khi thêm route mới**
+
+## 📋 CHECKLIST
+
+### Trước khi code:
 - [ ] Kiểm tra file/function tương tự đã có chưa
+- [ ] Nếu API → xem `security-checklist.md`
 
-Sau khi code:
-- [ ] Chạy lint: `pnpm nx run-many --target=lint --all`
-- [ ] Chạy typecheck: `pnpm nx run-many --target=typecheck --all`
+### Sau khi code:
+- [ ] Chạy lint + typecheck → 0 errors, 0 warnings
 - [ ] Nếu API mới → đã thêm auth?
 - [ ] Nếu form → đã có rate limiting?
 
+## 📖 STEERING FILES
+
+### LUÔN ĐỌC
+| File | Nội dung |
+|------|----------|
+| `security-checklist.md` | Auth, roles, rate limiting, Protected Routes Registry |
+| `ath-business-logic.md` | Business logic, công thức tính giá, roles |
+
+### ĐỌC THEO CONTEXT (fileMatch)
+| File | Trigger |
+|------|---------|
+| `react-patterns.md` | Files trong `landing/`, `admin/` |
+| `api-patterns.md` | Files trong `api/` |
+| `prisma-patterns.md` | Files trong `infra/prisma/` |
+
+## ⚠️ CRITICAL RULES
+
+### TYPE & PRISMA
+- Prisma là nguồn sự thật cho enum/model. **CẤM** tạo enum/type trùng nghĩa
+- JSON Prisma: dùng `Prisma.InputJsonValue` (ghi) / `Prisma.JsonValue` (đọc)
+
+### IMPORT ORDER
+```
+1. External libraries (react, hono, etc)
+2. Internal absolute imports (@app/shared, @app/ui)
+3. Relative imports (./Component)
+4. Types (import type ...)
+```
+
+### NAMING CONVENTIONS
+- Files: PascalCase cho components, camelCase cho utils
+- Components/Types: PascalCase
+- Functions/Variables: camelCase
+- Constants: UPPER_SNAKE_CASE
+
 ## 🔄 SPEC ↔ STEERING SYNC
 
-**Khi implement từ spec hoặc phát triển feature mới:**
-
-| Thay đổi | Cập nhật file |
-|----------|---------------|
-| API routes mới | `security-checklist.md` |
-| Role/permission mới | `ath-business-logic.md` |
-| Pattern mới | File pattern tương ứng |
-| Lỗi hay gặp | `common-mistakes.md` |
-
-**SAU KHI HOÀN THÀNH FEATURE → HỎI USER:**
-> "Cần cập nhật steering files không? (routes, roles, patterns...)"
+Sau khi hoàn thành feature, cập nhật steering nếu có:
+- API routes mới → `security-checklist.md`
+- Role/permission mới → `ath-business-logic.md`
+- Pattern mới → file pattern tương ứng

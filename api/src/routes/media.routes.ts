@@ -386,7 +386,10 @@ export function createMediaRoutes(prisma: PrismaClient, mediaDir?: string) {
       }
 
       // Delete file from disk
-      const filename = asset.url.split('/').pop() as string;
+      const filename = asset.url.split('/').pop();
+      if (!filename) {
+        return errorResponse(c, 'INTERNAL_ERROR', 'Invalid media URL format', 500);
+      }
       const filePath = path.join(resolvedMediaDir, filename);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
