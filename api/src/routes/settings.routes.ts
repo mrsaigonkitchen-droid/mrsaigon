@@ -90,7 +90,7 @@ export function createSettingsRoutes(prisma: PrismaClient) {
         value = setting.value;
       }
       
-      return successResponse(c, value);
+      return successResponse(c, { key, value });
     } catch (error) {
       console.error('Get setting error:', error);
       return errorResponse(c, 'INTERNAL_ERROR', 'Failed to get setting', 500);

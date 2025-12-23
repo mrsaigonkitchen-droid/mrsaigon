@@ -7,6 +7,7 @@ export interface HeaderLink {
   href: string;
   label: string;
   icon?: string;
+  highlight?: boolean; // Làm nổi bật link đặc biệt
 }
 
 export interface CTALink {
@@ -236,10 +237,22 @@ export function Header({ config, mobileMenuComponent }: HeaderProps) {
           justifyContent: 'space-between',
           ...containerStyle,
           padding: '16px 24px',
+          position: 'relative',
         }}
       >
-        {/* Logo */}
-        <Link to="/" style={{ textDecoration: 'none' }}>
+        {/* Mobile: Empty spacer for centering logo */}
+        <div className="mobile-only" style={{ width: 44 }} />
+
+        {/* Logo - Centered on mobile */}
+        <Link 
+          to="/" 
+          style={{ 
+            textDecoration: 'none',
+            position: 'relative',
+            zIndex: 1,
+          }}
+          className="header-logo"
+        >
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -292,40 +305,65 @@ export function Header({ config, mobileMenuComponent }: HeaderProps) {
         {/* Navigation */}
         <nav style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           {/* Desktop Links */}
-          {links?.map((item) => {
+          {links?.map((item, index) => {
             const isActive = location.pathname === item.href;
+            const isHighlight = item.highlight;
+            
             return (
               <Link
-                key={item.href}
+                key={`nav-${item.href}-${index}`}
                 to={item.href}
                 style={{ textDecoration: 'none' }}
                 className="desktop-only"
               >
                 <motion.div
-                  whileHover={{ y: -2 }}
+                  whileHover={{ y: -2, scale: isHighlight ? 1.05 : 1 }}
+                  whileTap={{ scale: 0.95 }}
                   style={{
-                    color: isActive ? tokens.color.primary : tokens.color.text,
+                    color: isHighlight 
+                      ? tokens.color.primary 
+                      : isActive 
+                        ? tokens.color.primary 
+                        : tokens.color.text,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 5,
                     fontSize: 14,
-                    fontWeight: isActive ? 600 : 500,
-                    transition: 'color 0.2s',
+                    fontWeight: isHighlight ? 600 : isActive ? 600 : 500,
+                    transition: 'all 0.2s',
                     position: 'relative',
-                    padding: '6px 0',
+                    padding: isHighlight ? '6px 12px' : '6px 0',
+                    background: isHighlight 
+                      ? `linear-gradient(135deg, ${tokens.color.primary}15, ${tokens.color.accent}15)` 
+                      : 'transparent',
+                    border: isHighlight 
+                      ? `1px solid ${tokens.color.primary}40` 
+                      : 'none',
+                    borderRadius: isHighlight ? tokens.radius.pill : 0,
+                    boxShadow: isHighlight 
+                      ? `0 2px 8px ${tokens.color.primary}20` 
+                      : 'none',
                   }}
                   onMouseEnter={(e) =>
                     (e.currentTarget.style.color = tokens.color.primary)
                   }
                   onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = isActive ? tokens.color.primary : tokens.color.text)
+                    (e.currentTarget.style.color = isHighlight || isActive ? tokens.color.primary : tokens.color.text)
                   }
                 >
                   {item.icon && (
                     <i className={item.icon} style={{ fontSize: 16 }} />
                   )}
                   {item.label}
-                  {isActive && (
+                  {isHighlight && (
+                    <motion.i 
+                      className="ri-sparkling-fill" 
+                      style={{ fontSize: 12, marginLeft: 2 }}
+                      animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  )}
+                  {isActive && !isHighlight && (
                     <motion.div
                       layoutId="activeTab"
                       style={{

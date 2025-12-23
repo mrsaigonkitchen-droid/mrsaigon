@@ -394,6 +394,122 @@ export class GoogleSheetsService {
     const config: IntegrationConfig = JSON.parse(integration.config);
     return config.syncEnabled && !!config.spreadsheetId;
   }
+
+  /**
+   * Read data from a specific sheet
+   * 
+   * @param spreadsheetId - The Google Spreadsheet ID
+   * @param sheetName - The name of the sheet to read
+   * @param range - Optional range (e.g., 'A1:G100'), defaults to entire sheet
+   * @returns Array of rows, where each row is an array of cell values
+   */
+  async readSheet(
+    spreadsheetId: string,
+    sheetName: string,
+    range?: string
+  ): Promise<(string | number | null)[][] | null> {
+    const integration = await prisma.integration.findUnique({
+      where: { type: 'google_sheets' },
+    });
+
+    if (!integration?.credentials) {
+      throw new Error('Google Sheets not connected');
+    }
+
+    // Decrypt token before use
+    const refreshToken = this.getDecryptedToken(integration.credentials);
+    this.oauth2Client.setCredentials({ refresh_token: refreshToken });
+    const sheets = google.sheets({ version: 'v4', auth: this.oauth2Client });
+
+    // Build the range string
+    const fullRange = range ? `${sheetName}!${range}` : sheetName;
+
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: fullRange,
+      });
+
+      const rows = response.data.values;
+      if (!rows || rows.length === 0) {
+        return null;
+      }
+
+      // Convert to typed array
+      return rows.map((row) =>
+        row.map((cell) => {
+          if (cell === null || cell === undefined || cell === '') {
+            return null;
+          }
+          // Try to parse as number
+          const num = Number(cell);
+          if (!isNaN(num) && cell !== '') {
+            return num;
+          }
+          return String(cell);
+        })
+      );
+    } catch (error) {
+      console.error('Read sheet error:', error);
+      throw new Error(`Failed to read sheet "${sheetName}": ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Write data to a specific sheet
+   * 
+   * @param spreadsheetId - The Google Spreadsheet ID
+   * @param sheetName - The name of the sheet to write to
+   * @param data - Array of rows to write
+   * @param startCell - Starting cell (e.g., 'A1'), defaults to 'A1'
+   * @returns Number of rows written
+   */
+  async writeSheet(
+    spreadsheetId: string,
+    sheetName: string,
+    data: (string | number | null)[][],
+    startCell = 'A1'
+  ): Promise<number> {
+    const integration = await prisma.integration.findUnique({
+      where: { type: 'google_sheets' },
+    });
+
+    if (!integration?.credentials) {
+      throw new Error('Google Sheets not connected');
+    }
+
+    // Decrypt token before use
+    const refreshToken = this.getDecryptedToken(integration.credentials);
+    this.oauth2Client.setCredentials({ refresh_token: refreshToken });
+    const sheets = google.sheets({ version: 'v4', auth: this.oauth2Client });
+
+    const range = `${sheetName}!${startCell}`;
+
+    try {
+      // Clear existing data first
+      await sheets.spreadsheets.values.clear({
+        spreadsheetId,
+        range: sheetName,
+      });
+
+      // Write new data
+      const response = await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range,
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: data.map((row) =>
+            row.map((cell) => (cell === null ? '' : cell))
+          ),
+        },
+      });
+
+      return response.data.updatedRows ?? 0;
+    } catch (error) {
+      console.error('Write sheet error:', error);
+      throw new Error(`Failed to write to sheet "${sheetName}": ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
 }
 
 // Singleton instance

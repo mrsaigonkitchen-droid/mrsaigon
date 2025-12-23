@@ -23,6 +23,7 @@ const QuoteCalculatorSection = lazy(() => import('./QuoteCalculatorSection').the
 const InteriorQuoteSection = lazy(() => import('./InteriorQuoteSection').then(m => ({ default: m.InteriorQuoteSection })));
 const InteriorPricingTable = lazy(() => import('./InteriorPricingTable').then(m => ({ default: m.InteriorPricingTable })));
 const InteriorWizardSection = lazy(() => import('./InteriorWizardSection').then(m => ({ default: m.InteriorWizardSection })));
+const MarketplaceSection = lazy(() => import('./MarketplaceSection').then(m => ({ default: m.MarketplaceSection })));
 
 // Loading fallback component
 const SectionLoader = () => (
@@ -211,6 +212,13 @@ export function renderSection(section: Section) {
       return (
         <Suspense key={section.id} fallback={<SectionLoader />}>
           <InteriorWizardSection data={data} />
+        </Suspense>
+      );
+
+    case 'MARKETPLACE':
+      return (
+        <Suspense key={section.id} fallback={<SectionLoader />}>
+          <MarketplaceSection data={data} />
         </Suspense>
       );
 

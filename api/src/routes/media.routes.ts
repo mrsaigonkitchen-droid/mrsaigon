@@ -362,16 +362,11 @@ export function createMediaRoutes(prisma: PrismaClient, mediaDir?: string) {
       // Get all media
       const allMedia = await prisma.mediaAsset.findMany();
 
-      // Get materials with images - normalize URLs
-      const materials = await prisma.material.findMany({
-        where: { imageUrl: { not: null } },
-        select: { imageUrl: true },
-      });
-      const materialUrls = new Set(
-        materials.map((m) => normalizeMediaUrl(m.imageUrl)).filter(Boolean) as string[]
-      );
-
-      // Get blog posts with featured images - normalize URLs
+      // ============================================
+      // COLLECT URLS BY CATEGORY
+      // ============================================
+      
+      // Blog posts with featured images
       const blogPosts = await prisma.blogPost.findMany({
         where: { featuredImage: { not: null } },
         select: { featuredImage: true },
@@ -380,7 +375,7 @@ export function createMediaRoutes(prisma: PrismaClient, mediaDir?: string) {
         blogPosts.map((b) => normalizeMediaUrl(b.featuredImage)).filter(Boolean) as string[]
       );
 
-      // Get sections with images in data
+      // Sections with images in data
       const sections = await prisma.section.findMany();
       const sectionUrls = new Set<string>();
       sections.forEach((s) => {
@@ -389,31 +384,240 @@ export function createMediaRoutes(prisma: PrismaClient, mediaDir?: string) {
         urlMatches.forEach((url) => sectionUrls.add(url));
       });
 
-      // Categorize media
+      // ============================================
+      // DYNAMIC CATEGORIES FROM INTERIOR & PRICING
+      // ============================================
+      
+      // Dynamic categories structure: { categoryKey: { label, icon, urls } }
+      const dynamicCategories: Record<string, { label: string; icon: string; urls: Set<string> }> = {};
+
+      // --- PRICING: Material Categories ---
+      const materialCategories = await prisma.materialCategory.findMany({
+        where: { isActive: true },
+        select: { id: true, name: true, icon: true },
+      });
+      
+      for (const cat of materialCategories) {
+        const materials = await prisma.material.findMany({
+          where: { categoryId: cat.id, imageUrl: { not: null } },
+          select: { imageUrl: true },
+        });
+        
+        if (materials.length > 0) {
+          const key = `material_${cat.id}`;
+          dynamicCategories[key] = {
+            label: cat.name,
+            icon: cat.icon || 'ri-tools-line',
+            urls: new Set(materials.map((m) => normalizeMediaUrl(m.imageUrl)).filter(Boolean) as string[]),
+          };
+        }
+      }
+
+      // --- INTERIOR: Furniture Categories ---
+      const furnitureCategories = await prisma.interiorFurnitureCategory.findMany({
+        where: { isActive: true, parentId: null }, // Only top-level categories
+        select: { id: true, name: true, icon: true },
+      });
+      
+      for (const cat of furnitureCategories) {
+        const items = await prisma.interiorFurnitureItem.findMany({
+          where: { 
+            categoryId: cat.id,
+            OR: [
+              { thumbnail: { not: null } },
+              { images: { not: null } },
+            ],
+          },
+          select: { thumbnail: true, images: true },
+        });
+        
+        const urls = new Set<string>();
+        items.forEach((item) => {
+          if (item.thumbnail) {
+            const url = normalizeMediaUrl(item.thumbnail);
+            if (url) urls.add(url);
+          }
+          if (item.images) {
+            try {
+              const imgs = JSON.parse(item.images) as string[];
+              imgs.forEach((img) => {
+                const url = normalizeMediaUrl(img);
+                if (url) urls.add(url);
+              });
+            } catch { /* ignore */ }
+          }
+        });
+        
+        if (urls.size > 0) {
+          const key = `furniture_${cat.id}`;
+          dynamicCategories[key] = {
+            label: cat.name,
+            icon: cat.icon || 'ri-home-smile-line',
+            urls,
+          };
+        }
+      }
+
+      // --- INTERIOR: Developments ---
+      const developments = await prisma.interiorDevelopment.findMany({
+        select: { id: true, name: true, thumbnail: true, images: true },
+      });
+      
+      const devUrls = new Set<string>();
+      developments.forEach((d) => {
+        if (d.thumbnail) {
+          const url = normalizeMediaUrl(d.thumbnail);
+          if (url) devUrls.add(url);
+        }
+        if (d.images) {
+          try {
+            const imgs = JSON.parse(d.images) as string[];
+            imgs.forEach((img) => {
+              const url = normalizeMediaUrl(img);
+              if (url) devUrls.add(url);
+            });
+          } catch { /* ignore */ }
+        }
+      });
+      
+      if (devUrls.size > 0) {
+        dynamicCategories['interior_developments'] = {
+          label: 'Dự án',
+          icon: 'ri-building-line',
+          urls: devUrls,
+        };
+      }
+
+      // --- INTERIOR: Buildings ---
+      const buildings = await prisma.interiorBuilding.findMany({
+        select: { thumbnail: true, floorPlanImage: true },
+      });
+      
+      const buildingUrls = new Set<string>();
+      buildings.forEach((b) => {
+        if (b.thumbnail) {
+          const url = normalizeMediaUrl(b.thumbnail);
+          if (url) buildingUrls.add(url);
+        }
+        if (b.floorPlanImage) {
+          const url = normalizeMediaUrl(b.floorPlanImage);
+          if (url) buildingUrls.add(url);
+        }
+      });
+      
+      if (buildingUrls.size > 0) {
+        dynamicCategories['interior_buildings'] = {
+          label: 'Tòa nhà',
+          icon: 'ri-building-2-line',
+          urls: buildingUrls,
+        };
+      }
+
+      // --- INTERIOR: Layouts ---
+      const layouts = await prisma.interiorUnitLayout.findMany({
+        select: { layoutImage: true, layout3DImage: true, dimensionImage: true },
+      });
+      
+      const layoutUrls = new Set<string>();
+      layouts.forEach((l) => {
+        if (l.layoutImage) {
+          const url = normalizeMediaUrl(l.layoutImage);
+          if (url) layoutUrls.add(url);
+        }
+        if (l.layout3DImage) {
+          const url = normalizeMediaUrl(l.layout3DImage);
+          if (url) layoutUrls.add(url);
+        }
+        if (l.dimensionImage) {
+          const url = normalizeMediaUrl(l.dimensionImage);
+          if (url) layoutUrls.add(url);
+        }
+      });
+      
+      if (layoutUrls.size > 0) {
+        dynamicCategories['interior_layouts'] = {
+          label: 'Mặt bằng',
+          icon: 'ri-layout-masonry-line',
+          urls: layoutUrls,
+        };
+      }
+
+      // --- INTERIOR: Packages ---
+      const packages = await prisma.interiorPackage.findMany({
+        select: { thumbnail: true, images: true },
+      });
+      
+      const packageUrls = new Set<string>();
+      packages.forEach((p) => {
+        if (p.thumbnail) {
+          const url = normalizeMediaUrl(p.thumbnail);
+          if (url) packageUrls.add(url);
+        }
+        if (p.images) {
+          try {
+            const imgs = JSON.parse(p.images) as string[];
+            imgs.forEach((img) => {
+              const url = normalizeMediaUrl(img);
+              if (url) packageUrls.add(url);
+            });
+          } catch { /* ignore */ }
+        }
+      });
+      
+      if (packageUrls.size > 0) {
+        dynamicCategories['interior_packages'] = {
+          label: 'Gói nội thất',
+          icon: 'ri-gift-line',
+          urls: packageUrls,
+        };
+      }
+
+      // ============================================
+      // CATEGORIZE MEDIA
+      // ============================================
+      
       const usage: Record<string, { usedIn: string[]; count: number }> = {};
 
       allMedia.forEach((media) => {
         const normalizedUrl = normalizeMediaUrl(media.url);
         const usedIn: string[] = [];
 
-        if (normalizedUrl && materialUrls.has(normalizedUrl)) {
-          usedIn.push('materials');
-        }
         if (normalizedUrl && blogUrls.has(normalizedUrl)) {
           usedIn.push('blog');
         }
         if (normalizedUrl && sectionUrls.has(normalizedUrl)) {
           usedIn.push('sections');
         }
+        
+        // Check dynamic categories
+        for (const [key, cat] of Object.entries(dynamicCategories)) {
+          if (normalizedUrl && cat.urls.has(normalizedUrl)) {
+            usedIn.push(key);
+          }
+        }
 
         usage[media.id] = { usedIn, count: usedIn.length };
       });
 
+      // ============================================
+      // BUILD RESPONSE
+      // ============================================
+      
+      // Convert dynamic categories to response format (without urls Set)
+      const categories: Record<string, { label: string; icon: string; count: number }> = {};
+      for (const [key, cat] of Object.entries(dynamicCategories)) {
+        categories[key] = {
+          label: cat.label,
+          icon: cat.icon,
+          count: allMedia.filter((m) => usage[m.id]?.usedIn.includes(key)).length,
+        };
+      }
+
       return successResponse(c, {
         usage,
+        categories, // Dynamic categories with counts
         summary: {
           total: allMedia.length,
-          materials: allMedia.filter((m) => usage[m.id]?.usedIn.includes('materials')).length,
           blog: allMedia.filter((m) => usage[m.id]?.usedIn.includes('blog')).length,
           sections: allMedia.filter((m) => usage[m.id]?.usedIn.includes('sections')).length,
           unused: allMedia.filter((m) => usage[m.id]?.count === 0).length,

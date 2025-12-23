@@ -1539,3 +1539,25 @@ model InteriorQuote {
   @@index([packageId])
   @@index([createdAt])
 }
+
+// ============================================
+// INTERIOR MODULE - SYNC LOG
+// ============================================
+
+model InteriorSyncLog {
+  id          String   @id @default(cuid())
+  direction   String   // 'pull' | 'push'
+  sheetId     String
+  sheetName   String
+  status      String   // 'success' | 'partial' | 'failed'
+  created     Int      @default(0)
+  updated     Int      @default(0)
+  skipped     Int      @default(0)
+  errors      String?  // JSON array of errors
+  syncedBy    String
+  syncedAt    DateTime @default(now())
+  
+  @@index([syncedAt])
+  @@index([direction])
+  @@index([status])
+}

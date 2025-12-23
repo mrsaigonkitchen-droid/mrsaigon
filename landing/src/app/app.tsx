@@ -88,17 +88,25 @@ function AppContent() {
   // Load company settings for background image
   useEffect(() => {
     fetch(`${API_URL}/settings/company`)
-      .then((res) => res.json())
+      .then((res) => {
+        console.log('📡 Settings API response status:', res.status);
+        return res.json();
+      })
       .then((json) => {
+        console.log('📦 Settings API raw response:', json);
         // Unwrap standardized response format { success: true, data: T }
         const data = json.data || json;
         const settings = data.value || data; // Handle both {key, value} and direct object
+        console.log('🔧 Parsed settings:', settings);
+        
         if (settings.backgroundImage && settings.backgroundImage.trim()) {
           const bgUrl = resolveMediaUrl(settings.backgroundImage);
+          console.log('🖼️ Background URL:', bgUrl);
           
           // Validate image exists before setting
           const img = new Image();
           img.onload = () => {
+            console.log('✅ Background image loaded successfully');
             setBackgroundImage(bgUrl);
           };
           img.onerror = () => {
@@ -107,12 +115,13 @@ function AppContent() {
           };
           img.src = bgUrl;
         } else {
+          console.log('ℹ️ No background image set, using default');
           // Clear background image if it was deleted or is empty
           setBackgroundImage(null);
         }
       })
       .catch((err) => {
-        console.error('Failed to load company settings:', err);
+        console.error('❌ Failed to load company settings:', err);
       });
   }, []);
 
@@ -363,27 +372,12 @@ function AppContent() {
           return headerConfig;
         })()}
         mobileMenuComponent={(() => {
-          // Get header config to sync menu items
-          const headerConfig = page?.headerConfig
-            ? (typeof page.headerConfig === 'string'
-                ? JSON.parse(page.headerConfig)
-                : page.headerConfig)
-            : headerConfigFromSettings;
-          
-          // Convert header links/navigation to mobile menu format
-          // Support both 'links' (from saved config) and 'navigation' (from default)
-          const navItems = headerConfig?.links || headerConfig?.navigation || [];
-          const menuItems = navItems.map((link: { href?: string; path?: string; route?: string; label: string; icon?: string }) => ({
-            href: link.href || link.path || link.route || '/',
-            label: link.label,
-            icon: link.icon ? link.icon.replace('-line', '-fill') : undefined,
-          }));
-          
+          // MobileMenu tự fetch config từ API (bao gồm highlight)
+          // Không cần truyền menuItems prop
           return (
             <MobileMenu 
               currentRoute={location.pathname} 
               onNavigate={handleNavigate}
-              menuItems={menuItems.length > 0 ? menuItems : undefined}
             />
           );
         })()}

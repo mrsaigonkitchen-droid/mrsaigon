@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { WizardState, Developer, Development, Building, BuildingUnit, Layout, Package, QuoteResult } from '../types';
 
 const STORAGE_KEY = 'interior_wizard_state';
@@ -51,9 +51,23 @@ export function useInteriorWizard(): UseInteriorWizardReturn {
       const saved = sessionStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved) as WizardState;
-        if (parsed && typeof parsed.currentStep === 'number') return parsed;
+        // Validate parsed state has required structure
+        if (parsed && typeof parsed.currentStep === 'number') {
+          // If we have a quote but it's incomplete, clear it
+          if (parsed.quote && (!parsed.quote.breakdown || !parsed.quote.unitInfo || !parsed.quote.packageInfo)) {
+            parsed.quote = null;
+            // Go back to package step if quote is invalid
+            if (parsed.currentStep === 7) {
+              parsed.currentStep = 6;
+            }
+          }
+          return parsed;
+        }
       }
-    } catch { /* ignore */ }
+    } catch { 
+      // Clear corrupted storage
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    }
     return initialState;
   });
 

@@ -31,6 +31,7 @@ export type SectionKind =
   | 'INTERIOR_QUOTE'
   | 'INTERIOR_PRICING_TABLE'
   | 'INTERIOR_WIZARD'
+  | 'MARKETPLACE'
   | 'ABOUT'
   | 'FAQ'
   // Legacy sections (kept for backward compatibility, not shown in UI)

@@ -40,6 +40,7 @@ export function SettingsPage() {
   const [footerConfig, setFooterConfig] = useState<FooterConfig>(defaultFooterConfig);
 
   // Fetch settings on mount - using settingsApi
+  // If settings don't exist, save defaults to database
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -48,12 +49,20 @@ export function SettingsPage() {
           settingsApi.get('promo').catch(() => null),
         ]);
 
-        if (companyData) {
-          setCompanySettings((prev) => ({ ...prev, ...companyData }));
+        // Company settings
+        if (companyData?.value && typeof companyData.value === 'object') {
+          setCompanySettings((prev) => ({ ...prev, ...(companyData.value as CompanySettings) }));
+        } else {
+          // Save default company settings to database
+          await settingsApi.update('company', { value: defaultCompanySettings }).catch((e) => console.warn('Failed to save default company settings:', e));
         }
 
-        if (promoData) {
-          setPromoSettings((prev) => ({ ...prev, ...promoData }));
+        // Promo settings
+        if (promoData?.value && typeof promoData.value === 'object') {
+          setPromoSettings((prev) => ({ ...prev, ...(promoData.value as PromoSettings) }));
+        } else {
+          // Save default promo settings to database
+          await settingsApi.update('promo', { value: defaultPromoSettings }).catch((e) => console.warn('Failed to save default promo settings:', e));
         }
       } catch (error) {
         console.error('Failed to fetch settings:', error);

@@ -406,6 +406,18 @@ img {
   }
 }
 
+/* Sparkle animation for highlight items */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
 /* Mobile Menu Panel hover effects */
 .mobile-menu-panel a:hover {
   background: rgba(255,255,255,0.08) !important;
@@ -415,6 +427,11 @@ img {
 .mobile-menu-panel button:hover {
   background: rgba(255,255,255,0.15) !important;
   color: var(--primary) !important;
+}
+
+/* Hide mobile-only elements on desktop by default */
+.mobile-only {
+  display: none !important;
 }
 
 /* Mobile styles */
@@ -430,6 +447,11 @@ img {
 
   .desktop-only {
     display: none !important;
+  }
+
+  /* Show mobile-only elements */
+  .mobile-only {
+    display: block !important;
   }
 
   /* Show mobile menu hamburger button */
@@ -491,6 +513,11 @@ img {
   /* Hide desktop navigation on tablet */
   .desktop-only {
     display: none !important;
+  }
+
+  /* Show mobile-only elements on tablet */
+  .mobile-only {
+    display: block !important;
   }
   
   /* ===== TABLET GRID LAYOUTS ===== */

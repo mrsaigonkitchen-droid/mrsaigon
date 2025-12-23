@@ -41,6 +41,7 @@ export function getSectionDescription(kind: SectionKind): string {
     INTERIOR_QUOTE: 'Interior quote wizard (legacy)',
     INTERIOR_PRICING_TABLE: 'Interior pricing table with package tiers',
     INTERIOR_WIZARD: 'Interior quote wizard with 7 steps',
+    MARKETPLACE: 'Public marketplace showing open projects for contractors',
   };
   return descriptions[kind] || '';
 }
@@ -81,6 +82,7 @@ export function getSectionIcon(kind: SectionKind): string {
     INTERIOR_QUOTE: 'ri-home-smile-fill',
     INTERIOR_PRICING_TABLE: 'ri-price-tag-3-fill',
     INTERIOR_WIZARD: 'ri-home-smile-fill',
+    MARKETPLACE: 'ri-store-2-fill',
   };
   return icons[kind] || 'ri-layout-fill';
 }

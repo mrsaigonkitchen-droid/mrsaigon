@@ -87,9 +87,10 @@ interface IconPickerProps {
   value: string;
   onChange: (icon: string) => void;
   placeholder?: string;
+  allowEmpty?: boolean; // Cho phép không chọn icon
 }
 
-export function IconPicker({ label, value, onChange, placeholder = 'Chọn icon...' }: IconPickerProps) {
+export function IconPicker({ label, value, onChange, placeholder = 'Chọn icon...', allowEmpty = false }: IconPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -373,6 +374,39 @@ export function IconPicker({ label, value, onChange, placeholder = 'Chọn icon.
                   }}
                 >
                   Xóa
+                </button>
+              </div>
+            )}
+
+            {/* Allow Empty Option */}
+            {allowEmpty && !value && (
+              <div style={{
+                padding: 12,
+                borderTop: `1px solid ${tokens.color.border}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <button
+                  onClick={() => {
+                    onChange('');
+                    setIsOpen(false);
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: `1px solid ${tokens.color.border}`,
+                    borderRadius: tokens.radius.sm,
+                    color: tokens.color.muted,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <i className="ri-close-circle-line" />
+                  Không sử dụng icon
                 </button>
               </div>
             )}

@@ -6,6 +6,179 @@ Danh sách các file được tạo mới hoặc chỉnh sửa theo ngày, để
 
 ## 2024-12-23
 
+### Task: Mobile Menu - Fix Highlight Feature Not Working
+**✏️ Modified:**
+- `landing/src/app/app.tsx` - Bỏ menuItems prop để MobileMenu tự fetch config từ API (bao gồm highlight)
+- `landing/src/app/components/MobileMenu.tsx` - Fix highlight feature:
+  - Sửa logic fetch config từ API
+  - Update highlight style giống PC (subtle gradient, border, sparkling icon)
+  - Xóa debug logs
+- `landing/src/styles.css` - Thêm sparkle animation cho highlight items
+
+---
+
+### Task: Mobile Menu - Highlight Feature for Landing
+**✏️ Modified:**
+- `landing/src/app/components/MobileMenu.tsx` - Thêm highlight styling cho menu items:
+  - Interface MobileMenuItem thêm field `highlight?: boolean`
+  - Render highlighted items với gradient background, border, sparkle icon animation
+  - Đồng nhất với Header highlight styling
+
+---
+
+### Task: Mobile Menu Settings - Enhanced UI with Drag & Drop
+**✏️ Modified:**
+- `admin/src/app/pages/SettingsPage/LayoutTab.tsx` - Cập nhật Mobile Menu tab:
+  - Thêm drag & drop cho Menu Items và Social Links
+  - Icon là optional (có thể không chọn)
+  - Thêm checkbox highlight cho mỗi menu item
+  - UI đồng nhất với Header tab
+
+---
+
+### Task: Fix Settings 404 Errors - Auto-create Default Settings
+**✏️ Modified:**
+- `admin/src/app/pages/SettingsPage/index.tsx` - Tự động tạo default settings (company, promo) vào database khi chưa có
+- `admin/src/app/pages/SettingsPage/LayoutTab.tsx` - Tự động tạo default mobileMenu settings vào database khi chưa có
+
+**Note:** Khi Admin load Settings page lần đầu, nếu settings chưa tồn tại trong database, sẽ tự động save default values. Điều này giúp Landing không bị lỗi 404 khi fetch settings.
+
+---
+
+### Task: Layout Settings - Drag & Drop Reorder Links
+**🆕 Created:**
+- `admin/src/app/components/SortableList.tsx` - Reusable drag & drop sortable list component using @dnd-kit
+
+**✏️ Modified:**
+- `admin/src/app/pages/SettingsPage/LayoutTab.tsx` - Thêm drag & drop cho Navigation Links, Quick Links, Social Links
+
+---
+
+### Task: Header Navigation Links - Optional Icon & Highlight Feature
+**✏️ Modified:**
+- `admin/src/app/pages/SettingsPage/types.ts` - Thêm interface HeaderNavItem với field highlight, cập nhật HeaderConfig
+- `admin/src/app/pages/SettingsPage/LayoutTab.tsx` - Cập nhật Navigation Links UI: icon optional, thêm checkbox highlight
+- `admin/src/app/components/IconPicker.tsx` - Thêm prop allowEmpty để cho phép không chọn icon
+- `landing/src/app/components/Header.tsx` - Render highlight links với style nổi bật (border, background, sparkle icon)
+
+---
+
+### Task: Interior Sheet Sync - Phase 9: Final Integration (Task 12)
+**✏️ Modified:**
+- `api/src/services/interior/sync.service.ts` - Fix Object.hasOwn compatibility issue (ES2022) bằng Object.prototype.hasOwnProperty.call
+- `.kiro/specs/interior-sheet-sync/tasks.md` - Đánh dấu Task 12.1 hoàn thành
+
+**Note:** syncService đã được export từ `api/src/services/interior/index.ts` trong các task trước đó.
+
+---
+
+### Task: Interior Sheet Sync - Phase 8: Admin UI (Task 11)
+**🆕 Created:**
+- `admin/src/app/pages/InteriorPage/SyncTab.tsx` - SyncTab component với đầy đủ tính năng: Sheet ID input, connection status, Pull/Push buttons, sheet selection checkboxes, sync history table với pagination, error details modal
+- `admin/src/app/api/interior-sync.ts` - API client functions cho interior sync: getStatus, getLogs, getPreview, pull, push
+
+**✏️ Modified:**
+- `admin/src/app/pages/InteriorPage/index.tsx` - Thêm 'sync' vào TabType, thêm tab config với icon ri-refresh-line, render SyncTab component
+- `admin/src/app/api/index.ts` - Export interiorSyncApi và các types liên quan
+- `.kiro/specs/interior-sheet-sync/tasks.md` - Đánh dấu Phase 8 (Tasks 11.1-11.5) hoàn thành
+
+---
+
+### Task: Interior Sheet Sync - Phase 7: Transaction & Error Handling (Task 9)
+**✏️ Modified:**
+- `api/src/services/interior/sync.service.ts` - Cập nhật syncDuAnData() và syncLayoutData() để implement proper transaction rollback với detailed error information (Requirements 7.1, 7.2)
+- `api/src/services/interior/sync.types.ts` - Thêm 'TRANSACTION_ROLLBACK' vào SyncErrorCode type
+- `api/src/services/interior/sync.service.property.test.ts` - Thêm Property 14: Transaction rollback on failure tests (7 test cases)
+- `.kiro/specs/interior-sheet-sync/tasks.md` - Đánh dấu Task 9 hoàn thành
+
+---
+
+### Task: Interior Sheet Sync - Phase 6: API Routes (Task 8)
+**🆕 Created:**
+- `api/src/routes/interior-sync.routes.ts` - API routes cho sync với các endpoints: GET /status, GET /logs, GET /preview, POST /pull, POST /push. Bao gồm rate limiting (1 request/phút/user) và auth middleware (ADMIN only)
+
+**✏️ Modified:**
+- `api/src/main.ts` - Import và mount interior-sync routes tại `/api/admin/interior/sync`
+- `api/src/services/interior/sync.service.property.test.ts` - Thêm Property 15: Rate limiting enforcement tests
+- `.kiro/specs/interior-sheet-sync/tasks.md` - Đánh dấu Phase 5 và Phase 6 hoàn thành
+
+---
+
+### Task: Interior Sheet Sync - Implement Push sync logic (Task 6)
+**✏️ Modified:**
+- `api/src/services/interior/sync.service.ts` - Thêm transformToDuAnSheet(), transformToLayoutIDsSheet(), pushToSheet() methods để push dữ liệu từ DB ra Google Sheet
+- `api/src/services/interior/sync.service.property.test.ts` - Thêm property tests cho Push output format (Property 7, 8)
+
+---
+
+### Task: Interior Sheet Sync - Implement sheet parsing (Task 3)
+**✏️ Modified:**
+- `api/src/services/interior/sync.service.ts` - Thêm parseDuAnSheet() và parseLayoutIDsSheet() methods để parse dữ liệu từ Google Sheet
+- `api/src/services/interior/sync.service.property.test.ts` - Thêm property tests cho DuAn parsing (Property 1, 4)
+
+---
+
+### Task: Interior Sheet Sync - Create InteriorSyncService base
+**🆕 Created:**
+- `api/src/services/interior/sync.service.ts` - InteriorSyncService với getStatus(), getLogs(), mapApartmentType(), createSyncLog() methods
+- `api/src/services/interior/sync.service.property.test.ts` - Property tests cho apartment type mapping (Property 12, 13)
+
+**✏️ Modified:**
+- `api/src/services/interior/index.ts` - Export syncService và sync types
+
+---
+
+### Task: Optimize Admin Interior - Rename Menu & Add Import Feature
+**🆕 Created:**
+- `admin/src/app/pages/InteriorPage/ImportTab.tsx` - Tab mới cho phép import dữ liệu từ file CSV vào các tab Interior (Chủ đầu tư, Dự án, Tòa nhà, Layout, Gói nội thất)
+
+**✏️ Modified:**
+- `admin/src/app/components/Layout.tsx` - Đổi tên menu "Nội thất" thành "Cấu hình nội thất"
+- `admin/src/app/pages/InteriorPage/index.tsx` - Thêm ImportTab vào danh sách tabs, đặt làm tab mặc định
+- `admin/src/app/pages/MediaPage/FilterTabs.tsx` - Fix unused import `BASE_FILTERS`
+- `admin/src/app/pages/MediaPage/UsageBadges.tsx` - Fix unused import `DynamicCategory`
+
+**📝 Summary:**
+- Đổi tên menu sidebar từ "Nội thất" → "Cấu hình nội thất"
+- Thêm tab Import với các tính năng: upload CSV, tự động phát hiện loại dữ liệu, ánh xạ cột, preview trước khi import, tải file mẫu
+- Fix 2 lint warnings trong MediaPage
+
+---
+
+### Task: Add Marketplace Section to Landing Page
+**🆕 Created:**
+- `landing/src/app/sections/MarketplaceSection.tsx` - Section mới hiển thị công trình đang mở (OPEN status) trên landing page để thu hút nhà thầu và chủ nhà
+
+**✏️ Modified:**
+- `landing/src/app/api.ts` - Thêm marketplace API (getProjects, getRegions, getCategories) và types (Project, Region, ServiceCategory, etc.)
+- `landing/src/app/types.ts` - Thêm `MARKETPLACE` vào SectionKind
+- `landing/src/app/sections/render.tsx` - Register MarketplaceSection với lazy loading
+- `admin/src/app/types/content.ts` - Thêm `MARKETPLACE` vào SectionKind
+- `admin/src/app/components/SectionTypePicker.tsx` - Thêm MARKETPLACE vào danh sách section types
+- `admin/src/app/components/SectionEditor/defaults.ts` - Thêm default data cho MARKETPLACE
+- `admin/src/app/components/SectionEditor/forms.tsx` - Thêm MarketplaceForm editor
+- `admin/src/app/components/SectionEditor/previews.tsx` - Thêm preview cho MARKETPLACE
+- `admin/src/app/components/SectionEditor/utils.ts` - Thêm description và icon cho MARKETPLACE
+
+**📝 Summary:**
+- Di chuyển marketplace từ portal ra landing để tăng visibility
+- Section hiển thị: stats, filters (khu vực, hạng mục, ngân sách), project cards với thông tin giới hạn (không có địa chỉ, không có owner)
+- CTA buttons để xem tất cả công trình và đăng ký làm nhà thầu
+- Admin có thể thêm section MARKETPLACE vào bất kỳ trang nào qua CMS
+
+---
+
+### Task: Fix Interior Wizard Quote Calculation - API Response Mapping
+**✏️ Modified:**
+- `landing/src/app/components/InteriorWizard/steps/ResultStep.tsx` - Fixed API response mapping: transformed `priceBreakdown` to `breakdown`, `vatAmount` to `vat`, `developmentName` to `development`, `buildingName` to `building`. Added proper type transformation for surcharges array.
+
+**📝 Summary:**
+- Fixed "Dữ liệu báo giá không đầy đủ" error in Interior Wizard step 7
+- API returns `QuoteCalculationResult` with different field names than frontend `QuoteResult` type
+- Added transformation layer to map API response to frontend expected format
+
+---
+
 ### Task: Interior Quote UI Review & Responsive Optimization
 **✏️ Modified:**
 - `landing/src/app/components/InteriorWizard/SelectionCard.tsx` - Fixed hardcoded `#fff` colors to use `tokens.color.background`

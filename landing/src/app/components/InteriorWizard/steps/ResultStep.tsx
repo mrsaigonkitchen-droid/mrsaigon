@@ -30,9 +30,13 @@ export function ResultStep({ state, onQuoteCalculated, onStartOver, onBack }: Re
   });
 
   useEffect(() => {
-    if (!quote && state.unit && state.package) {
+    // Check if quote is complete (has all required fields)
+    const isQuoteComplete = quote && quote.breakdown && quote.unitInfo && quote.packageInfo;
+    
+    if (!isQuoteComplete && state.unit && state.package) {
+      // Quote missing or incomplete - calculate it
       calculateQuote();
-    } else if (quote) {
+    } else if (isQuoteComplete) {
       setLoading(false);
     }
   }, []);
@@ -57,9 +61,48 @@ export function ResultStep({ state, onQuoteCalculated, onStartOver, onBack }: Re
       if (!response.ok) throw new Error('Failed to calculate quote');
 
       const json = await response.json();
-      const data = json.data || json;
-      setQuote(data);
-      onQuoteCalculated(data);
+      const apiData = json.data || json;
+      
+      // Transform API response to match frontend QuoteResult type
+      const transformedQuote: QuoteResult = {
+        unitInfo: {
+          developer: state.developer?.name || '',
+          development: apiData.unitInfo?.developmentName || '',
+          building: apiData.unitInfo?.buildingName || '',
+          unitCode: apiData.unitInfo?.unitCode || '',
+          unitType: apiData.unitInfo?.unitType || '',
+          bedrooms: apiData.layoutInfo?.bedrooms || state.layout?.bedrooms || 0,
+          bathrooms: apiData.layoutInfo?.bathrooms || state.layout?.bathrooms || 0,
+          grossArea: apiData.layoutInfo?.grossArea || 0,
+          netArea: apiData.layoutInfo?.netArea || 0,
+        },
+        packageInfo: {
+          name: apiData.packageInfo?.name || '',
+          tier: apiData.packageInfo?.tier || 1,
+          basePrice: apiData.packageInfo?.basePrice || 0,
+        },
+        breakdown: {
+          packagePrice: apiData.priceBreakdown?.packagePrice || 0,
+          laborCost: apiData.priceBreakdown?.laborCost || 0,
+          surcharges: (apiData.priceBreakdown?.surcharges || []).map((s: { name: string; amount: number }) => ({
+            name: s.name,
+            type: 'FIXED' as const,
+            value: s.amount,
+            amount: s.amount,
+          })),
+          managementFee: apiData.priceBreakdown?.managementFee || 0,
+          contingency: apiData.priceBreakdown?.contingency || 0,
+          subtotal: apiData.priceBreakdown?.subtotal || 0,
+          vat: apiData.priceBreakdown?.vatAmount || 0,
+          discount: apiData.priceBreakdown?.discount || 0,
+          grandTotal: apiData.priceBreakdown?.grandTotal || 0,
+          pricePerSqm: apiData.priceBreakdown?.pricePerSqm || 0,
+        },
+        validUntil: apiData.validUntil,
+      };
+      
+      setQuote(transformedQuote);
+      onQuoteCalculated(transformedQuote);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Có lỗi xảy ra');
     } finally {

@@ -19,6 +19,7 @@ import { SurchargesTab } from './SurchargesTab';
 import { QuoteSettingsTab } from './QuoteSettingsTab';
 import { RoomTypesTab } from './RoomTypesTab';
 import { QuotesTab } from './QuotesTab';
+import { SyncTab } from './SyncTab';
 
 type TabType =
   | 'developers'
@@ -31,7 +32,8 @@ type TabType =
   | 'surcharges'
   | 'settings'
   | 'room-types'
-  | 'quotes';
+  | 'quotes'
+  | 'sync';
 
 interface Tab {
   id: TabType;
@@ -52,6 +54,7 @@ const tabs: Tab[] = [
   { id: 'settings', label: 'Cài đặt', icon: 'ri-settings-3-line', description: 'Cấu hình báo giá' },
   { id: 'room-types', label: 'Loại phòng', icon: 'ri-door-line', description: 'Quản lý loại phòng' },
   { id: 'quotes', label: 'Báo giá', icon: 'ri-file-list-3-line', description: 'Lịch sử báo giá' },
+  { id: 'sync', label: 'Đồng bộ', icon: 'ri-refresh-line', description: 'Đồng bộ Google Sheets' },
 ];
 
 export function InteriorPage() {
@@ -81,6 +84,8 @@ export function InteriorPage() {
         return <RoomTypesTab />;
       case 'quotes':
         return <QuotesTab />;
+      case 'sync':
+        return <SyncTab />;
       default:
         return null;
     }

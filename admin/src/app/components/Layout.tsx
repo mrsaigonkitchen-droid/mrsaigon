@@ -24,7 +24,7 @@ export function Layout({ children, currentRoute, currentPageSlug, onNavigate, on
     { route: 'bidding', icon: 'ri-auction-line', label: 'Quản lý Đấu thầu' },
     { route: 'bidding-settings', icon: 'ri-settings-4-line', label: 'Cài đặt Đấu thầu' },
     { route: 'contractors', icon: 'ri-building-2-line', label: 'Quản lý Nhà thầu' },
-    { route: 'interior', icon: 'ri-home-smile-line', label: 'Nội thất' },
+    { route: 'interior', icon: 'ri-home-smile-line', label: 'Cấu hình nội thất' },
     { route: 'pricing-config', icon: 'ri-calculator-line', label: 'Cấu hình báo giá' },
     { route: 'media', icon: 'ri-gallery-line', label: 'Media & Gallery' },
     { route: 'blog-manager', icon: 'ri-quill-pen-line', label: 'Blog Manager' },

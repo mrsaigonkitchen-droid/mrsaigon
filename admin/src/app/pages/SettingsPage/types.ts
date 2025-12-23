@@ -45,9 +45,16 @@ export interface CTALink {
   icon?: string;
 }
 
+export interface HeaderNavItem {
+  label: string;
+  route: string;
+  icon?: string;
+  highlight?: boolean; // Làm nổi bật link đặc biệt (như Marketplace)
+}
+
 export interface HeaderConfig {
   logo?: { text?: string; icon?: string; imageUrl?: string; animateIcon?: boolean };
-  navigation?: Array<{ label: string; route: string; icon?: string }>;
+  navigation?: HeaderNavItem[];
   cta?: { 
     text?: string; 
     link?: string; 

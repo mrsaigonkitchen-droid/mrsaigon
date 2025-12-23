@@ -55,11 +55,17 @@ export const sectionsApi = {
 };
 
 // ========== MEDIA API ==========
+interface DynamicCategory {
+  label: string;
+  icon: string;
+  count: number;
+}
+
 interface MediaUsageResponse {
   usage: Record<string, { usedIn: string[]; count: number }>;
+  categories: Record<string, DynamicCategory>; // Dynamic categories from interior/pricing
   summary: {
     total: number;
-    materials: number;
     blog: number;
     sections: number;
     unused: number;
@@ -101,7 +107,9 @@ export const mediaApi = {
       throw new Error(errorData.error || errorData.details || 'Upload failed');
     }
 
-    return response.json() as Promise<MediaAsset>;
+    const json = await response.json();
+    // Unwrap standardized response format: { success: true, data: MediaAsset }
+    return (json.data || json) as MediaAsset;
   },
 
   delete: (id: string) =>

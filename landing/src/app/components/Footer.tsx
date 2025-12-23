@@ -260,9 +260,9 @@ export function Footer({ config }: FooterProps) {
                 Liên kết nhanh
               </h4>
               <div className="quick-links" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {quickLinks.map((link) => (
+                {quickLinks.map((link, index) => (
                   <Link
-                    key={link.href}
+                    key={`footer-link-${link.href}-${index}`}
                     to={link.href}
                     style={{ textDecoration: 'none' }}
                   >
@@ -366,9 +366,9 @@ export function Footer({ config }: FooterProps) {
           {/* Social Links */}
           {socialLinks && socialLinks.length > 0 && (
             <div style={{ display: 'flex', gap: 12 }}>
-              {socialLinks.map((social) => (
+              {socialLinks.map((social, index) => (
                 <motion.a
-                  key={social.platform}
+                  key={`footer-social-${social.platform}-${index}`}
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"

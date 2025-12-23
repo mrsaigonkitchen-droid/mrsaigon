@@ -74,6 +74,24 @@ export {
   interiorQuotesApi,
 } from './interior';
 
+// Interior Sync APIs
+export { interiorSyncApi } from './interior-sync';
+export type {
+  SyncError,
+  SheetSyncResult,
+  PullResult,
+  PushResult,
+  ChangeType,
+  PreviewRow,
+  PreviewResult,
+  SyncStatus,
+  SyncDirection,
+  SyncLogStatus,
+  SyncLogEntry,
+  SyncLogsResponse,
+  SheetType,
+} from './interior-sync';
+
 // Backward compatible combined api export
 export const api = {
   // Auth

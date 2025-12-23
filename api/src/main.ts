@@ -62,6 +62,7 @@ import { createPublicReportRoutes, createAdminReportRoutes } from './routes/repo
 import { createSavedProjectRoutes } from './routes/saved-project.routes';
 import { createActivityRoutes } from './routes/activity.routes';
 import { createInteriorRoutes, createAdminInteriorRoutes } from './routes/interior.routes';
+import { createAdminInteriorSyncRoutes } from './routes/interior-sync.routes';
 
 // Service imports
 import { AuthService } from './services/auth.service';
@@ -282,6 +283,9 @@ app.route('/api/user/activity', createActivityRoutes(prisma));
 // Interior Quote routes - Requirements: 18.1, 18.2
 app.route('/api/interior', createInteriorRoutes(prisma));
 app.route('/api/admin/interior', createAdminInteriorRoutes(prisma));
+
+// Interior Sync routes - Feature: interior-sheet-sync
+app.route('/api/admin/interior/sync', createAdminInteriorSyncRoutes(prisma));
 
 // ============================================
 // GLOBAL ERROR HANDLER

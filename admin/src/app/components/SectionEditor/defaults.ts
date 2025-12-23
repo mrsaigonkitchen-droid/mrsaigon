@@ -235,6 +235,17 @@ export function getDefaultData(sectionKind: SectionKind): Record<string, unknown
         ctaLink: '/noi-that',
         columns: 3,
       };
+    case 'MARKETPLACE':
+      return {
+        title: 'Công trình đang tìm nhà thầu',
+        subtitle: 'Khám phá các dự án xây dựng đang chờ báo giá từ nhà thầu uy tín',
+        showStats: true,
+        limit: 6,
+        ctaText: 'Xem tất cả công trình',
+        ctaLink: '/portal/marketplace',
+        registerText: 'Đăng ký làm nhà thầu',
+        registerLink: '/portal/auth/register?type=contractor',
+      };
     default:
       return {};
   }

@@ -26,9 +26,6 @@ export const Features = memo(function Features({ data }: { data: FeaturesData })
         transition={{ duration: 0.6 }}
         style={{
           padding: '60px 24px',
-          background: 'radial-gradient(800px 400px at 50% 50%, rgba(245,211,147,0.05) 0%, transparent 70%)',
-          borderRadius: tokens.radius.xl,
-          border: `1px solid ${tokens.color.border}`,
         }}
       >
       {/* Header */}

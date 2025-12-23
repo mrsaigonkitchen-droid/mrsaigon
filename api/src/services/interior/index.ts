@@ -58,3 +58,17 @@ export {
   exportQuotesToCSV,
   deleteQuote,
 } from './quote.service';
+
+// Sync service
+export * as syncService from './sync.service';
+export {
+  InteriorSyncService,
+  interiorSyncService,
+  getStatus as getSyncStatus,
+  getLogs as getSyncLogs,
+  mapApartmentType,
+  createSyncLog,
+} from './sync.service';
+
+// Sync types
+export * from './sync.types';

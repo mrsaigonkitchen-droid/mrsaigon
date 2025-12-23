@@ -5,7 +5,8 @@ import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { IconPicker } from '../../components/IconPicker';
-import type { HeaderConfig, FooterConfig } from './types';
+import { SortableList } from '../../components/SortableList';
+import type { HeaderConfig, FooterConfig, HeaderNavItem } from './types';
 import { glass } from './types';
 import { settingsApi, pagesApi } from '../../api';
 
@@ -24,9 +25,17 @@ type LayoutSubTab = 'header' | 'footer' | 'mobile';
 // ATH pages list
 const ATH_PAGES = ['home', 'about', 'contact', 'blog', 'bao-gia', 'noi-that'];
 
+// Mobile Menu Item Type
+interface MobileMenuItem {
+  label: string;
+  href: string;
+  icon: string;
+  highlight?: boolean;
+}
+
 // Mobile Menu Config Type
 interface MobileMenuConfig {
-  items: Array<{ label: string; href: string; icon: string }>;
+  items: MobileMenuItem[];
   showLogo: boolean;
   showCTA: boolean;
   ctaText: string;
@@ -87,10 +96,11 @@ export function LayoutTab({
                 icon: parsed.logo.icon,
                 animateIcon: parsed.logo.animateIcon,
               } : undefined,
-              navigation: parsed.links?.map((link: { href: string; label: string; icon?: string }) => ({
+              navigation: parsed.links?.map((link: { href: string; label: string; icon?: string; highlight?: boolean }) => ({
                 label: link.label,
                 route: link.href,
-                icon: link.icon,
+                icon: link.icon || '',
+                highlight: link.highlight || false,
               })),
               cta: parsed.ctaButton ? {
                 text: parsed.ctaButton.text,
@@ -148,15 +158,33 @@ export function LayoutTab({
   }, [onHeaderChange, onFooterChange]);
 
   // Load mobile menu config from API on mount
+  // If not exists, save default to database
   useEffect(() => {
     settingsApi.get('mobileMenu')
       .then(data => {
+        console.log('[Admin] Loaded mobile menu config from API:', data);
         if (data?.value) {
-          setMobileMenuConfig(prev => ({ ...prev, ...(data.value as MobileMenuConfig) }));
+          const loadedConfig = data.value as MobileMenuConfig;
+          // Ensure all items have highlight field (for backward compatibility)
+          const itemsWithHighlight = loadedConfig.items?.map(item => ({
+            ...item,
+            highlight: item.highlight ?? false,
+          })) || [];
+          setMobileMenuConfig(prev => ({ 
+            ...prev, 
+            ...loadedConfig,
+            items: itemsWithHighlight,
+          }));
+        } else {
+          // Save default mobile menu config to database
+          settingsApi.update('mobileMenu', { value: defaultMobileMenuConfig })
+            .catch((e) => console.warn('Failed to save default mobile menu config:', e));
         }
       })
-      .catch(err => {
-        console.warn('Failed to load mobile menu config:', err);
+      .catch(() => {
+        // Save default mobile menu config to database on error
+        settingsApi.update('mobileMenu', { value: defaultMobileMenuConfig })
+          .catch((e) => console.warn('Failed to save default mobile menu config:', e));
       });
   }, []);
 
@@ -199,7 +227,8 @@ export function LayoutTab({
           headerConfig.navigation?.map((nav) => ({
             href: nav.route,
             label: nav.label,
-            icon: nav.icon,
+            icon: nav.icon || undefined, // Allow empty icon
+            highlight: nav.highlight || false,
           })) || [],
         ctaButton: headerConfig.cta
           ? {
@@ -282,8 +311,10 @@ export function LayoutTab({
   const handleSaveMobileMenu = useCallback(async () => {
     try {
       setSavingMobile(true);
-      // Save to settings API
-      await settingsApi.update('mobileMenu', { key: 'mobileMenu', value: mobileMenuConfig });
+      // Debug: log the config being saved
+      console.log('[Admin] Saving mobile menu config:', JSON.stringify(mobileMenuConfig, null, 2));
+      // Save to settings API - only send { value: ... }
+      await settingsApi.update('mobileMenu', { value: mobileMenuConfig });
       onShowMessage('✅ Mobile Menu đã được lưu!');
     } catch (error) {
       console.error('Error saving mobile menu:', error);
@@ -295,7 +326,7 @@ export function LayoutTab({
 
   // Navigation helpers for Header
   const addNavItem = useCallback(() => {
-    const newNav = [...(headerConfig.navigation || []), { label: 'Link mới', route: '/', icon: 'ri-link' }];
+    const newNav = [...(headerConfig.navigation || []), { label: 'Link mới', route: '/', icon: '', highlight: false }];
     onHeaderChange({ ...headerConfig, navigation: newNav });
   }, [headerConfig, onHeaderChange]);
 
@@ -304,11 +335,16 @@ export function LayoutTab({
     onHeaderChange({ ...headerConfig, navigation: newNav });
   }, [headerConfig, onHeaderChange]);
 
-  const updateNavItem = useCallback((index: number, field: string, value: string) => {
+  const updateNavItem = useCallback((index: number, field: string, value: string | boolean) => {
     const newNav = headerConfig.navigation?.map((item, i) =>
-      i === index ? { ...item, [field]: value } : item
+      i === index ? { ...item, [field]: field === 'highlight' ? value === 'true' || value === true : value } : item
     ) || [];
     onHeaderChange({ ...headerConfig, navigation: newNav });
+  }, [headerConfig, onHeaderChange]);
+
+  // Reorder navigation items (drag & drop)
+  const reorderNavItems = useCallback((newItems: HeaderNavItem[]) => {
+    onHeaderChange({ ...headerConfig, navigation: newItems });
   }, [headerConfig, onHeaderChange]);
 
   // Quick links helpers for Footer
@@ -329,6 +365,11 @@ export function LayoutTab({
     onFooterChange({ ...footerConfig, quickLinks: newLinks });
   }, [footerConfig, onFooterChange]);
 
+  // Reorder quick links (drag & drop)
+  const reorderQuickLinks = useCallback((newItems: Array<{ label: string; link: string }>) => {
+    onFooterChange({ ...footerConfig, quickLinks: newItems });
+  }, [footerConfig, onFooterChange]);
+
   // Social links helpers for Footer
   const addSocialLink = useCallback(() => {
     const newSocial = [...(footerConfig.social || []), { platform: 'Facebook', url: 'https://facebook.com', icon: 'ri-facebook-fill' }];
@@ -347,11 +388,16 @@ export function LayoutTab({
     onFooterChange({ ...footerConfig, social: newSocial });
   }, [footerConfig, onFooterChange]);
 
+  // Reorder social links (drag & drop)
+  const reorderSocialLinks = useCallback((newItems: Array<{ platform: string; url: string; icon: string }>) => {
+    onFooterChange({ ...footerConfig, social: newItems });
+  }, [footerConfig, onFooterChange]);
+
   // Mobile menu helpers
   const addMobileMenuItem = useCallback(() => {
     setMobileMenuConfig(prev => ({
       ...prev,
-      items: [...prev.items, { label: 'Link mới', href: '/', icon: 'ri-link' }],
+      items: [...prev.items, { label: 'Link mới', href: '/', icon: '', highlight: false }],
     }));
   }, []);
 
@@ -362,11 +408,20 @@ export function LayoutTab({
     }));
   }, []);
 
-  const updateMobileMenuItem = useCallback((index: number, field: string, value: string) => {
+  const updateMobileMenuItem = useCallback((index: number, field: string, value: string | boolean) => {
     setMobileMenuConfig(prev => ({
       ...prev,
-      items: prev.items.map((item, i) => i === index ? { ...item, [field]: value } : item),
+      items: prev.items.map((item, i) => 
+        i === index 
+          ? { ...item, [field]: field === 'highlight' ? Boolean(value) : value } 
+          : item
+      ),
     }));
+  }, []);
+
+  // Reorder mobile menu items (drag & drop)
+  const reorderMobileMenuItems = useCallback((newItems: MobileMenuItem[]) => {
+    setMobileMenuConfig((prev) => ({ ...prev, items: newItems }));
   }, []);
 
   const addMobileSocialLink = useCallback(() => {
@@ -390,12 +445,18 @@ export function LayoutTab({
     }));
   }, []);
 
+  // Reorder mobile social links (drag & drop)
+  const reorderMobileSocialLinks = useCallback((newItems: Array<{ platform: string; url: string; icon: string }>) => {
+    setMobileMenuConfig(prev => ({ ...prev, socialLinks: newItems }));
+  }, []);
+
   // Sync from Header to Mobile Menu
   const syncFromHeader = useCallback(() => {
     const newItems = headerConfig.navigation?.map(nav => ({
       label: nav.label,
       href: nav.route,
       icon: nav.icon?.replace('-line', '-fill') || 'ri-link',
+      highlight: nav.highlight || false, // Copy highlight from header
     })) || [];
     setMobileMenuConfig(prev => ({ ...prev, items: newItems }));
     onShowMessage('✅ Đã đồng bộ từ Header!');
@@ -489,29 +550,83 @@ export function LayoutTab({
           {/* Navigation */}
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h4 style={{ color: tokens.color.text, fontSize: 14, fontWeight: 600 }}>Navigation Links</h4>
+              <h4 style={{ color: tokens.color.text, fontSize: 14, fontWeight: 600 }}>
+                Navigation Links
+                <span style={{ color: tokens.color.muted, fontWeight: 400, fontSize: 12, marginLeft: 8 }}>
+                  <i className="ri-draggable" style={{ marginRight: 4 }} />
+                  Kéo thả để sắp xếp
+                </span>
+              </h4>
               <Button variant="secondary" size="small" onClick={addNavItem}>
                 <i className="ri-add-line" /> Thêm
               </Button>
             </div>
-            {headerConfig.navigation?.map((nav, i) => (
-              <div key={i} style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr auto',
-                gap: 8,
-                marginBottom: 8,
-                padding: 12,
-                background: glass.background,
+            {headerConfig.navigation && headerConfig.navigation.length > 0 ? (
+              <SortableList
+                items={headerConfig.navigation}
+                getItemId={(_, index) => `nav-${index}`}
+                onReorder={reorderNavItems}
+                renderItem={(nav, i) => (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    padding: 12,
+                    background: nav.highlight ? 'rgba(245,211,147,0.1)' : glass.background,
+                    borderRadius: `0 ${tokens.radius.md} ${tokens.radius.md} 0`,
+                    border: nav.highlight ? `1px solid ${tokens.color.primary}40` : 'none',
+                    borderLeft: 'none',
+                  }}>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr auto auto',
+                      gap: 8,
+                      alignItems: 'center',
+                    }}>
+                      <Input value={nav.label} onChange={(v) => updateNavItem(i, 'label', v)} placeholder="Label" fullWidth />
+                      <Input value={nav.route} onChange={(v) => updateNavItem(i, 'route', v)} placeholder="/route" fullWidth />
+                      <IconPicker 
+                        value={nav.icon || ''} 
+                        onChange={(v) => updateNavItem(i, 'icon', v)} 
+                        allowEmpty
+                        placeholder="Không có icon"
+                      />
+                      <Button variant="danger" size="small" onClick={() => removeNavItem(i)}>
+                        <i className="ri-delete-bin-line" />
+                      </Button>
+                    </div>
+                    <label style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 8, 
+                      color: nav.highlight ? tokens.color.primary : tokens.color.muted, 
+                      fontSize: 12,
+                      cursor: 'pointer',
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={nav.highlight || false}
+                        onChange={(e) => updateNavItem(i, 'highlight', e.target.checked ? 'true' : '')}
+                        style={{ width: 14, height: 14, accentColor: tokens.color.primary }}
+                      />
+                      <i className="ri-star-fill" style={{ fontSize: 12 }} />
+                      Nổi bật (highlight) - Hiển thị khác biệt trên header
+                    </label>
+                  </div>
+                )}
+              />
+            ) : (
+              <div style={{ 
+                padding: 24, 
+                background: glass.background, 
                 borderRadius: tokens.radius.md,
+                textAlign: 'center',
+                color: tokens.color.muted,
+                fontSize: 13,
               }}>
-                <Input value={nav.label} onChange={(v) => updateNavItem(i, 'label', v)} placeholder="Label" fullWidth />
-                <Input value={nav.route} onChange={(v) => updateNavItem(i, 'route', v)} placeholder="/route" fullWidth />
-                <IconPicker value={nav.icon || ''} onChange={(v) => updateNavItem(i, 'icon', v)} />
-                <Button variant="danger" size="small" onClick={() => removeNavItem(i)}>
-                  <i className="ri-delete-bin-line" />
-                </Button>
+                Chưa có navigation link nào. Bấm "Thêm" để tạo mới.
               </div>
-            ))}
+            )}
           </div>
 
           {/* CTA */}
@@ -646,56 +761,104 @@ export function LayoutTab({
           {/* Quick Links */}
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h4 style={{ color: tokens.color.text, fontSize: 14, fontWeight: 600 }}>Quick Links</h4>
+              <h4 style={{ color: tokens.color.text, fontSize: 14, fontWeight: 600 }}>
+                Quick Links
+                <span style={{ color: tokens.color.muted, fontWeight: 400, fontSize: 12, marginLeft: 8 }}>
+                  <i className="ri-draggable" style={{ marginRight: 4 }} />
+                  Kéo thả để sắp xếp
+                </span>
+              </h4>
               <Button variant="secondary" size="small" onClick={addQuickLink}>
                 <i className="ri-add-line" /> Thêm
               </Button>
             </div>
-            {footerConfig.quickLinks?.map((link, i) => (
-              <div key={i} style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr auto',
-                gap: 8,
-                marginBottom: 8,
-                padding: 12,
-                background: glass.background,
+            {footerConfig.quickLinks && footerConfig.quickLinks.length > 0 ? (
+              <SortableList
+                items={footerConfig.quickLinks}
+                getItemId={(_, index) => `quick-${index}`}
+                onReorder={reorderQuickLinks}
+                renderItem={(link, i) => (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr auto',
+                    gap: 8,
+                    padding: 12,
+                    background: glass.background,
+                    borderRadius: `0 ${tokens.radius.md} ${tokens.radius.md} 0`,
+                    borderLeft: 'none',
+                  }}>
+                    <Input value={link.label} onChange={(v) => updateQuickLink(i, 'label', v)} placeholder="Label" fullWidth />
+                    <Input value={link.link} onChange={(v) => updateQuickLink(i, 'link', v)} placeholder="/link" fullWidth />
+                    <Button variant="danger" size="small" onClick={() => removeQuickLink(i)}>
+                      <i className="ri-delete-bin-line" />
+                    </Button>
+                  </div>
+                )}
+              />
+            ) : (
+              <div style={{ 
+                padding: 24, 
+                background: glass.background, 
                 borderRadius: tokens.radius.md,
+                textAlign: 'center',
+                color: tokens.color.muted,
+                fontSize: 13,
               }}>
-                <Input value={link.label} onChange={(v) => updateQuickLink(i, 'label', v)} placeholder="Label" fullWidth />
-                <Input value={link.link} onChange={(v) => updateQuickLink(i, 'link', v)} placeholder="/link" fullWidth />
-                <Button variant="danger" size="small" onClick={() => removeQuickLink(i)}>
-                  <i className="ri-delete-bin-line" />
-                </Button>
+                Chưa có quick link nào. Bấm "Thêm" để tạo mới.
               </div>
-            ))}
+            )}
           </div>
 
           {/* Social Links */}
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h4 style={{ color: tokens.color.text, fontSize: 14, fontWeight: 600 }}>Social Links</h4>
+              <h4 style={{ color: tokens.color.text, fontSize: 14, fontWeight: 600 }}>
+                Social Links
+                <span style={{ color: tokens.color.muted, fontWeight: 400, fontSize: 12, marginLeft: 8 }}>
+                  <i className="ri-draggable" style={{ marginRight: 4 }} />
+                  Kéo thả để sắp xếp
+                </span>
+              </h4>
               <Button variant="secondary" size="small" onClick={addSocialLink}>
                 <i className="ri-add-line" /> Thêm
               </Button>
             </div>
-            {footerConfig.social?.map((social, i) => (
-              <div key={i} style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr auto',
-                gap: 8,
-                marginBottom: 8,
-                padding: 12,
-                background: glass.background,
+            {footerConfig.social && footerConfig.social.length > 0 ? (
+              <SortableList
+                items={footerConfig.social}
+                getItemId={(_, index) => `social-${index}`}
+                onReorder={reorderSocialLinks}
+                renderItem={(social, i) => (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr 1fr auto',
+                    gap: 8,
+                    padding: 12,
+                    background: glass.background,
+                    borderRadius: `0 ${tokens.radius.md} ${tokens.radius.md} 0`,
+                    borderLeft: 'none',
+                  }}>
+                    <Input value={social.platform} onChange={(v) => updateSocialLink(i, 'platform', v)} placeholder="Platform" fullWidth />
+                    <Input value={social.url} onChange={(v) => updateSocialLink(i, 'url', v)} placeholder="URL" fullWidth />
+                    <IconPicker value={social.icon} onChange={(v) => updateSocialLink(i, 'icon', v)} />
+                    <Button variant="danger" size="small" onClick={() => removeSocialLink(i)}>
+                      <i className="ri-delete-bin-line" />
+                    </Button>
+                  </div>
+                )}
+              />
+            ) : (
+              <div style={{ 
+                padding: 24, 
+                background: glass.background, 
                 borderRadius: tokens.radius.md,
+                textAlign: 'center',
+                color: tokens.color.muted,
+                fontSize: 13,
               }}>
-                <Input value={social.platform} onChange={(v) => updateSocialLink(i, 'platform', v)} placeholder="Platform" fullWidth />
-                <Input value={social.url} onChange={(v) => updateSocialLink(i, 'url', v)} placeholder="URL" fullWidth />
-                <IconPicker value={social.icon} onChange={(v) => updateSocialLink(i, 'icon', v)} />
-                <Button variant="danger" size="small" onClick={() => removeSocialLink(i)}>
-                  <i className="ri-delete-bin-line" />
-                </Button>
+                Chưa có social link nào. Bấm "Thêm" để tạo mới.
               </div>
-            ))}
+            )}
           </div>
 
           {/* Copyright */}
@@ -741,29 +904,84 @@ export function LayoutTab({
           {/* Menu Items */}
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h4 style={{ color: tokens.color.text, fontSize: 14, fontWeight: 600 }}>Menu Items</h4>
+              <h4 style={{ color: tokens.color.text, fontSize: 14, fontWeight: 600 }}>
+                Menu Items
+                <span style={{ color: tokens.color.muted, fontWeight: 400, fontSize: 12, marginLeft: 8 }}>
+                  <i className="ri-draggable" style={{ marginRight: 4 }} />
+                  Kéo thả để sắp xếp
+                </span>
+              </h4>
               <Button variant="secondary" size="small" onClick={addMobileMenuItem}>
                 <i className="ri-add-line" /> Thêm
               </Button>
             </div>
-            {mobileMenuConfig.items.map((item, i) => (
-              <div key={i} style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr auto',
-                gap: 8,
-                marginBottom: 8,
-                padding: 12,
-                background: glass.background,
+            {mobileMenuConfig.items.length > 0 ? (
+              <SortableList
+                items={mobileMenuConfig.items}
+                getItemId={(_, index) => `mobile-item-${index}`}
+                onReorder={reorderMobileMenuItems}
+                renderItem={(item, i) => (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    padding: 12,
+                    background: item.highlight ? 'rgba(245,211,147,0.1)' : glass.background,
+                    borderRadius: `0 ${tokens.radius.md} ${tokens.radius.md} 0`,
+                    borderLeft: 'none',
+                    border: item.highlight ? `1px solid ${tokens.color.primary}40` : 'none',
+                    borderLeftWidth: 0,
+                  }}>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr auto auto',
+                      gap: 8,
+                      alignItems: 'center',
+                    }}>
+                      <Input value={item.label} onChange={(v) => updateMobileMenuItem(i, 'label', v)} placeholder="Label" fullWidth />
+                      <Input value={item.href} onChange={(v) => updateMobileMenuItem(i, 'href', v)} placeholder="/link" fullWidth />
+                      <IconPicker 
+                        value={item.icon || ''} 
+                        onChange={(v) => updateMobileMenuItem(i, 'icon', v)} 
+                        allowEmpty
+                        placeholder="Không có icon"
+                      />
+                      <Button variant="danger" size="small" onClick={() => removeMobileMenuItem(i)}>
+                        <i className="ri-delete-bin-line" />
+                      </Button>
+                    </div>
+                    <label style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 8, 
+                      color: item.highlight ? tokens.color.primary : tokens.color.muted, 
+                      fontSize: 12,
+                      cursor: 'pointer',
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={item.highlight || false}
+                        onChange={(e) => updateMobileMenuItem(i, 'highlight', e.target.checked)}
+                        style={{ width: 14, height: 14, accentColor: tokens.color.primary }}
+                      />
+                      <i className="ri-star-fill" style={{ fontSize: 12 }} />
+                      Nổi bật (highlight) - Hiển thị khác biệt trên mobile menu
+                    </label>
+                  </div>
+                )}
+              />
+            ) : (
+              <div style={{ 
+                padding: 24, 
+                background: glass.background, 
                 borderRadius: tokens.radius.md,
+                textAlign: 'center',
+                color: tokens.color.muted,
+                fontSize: 13,
               }}>
-                <Input value={item.label} onChange={(v) => updateMobileMenuItem(i, 'label', v)} placeholder="Label" fullWidth />
-                <Input value={item.href} onChange={(v) => updateMobileMenuItem(i, 'href', v)} placeholder="/link" fullWidth />
-                <IconPicker value={item.icon} onChange={(v) => updateMobileMenuItem(i, 'icon', v)} />
-                <Button variant="danger" size="small" onClick={() => removeMobileMenuItem(i)}>
-                  <i className="ri-delete-bin-line" />
-                </Button>
+                Chưa có menu item nào. Bấm "Thêm" để tạo mới.
               </div>
-            ))}
+            )}
           </div>
 
           {/* CTA Button */}
@@ -801,29 +1019,53 @@ export function LayoutTab({
           {/* Social Links */}
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h4 style={{ color: tokens.color.text, fontSize: 14, fontWeight: 600 }}>Social Links</h4>
+              <h4 style={{ color: tokens.color.text, fontSize: 14, fontWeight: 600 }}>
+                Social Links
+                <span style={{ color: tokens.color.muted, fontWeight: 400, fontSize: 12, marginLeft: 8 }}>
+                  <i className="ri-draggable" style={{ marginRight: 4 }} />
+                  Kéo thả để sắp xếp
+                </span>
+              </h4>
               <Button variant="secondary" size="small" onClick={addMobileSocialLink}>
                 <i className="ri-add-line" /> Thêm
               </Button>
             </div>
-            {mobileMenuConfig.socialLinks.map((social, i) => (
-              <div key={i} style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr auto',
-                gap: 8,
-                marginBottom: 8,
-                padding: 12,
-                background: glass.background,
+            {mobileMenuConfig.socialLinks.length > 0 ? (
+              <SortableList
+                items={mobileMenuConfig.socialLinks}
+                getItemId={(_, index) => `mobile-social-${index}`}
+                onReorder={reorderMobileSocialLinks}
+                renderItem={(social, i) => (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr 1fr auto',
+                    gap: 8,
+                    padding: 12,
+                    background: glass.background,
+                    borderRadius: `0 ${tokens.radius.md} ${tokens.radius.md} 0`,
+                    borderLeft: 'none',
+                  }}>
+                    <Input value={social.platform} onChange={(v) => updateMobileSocialLink(i, 'platform', v)} placeholder="Platform" fullWidth />
+                    <Input value={social.url} onChange={(v) => updateMobileSocialLink(i, 'url', v)} placeholder="URL" fullWidth />
+                    <IconPicker value={social.icon} onChange={(v) => updateMobileSocialLink(i, 'icon', v)} />
+                    <Button variant="danger" size="small" onClick={() => removeMobileSocialLink(i)}>
+                      <i className="ri-delete-bin-line" />
+                    </Button>
+                  </div>
+                )}
+              />
+            ) : (
+              <div style={{ 
+                padding: 24, 
+                background: glass.background, 
                 borderRadius: tokens.radius.md,
+                textAlign: 'center',
+                color: tokens.color.muted,
+                fontSize: 13,
               }}>
-                <Input value={social.platform} onChange={(v) => updateMobileSocialLink(i, 'platform', v)} placeholder="Platform" fullWidth />
-                <Input value={social.url} onChange={(v) => updateMobileSocialLink(i, 'url', v)} placeholder="URL" fullWidth />
-                <IconPicker value={social.icon} onChange={(v) => updateMobileSocialLink(i, 'icon', v)} />
-                <Button variant="danger" size="small" onClick={() => removeMobileSocialLink(i)}>
-                  <i className="ri-delete-bin-line" />
-                </Button>
+                Chưa có social link nào. Bấm "Thêm" để tạo mới.
               </div>
-            ))}
+            )}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

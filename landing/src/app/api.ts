@@ -7,7 +7,73 @@ import { API_URL } from '@app/shared';
 
 const API_BASE = API_URL;
 
-// Type definitions
+// ============================================
+// TYPE DEFINITIONS
+// ============================================
+
+// Marketplace Types
+export interface Region {
+  id: string;
+  name: string;
+  slug: string;
+  parentId?: string;
+  level: number;
+  isActive: boolean;
+}
+
+export interface ServiceCategory {
+  id: string;
+  name: string;
+  coefficient: number;
+  allowMaterials: boolean;
+  isActive: boolean;
+}
+
+export interface Project {
+  id: string;
+  code: string;
+  title: string;
+  description: string;
+  categoryId: string;
+  category?: ServiceCategory;
+  regionId: string;
+  region?: Region;
+  area?: number;
+  budgetMin?: number;
+  budgetMax?: number;
+  timeline?: string;
+  images?: string[];
+  status: string;
+  bidDeadline?: string;
+  maxBids: number;
+  bidCount?: number;
+  publishedAt?: string;
+  createdAt: string;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
+export interface MarketplaceQuery {
+  page?: number;
+  limit?: number;
+  regionId?: string;
+  categoryId?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+// Blog Types
 interface BlogPost {
   id: string;
   title: string;
@@ -195,5 +261,51 @@ export const reviewsAPI = {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
+  },
+};
+
+// ============================================
+// MARKETPLACE API
+// ============================================
+
+/**
+ * Marketplace API for public project listings
+ * Backend: GET /api/projects, /api/regions, /service-categories
+ */
+export const marketplaceAPI = {
+  /**
+   * Get public marketplace projects (OPEN status only)
+   */
+  getProjects: (query?: MarketplaceQuery) => {
+    const params = new URLSearchParams();
+    if (query?.page) params.append('page', query.page.toString());
+    if (query?.limit) params.append('limit', query.limit.toString());
+    if (query?.regionId) params.append('regionId', query.regionId);
+    if (query?.categoryId) params.append('categoryId', query.categoryId);
+    if (query?.search) params.append('search', query.search);
+    if (query?.sortBy) params.append('sortBy', query.sortBy);
+    if (query?.sortOrder) params.append('sortOrder', query.sortOrder);
+
+    const queryString = params.toString();
+    return apiFetch<PaginatedResult<Project>>(`/api/projects${queryString ? `?${queryString}` : ''}`);
+  },
+
+  /**
+   * Get regions for filtering
+   */
+  getRegions: (query?: { parentId?: string; level?: number }) => {
+    const params = new URLSearchParams();
+    if (query?.parentId) params.append('parentId', query.parentId);
+    if (query?.level) params.append('level', query.level.toString());
+
+    const queryString = params.toString();
+    return apiFetch<Region[]>(`/api/regions${queryString ? `?${queryString}` : ''}`);
+  },
+
+  /**
+   * Get service categories for filtering
+   */
+  getCategories: () => {
+    return apiFetch<ServiceCategory[]>('/service-categories');
   },
 };

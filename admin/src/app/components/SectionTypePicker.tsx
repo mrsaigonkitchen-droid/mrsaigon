@@ -224,6 +224,15 @@ const sectionTypes: Array<{
     color: '#8b5cf6',
     example: 'Trang chủ, landing page',
   },
+  // Marketplace
+  {
+    type: 'MARKETPLACE',
+    icon: 'ri-store-2-line',
+    label: 'Sàn Giao Dịch',
+    description: 'Hiển thị công trình đang tìm nhà thầu (OPEN status)',
+    color: '#06b6d4',
+    example: 'Trang chủ, thu hút nhà thầu',
+  },
 ];
 
 export function SectionTypePicker({ onSelect, onCancel }: SectionTypePickerProps) {
