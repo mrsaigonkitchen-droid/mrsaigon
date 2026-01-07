@@ -17,8 +17,8 @@ COPY api/package.json ./api/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/ui/package.json ./packages/ui/
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (không dùng frozen-lockfile vì CI có thể có version khác)
+RUN pnpm install --no-frozen-lockfile
 
 # Copy source code
 COPY . .
