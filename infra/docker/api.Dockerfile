@@ -40,8 +40,8 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Install runtime dependencies for native modules
-RUN apk add --no-cache libc6-compat
+# Install runtime dependencies for native modules and OpenSSL 1.1 for Prisma
+RUN apk add --no-cache libc6-compat openssl1.1-compat
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
