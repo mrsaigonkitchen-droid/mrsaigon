@@ -61,7 +61,7 @@ deploy_api() {
 # Function to deploy frontend app
 deploy_frontend() {
   local app_name=$1
-  local api_url=${2:-"https://api.anhthoxay.vn"}
+  local api_url=${2:-"https://api.noithatnhanh.vn"}
   
   echo -e "${GREEN}🚀 Deploying $app_name...${NC}"
   

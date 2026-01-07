@@ -4,7 +4,7 @@
 # ============================================
 
 substitutions:
-  _API_URL: 'https://api.noithanhnhanh.vn'
+  _API_URL: 'https://api.noithatnhanh.vn'
 
 steps:
   # Step 1: Build Docker image

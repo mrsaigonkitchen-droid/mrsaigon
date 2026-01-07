@@ -73,8 +73,11 @@ ai-sales-agents-platform-backup-*/
 *.pdf
 *.docx
 
-# API Documentation (sensitive - contains integration guides)
-docs/api/
+# Kiro IDE (contains specs, steering, sensitive notes)
+.kiro/
+
+# Documentation (may contain sensitive deployment info)
+docs/
 
 # Misc
 .turbo/
