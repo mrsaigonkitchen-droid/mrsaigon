@@ -26,6 +26,9 @@ COPY . .
 # Generate Prisma client
 RUN pnpm db:generate
 
+# Increase Node.js memory limit for build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 # Build API
 RUN pnpm nx build api --configuration=production
 
