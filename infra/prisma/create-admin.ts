@@ -1,6 +1,9 @@
 /**
  * Create Admin User Script
  * Run this before seeding if no admin user exists
+ * 
+ * Usage:
+ *   ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=SecurePass123 pnpm tsx infra/prisma/create-admin.ts
  */
 
 import { PrismaClient } from '@prisma/client';
@@ -11,6 +14,16 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🔐 Creating admin user...');
 
+  // Read from environment variables
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@noithatnhanh.vn';
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  
+  if (!adminPassword) {
+    console.error('❌ ADMIN_PASSWORD environment variable is required');
+    console.log('   Usage: ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=SecurePass123 pnpm tsx infra/prisma/create-admin.ts');
+    process.exit(1);
+  }
+
   const existingAdmin = await prisma.user.findFirst({
     where: { role: 'ADMIN' },
   });
@@ -20,11 +33,11 @@ async function main() {
     return;
   }
 
-  const passwordHash = await bcrypt.hash('Admin@123', 12);
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
 
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@anhthoxay.vn',
+      email: adminEmail,
       passwordHash,
       name: 'Admin',
       role: 'ADMIN',
@@ -33,7 +46,6 @@ async function main() {
   });
 
   console.log('✅ Admin user created:', admin.email);
-  console.log('   Password: Admin@123');
 }
 
 main()
