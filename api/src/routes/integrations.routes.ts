@@ -77,24 +77,58 @@ export function createIntegrationsRoutes(prisma: PrismaClient) {
    * @returns Redirect to admin settings page or error response
    */
   app.get('/google/callback', async (c) => {
+    // Get admin URL from environment or derive from request
+    const getAdminUrl = (): string => {
+      // Check for explicit ADMIN_URL env var
+      if (process.env.ADMIN_URL) {
+        return process.env.ADMIN_URL;
+      }
+      
+      // Try to derive from CORS_ORIGINS (look for admin subdomain)
+      const corsOrigins = process.env.CORS_ORIGINS || '';
+      const adminOrigin = corsOrigins.split(',').find(origin => 
+        origin.includes('admin.') || origin.includes(':4201')
+      );
+      if (adminOrigin) {
+        return adminOrigin.trim();
+      }
+      
+      // Fallback: derive from request host
+      const host = c.req.header('host') || 'localhost:4202';
+      const protocol = c.req.header('x-forwarded-proto') || 'http';
+      
+      // If API is at api.domain.com, admin is at admin.domain.com
+      if (host.startsWith('api.')) {
+        return `${protocol}://${host.replace('api.', 'admin.')}`;
+      }
+      
+      // Local development fallback
+      return 'http://localhost:4201';
+    };
+
     try {
       const code = c.req.query('code');
       
       if (!code) {
-        return errorResponse(c, 'VALIDATION_ERROR', 'No authorization code provided', 400);
+        const adminUrl = getAdminUrl();
+        return c.redirect(`${adminUrl}/settings?tab=integrations&status=error&message=no_code`);
       }
 
       const result = await googleSheetsService.handleCallback(code);
+      const adminUrl = getAdminUrl();
       
       if (result.success) {
         // Redirect to admin settings page on success
-        return c.redirect('/admin/settings?tab=integrations&status=success');
+        return c.redirect(`${adminUrl}/settings?tab=integrations&status=success`);
       }
       
-      return errorResponse(c, 'OAUTH_ERROR', result.message, 400);
+      // Redirect with error
+      const errorMessage = encodeURIComponent(result.message);
+      return c.redirect(`${adminUrl}/settings?tab=integrations&status=error&message=${errorMessage}`);
     } catch (error) {
       console.error('OAuth callback error:', error);
-      return errorResponse(c, 'INTERNAL_ERROR', 'Failed to process OAuth callback', 500);
+      const adminUrl = getAdminUrl();
+      return c.redirect(`${adminUrl}/settings?tab=integrations&status=error&message=internal_error`);
     }
   });
 

@@ -2,6 +2,17 @@
 
 ## 2026-01-08
 
+### Task: Setup Cloud Storage for Media (Bước 11)
+
+**✏️ Modified:**
+- `api/src/services/media.service.ts` - Refactored to use storage abstraction instead of direct fs operations. Now supports local, S3, and R2 storage.
+- `api/src/routes/media.routes.ts` - Refactored to use storage abstraction. Added `/media/storage-info` endpoint for debugging. Removed direct fs dependency.
+- `docs/DEPLOYMENT_GCP.md` - Enhanced Bước 11 with detailed instructions: Service Account creation, HMAC key setup, Secret Manager configuration, CORS setup, and Cloud CDN optimization.
+
+**Details:** Media files are now stored using a unified storage interface that auto-selects between local filesystem (development) and S3-compatible storage (production). This ensures files persist across Cloud Run container restarts.
+
+---
+
 ### Task: Add Google Integration Setup Script
 
 **🆕 Created:**

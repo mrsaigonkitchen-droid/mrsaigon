@@ -2,17 +2,15 @@
  * Media Service Module
  *
  * Handles business logic for media asset operations including upload,
- * deletion, and file serving. Separates data access and business logic
- * from HTTP handling.
+ * deletion, and file serving. Uses storage abstraction for cloud compatibility.
  *
  * **Feature: media-gallery-isolation**
  * **Requirements: 1.1, 1.2, 1.3**
  */
 
 import { PrismaClient, MediaAsset } from '@prisma/client';
-import fs from 'fs';
-import path from 'path';
 import sharp from 'sharp';
+import { getStorage, getStorageType, IStorage } from './storage';
 
 // ============================================
 // TYPES & INTERFACES
@@ -44,7 +42,6 @@ export class MediaServiceError extends Error {
   }
 }
 
-
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
@@ -64,6 +61,16 @@ export function getMimeType(filename: string): string {
     case 'jpg':
     case 'jpeg':
       return 'image/jpeg';
+    case 'gif':
+      return 'image/gif';
+    case 'svg':
+      return 'image/svg+xml';
+    case 'pdf':
+      return 'application/pdf';
+    case 'doc':
+      return 'application/msword';
+    case 'docx':
+      return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     default:
       return 'application/octet-stream';
   }
@@ -74,23 +81,10 @@ export function getMimeType(filename: string): string {
 // ============================================
 
 export class MediaService {
-  private mediaDir: string;
+  private storage: IStorage;
 
-  constructor(
-    private prisma: PrismaClient,
-    mediaDir?: string
-  ) {
-    this.mediaDir = mediaDir || path.resolve(process.cwd(), process.env.MEDIA_DIR || '.media');
-    this.ensureMediaDir();
-  }
-
-  /**
-   * Ensure media directory exists
-   */
-  private ensureMediaDir(): void {
-    if (!fs.existsSync(this.mediaDir)) {
-      fs.mkdirSync(this.mediaDir, { recursive: true });
-    }
+  constructor(private prisma: PrismaClient) {
+    this.storage = getStorage();
   }
 
   // ============================================
@@ -121,17 +115,27 @@ export class MediaService {
     const id = crypto.randomUUID();
 
     // Optimize images to WebP
-    if (mimeType.startsWith('image/')) {
+    if (mimeType.startsWith('image/') && !mimeType.includes('svg')) {
       const optimized = await sharp(buffer).webp({ quality: 85 }).toBuffer();
       const metadata = await sharp(buffer).metadata();
       const webpFilename = `${id}.webp`;
 
-      fs.writeFileSync(path.join(this.mediaDir, webpFilename), optimized);
+      // Upload to storage
+      const storageFile = await this.storage.upload(webpFilename, optimized, {
+        contentType: 'image/webp',
+        cacheControl: 'public, max-age=31536000',
+        isPublic: true,
+        metadata: {
+          originalName: filename || 'unknown',
+          width: String(metadata.width || 0),
+          height: String(metadata.height || 0),
+        },
+      });
 
       const asset = await this.prisma.mediaAsset.create({
         data: {
           id,
-          url: `/media/${webpFilename}`,
+          url: storageFile.url,
           mimeType: 'image/webp',
           width: metadata.width || null,
           height: metadata.height || null,
@@ -142,16 +146,24 @@ export class MediaService {
       return { asset };
     }
 
-    // Non-image files
+    // Non-image files (or SVG)
     const ext = (filename?.split('.').pop() || 'bin').toLowerCase();
     const savedFilename = `${id}.${ext}`;
 
-    fs.writeFileSync(path.join(this.mediaDir, savedFilename), buffer);
+    // Upload to storage
+    const storageFile = await this.storage.upload(savedFilename, buffer, {
+      contentType: mimeType,
+      cacheControl: 'public, max-age=31536000',
+      isPublic: true,
+      metadata: {
+        originalName: filename || 'unknown',
+      },
+    });
 
     const asset = await this.prisma.mediaAsset.create({
       data: {
         id,
-        url: `/media/${savedFilename}`,
+        url: storageFile.url,
         mimeType,
         size: buffer.length,
       },
@@ -171,17 +183,41 @@ export class MediaService {
       throw new MediaServiceError('NOT_FOUND', 'Media asset not found', 404);
     }
 
-    // Delete file from disk
-    const filename = asset.url.split('/').pop() as string;
-    const filePath = path.join(this.mediaDir, filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Extract filename from URL
+    const filename = this.extractFilenameFromUrl(asset.url);
+    
+    if (filename) {
+      // Delete file from storage
+      await this.storage.delete(filename);
     }
 
     // Delete from database
     await this.prisma.mediaAsset.delete({ where: { id } });
   }
 
+  /**
+   * Extract filename from URL
+   */
+  private extractFilenameFromUrl(url: string): string | null {
+    try {
+      // Handle both relative and absolute URLs
+      if (url.startsWith('/media/')) {
+        return url.replace('/media/', '');
+      }
+      
+      // For absolute URLs (S3/R2), extract the key
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      
+      // Remove leading slash and bucket name if present
+      const parts = pathname.split('/').filter(Boolean);
+      return parts[parts.length - 1] || null;
+    } catch {
+      // If URL parsing fails, try simple extraction
+      const parts = url.split('/');
+      return parts[parts.length - 1] || null;
+    }
+  }
 
   // ============================================
   // FILE SERVING
@@ -191,16 +227,36 @@ export class MediaService {
    * Get file buffer and content type by filename
    * @throws MediaServiceError if file not found
    */
-  getFile(filename: string): { buffer: Buffer; contentType: string } {
-    const filePath = path.join(this.mediaDir, filename);
+  async getFile(filename: string): Promise<{ buffer: Buffer; contentType: string }> {
+    const buffer = await this.storage.download(filename);
 
-    if (!fs.existsSync(filePath)) {
+    if (!buffer) {
       throw new MediaServiceError('NOT_FOUND', 'File not found', 404);
     }
 
-    const buffer = fs.readFileSync(filePath);
     const contentType = getMimeType(filename);
 
     return { buffer, contentType };
+  }
+
+  /**
+   * Check if file exists
+   */
+  async fileExists(filename: string): Promise<boolean> {
+    return this.storage.exists(filename);
+  }
+
+  /**
+   * Get public URL for a file
+   */
+  getFileUrl(filename: string): string {
+    return this.storage.getUrl(filename);
+  }
+
+  /**
+   * Get storage type (for debugging/info)
+   */
+  getStorageType(): 'local' | 's3' | 'r2' {
+    return getStorageType();
   }
 }
