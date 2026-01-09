@@ -2,6 +2,39 @@
 
 ## 2026-01-09
 
+### Task: Cleanup Admin - Xóa các tính năng không cần thiết & Thêm Menu Manager
+
+**🗑️ Deleted Pages:**
+- `admin/src/app/pages/FurniturePage/` - Xóa trang Nội thất
+- `admin/src/app/pages/GuidePage/` - Xóa trang Hướng dẫn
+- `admin/src/app/pages/PricingConfigPage/` - Xóa trang Cấu hình báo giá
+- `admin/src/app/pages/BiddingManagementPage/` - Xóa trang Quản lý Đấu thầu
+- `admin/src/app/pages/BiddingSettingsPage/` - Xóa trang Cài đặt Đấu thầu
+- `admin/src/app/pages/ContractorsPage/` - Xóa trang Quản lý Nhà thầu
+- `admin/src/app/pages/RegionsPage/` - Xóa trang Khu vực
+- `admin/src/app/pages/ProjectsPage/` - Xóa trang Dự án
+- `admin/src/app/pages/BidsPage/` - Xóa trang Bids
+- `admin/src/app/pages/MatchesPage/` - Xóa trang Matches
+- `admin/src/app/pages/FeesPage/` - Xóa trang Fees
+- `admin/src/app/pages/DisputesPage/` - Xóa trang Disputes
+- `admin/src/app/pages/NotificationTemplatesPage/` - Xóa trang Notification Templates
+- `admin/src/app/pages/ChatPage/` - Xóa trang Chat
+
+**🆕 Created:**
+- `admin/src/app/pages/MenuManagerPage/index.tsx` - Trang quản lý thực đơn nhà hàng
+- `admin/src/app/pages/MenuManagerPage/types.ts` - Types cho MenuCategory và MenuItem
+- `admin/src/app/pages/MenuManagerPage/components/CategoryList.tsx` - Danh sách danh mục
+- `admin/src/app/pages/MenuManagerPage/components/MenuItemList.tsx` - Danh sách món ăn
+- `admin/src/app/pages/MenuManagerPage/components/CategoryModal.tsx` - Modal tạo/sửa danh mục
+- `admin/src/app/pages/MenuManagerPage/components/MenuItemModal.tsx` - Modal tạo/sửa món ăn
+
+**✏️ Modified:**
+- `admin/src/app/components/Layout/constants.ts` - Cập nhật menu sidebar (xóa các mục cũ, thêm Quản lý Thực đơn)
+- `admin/src/app/app.tsx` - Cập nhật routes (xóa routes cũ, thêm /menu-manager)
+- `admin/src/app/types/settings.ts` - Cập nhật RouteType
+
+---
+
 ### Task: Deploy MrSaiGon to GCP (New Project)
 
 **🔧 GCP Resources Created:**

@@ -89,6 +89,7 @@ export interface ServiceFee {
  */
 export type RouteType =
   | 'dashboard'
+  | 'menu-manager'
   | 'pages'
   | 'sections'
   | 'media'
@@ -96,21 +97,7 @@ export type RouteType =
   | 'settings'
   | 'settings/api-keys'
   | 'leads'
-  | 'pricing-config'
-  | 'furniture'
   | 'users'
-  | 'contractors'
-  | 'regions'
-  | 'projects'
-  | 'bids'
-  | 'matches'
-  | 'escrows'
-  | 'fees'
-  | 'disputes'
-  | 'notification-templates'
-  | 'chat'
-  | 'bidding'
-  | 'bidding-settings'
   | 'api-keys'
-  | 'guide'
-  | 'rate-limits';
+  | 'rate-limits'
+  | 'reservations';
