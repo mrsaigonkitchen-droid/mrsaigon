@@ -6,7 +6,6 @@
 import { useState, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { tokens, API_URL, resolveMediaUrl } from '@app/shared';
-import { glassEffect } from '../styles/glassEffect';
 
 interface MenuItem {
   id: string;
@@ -118,12 +117,12 @@ export const FeaturedMenu = memo(function FeaturedMenu({ data }: { data: Feature
 
   if (loading) {
     return (
-      <section style={{ 
-        padding: '80px 20px', 
-        ...glassEffect({ variant: 'subtle' }),
-        borderRadius: 0,
-        border: 'none',
-      }}>
+      <section
+        style={{
+          padding: '80px 20px',
+          position: 'relative',
+        }}
+      >
         <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
           <motion.div
             animate={{ rotate: 360 }}
@@ -152,25 +151,30 @@ export const FeaturedMenu = memo(function FeaturedMenu({ data }: { data: Feature
     <section
       style={{
         padding: 'clamp(60px, 10vw, 100px) 20px',
-        ...glassEffect({ variant: 'subtle' }),
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: 0,
-        border: 'none',
-        borderTop: `1px solid rgba(255, 255, 255, 0.08)`,
-        borderBottom: `1px solid rgba(255, 255, 255, 0.08)`,
       }}
     >
-      {/* Background decoration */}
+      {/* Subtle gradient overlay for depth */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Decorative glow */}
       <div
         style={{
           position: 'absolute',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '150%',
-          height: '150%',
-          background: `radial-gradient(ellipse at center, ${tokens.color.primary}10 0%, transparent 70%)`,
+          width: '80%',
+          height: '80%',
+          background: `radial-gradient(ellipse at center, ${tokens.color.primary}08 0%, transparent 60%)`,
           pointerEvents: 'none',
         }}
       />
