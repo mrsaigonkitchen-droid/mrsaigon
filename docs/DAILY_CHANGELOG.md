@@ -2,6 +2,19 @@
 
 ## 2026-01-09
 
+### Task: Cải thiện UI Blog Manager - Nút Lưu nháp và Xuất bản riêng biệt
+
+**✏️ Modified:**
+- `admin/src/app/pages/BlogManagerPage/components/PostEditorModal.tsx` - Thêm 2 nút riêng biệt "Lưu nháp" và "Xuất bản ngay", thêm hint text giải thích
+- `admin/src/app/pages/BlogManagerPage/index.tsx` - Cập nhật handleSavePost để nhận status parameter
+
+**📋 Features:**
+- Khi tạo bài mới: hiện 2 nút "Lưu nháp" và "Xuất bản ngay" rõ ràng
+- Khi sửa bài: hiện dropdown trạng thái và nút "Cập nhật"
+- Thêm hint text giải thích sự khác biệt giữa Lưu nháp và Xuất bản
+
+---
+
 ### Task: Cải thiện trang Quản lý tài khoản Admin
 
 **✏️ Modified:**

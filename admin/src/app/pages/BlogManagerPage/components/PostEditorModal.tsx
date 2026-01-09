@@ -15,7 +15,7 @@ interface PostEditorModalProps {
   categories: BlogCategory[];
   onTitleChange: (title: string) => void;
   onFormChange: React.Dispatch<React.SetStateAction<PostFormData>>;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (status?: 'DRAFT' | 'PUBLISHED') => void;
   onClose: () => void;
 }
 
@@ -28,6 +28,13 @@ export function PostEditorModal({
   onSubmit, 
   onClose 
 }: PostEditorModalProps) {
+  const handleSaveDraft = () => {
+    onSubmit('DRAFT');
+  };
+
+  const handlePublish = () => {
+    onSubmit('PUBLISHED');
+  };
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -92,7 +99,7 @@ export function PostEditorModal({
           </motion.button>
         </div>
 
-        <form onSubmit={onSubmit} style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
             <div style={{ gridColumn: '1 / -1' }}>
               <Input label="Tiêu đề" value={formData.title} onChange={onTitleChange}
@@ -161,20 +168,23 @@ export function PostEditorModal({
               onChange={(value) => onFormChange(prev => ({ ...prev, tags: value }))}
               placeholder="xây dựng, cải tạo, tips" fullWidth />
 
-            <div>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: tokens.color.text, marginBottom: 8 }}>
-                Trạng thái
-              </label>
-              <Select
-                value={formData.status}
-                onChange={(val) => onFormChange(prev => ({ ...prev, status: val as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' }))}
-                options={[
-                  { value: 'DRAFT', label: 'Nháp' },
-                  { value: 'PUBLISHED', label: 'Xuất bản' },
-                  { value: 'ARCHIVED', label: 'Lưu trữ' },
-                ]}
-              />
-            </div>
+            {/* Chỉ hiện dropdown trạng thái khi đang sửa bài */}
+            {editingPost && (
+              <div>
+                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, color: tokens.color.text, marginBottom: 8 }}>
+                  Trạng thái
+                </label>
+                <Select
+                  value={formData.status}
+                  onChange={(val) => onFormChange(prev => ({ ...prev, status: val as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' }))}
+                  options={[
+                    { value: 'DRAFT', label: 'Nháp' },
+                    { value: 'PUBLISHED', label: 'Xuất bản' },
+                    { value: 'ARCHIVED', label: 'Lưu trữ' },
+                  ]}
+                />
+              </div>
+            )}
 
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ 
@@ -200,14 +210,64 @@ export function PostEditorModal({
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 12, paddingTop: 16, borderTop: `1px solid ${tokens.color.border}` }}>
-            <Button type="submit" fullWidth icon={editingPost ? 'ri-save-line' : 'ri-add-line'}>
-              {editingPost ? 'Cập nhật' : 'Tạo bài viết'}
-            </Button>
-            <Button type="button" variant="secondary" onClick={onClose} fullWidth>
-              Hủy
-            </Button>
+          {/* Action Buttons */}
+          <div style={{ 
+            display: 'flex', gap: 12, paddingTop: 20, 
+            borderTop: `1px solid ${tokens.color.border}`,
+            flexWrap: 'wrap',
+          }}>
+            {editingPost ? (
+              // Khi sửa bài: hiện nút Cập nhật
+              <>
+                <Button type="button" onClick={handlePublish} fullWidth icon="ri-save-line">
+                  Cập nhật
+                </Button>
+                <Button type="button" variant="secondary" onClick={onClose} fullWidth>
+                  Hủy
+                </Button>
+              </>
+            ) : (
+              // Khi tạo mới: hiện 2 nút Lưu nháp và Xuất bản
+              <>
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  onClick={handleSaveDraft}
+                  style={{ flex: 1 }}
+                  icon="ri-draft-line"
+                >
+                  Lưu nháp
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={handlePublish}
+                  style={{ flex: 2 }}
+                  icon="ri-send-plane-fill"
+                >
+                  <i className="ri-global-line" style={{ marginRight: 6 }} />
+                  Xuất bản ngay
+                </Button>
+              </>
+            )}
           </div>
+
+          {/* Hint text */}
+          {!editingPost && (
+            <div style={{ 
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '12px 16px', 
+              background: `${tokens.color.info}10`,
+              border: `1px solid ${tokens.color.info}30`,
+              borderRadius: tokens.radius.md,
+              marginTop: -8,
+            }}>
+              <i className="ri-information-line" style={{ color: tokens.color.info, fontSize: 18 }} />
+              <span style={{ fontSize: 13, color: tokens.color.textMuted }}>
+                <strong style={{ color: tokens.color.text }}>Lưu nháp:</strong> Chỉ lưu, chưa hiển thị trên website. 
+                <strong style={{ color: tokens.color.primary, marginLeft: 8 }}>Xuất bản:</strong> Hiển thị ngay trên website.
+              </span>
+            </div>
+          )}
         </form>
       </motion.div>
     </motion.div>

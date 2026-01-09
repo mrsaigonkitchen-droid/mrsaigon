@@ -244,15 +244,21 @@ export function BlogManagerPage() {
   );
 
   const handleSavePost = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+    async (status?: 'DRAFT' | 'PUBLISHED') => {
       try {
+        // Nếu có status được truyền vào, override status trong form
+        const dataToSave = status ? { ...postForm, status } : postForm;
+        
         if (editingPost) {
-          await blogPostsApi.update(editingPost.id, postForm);
+          await blogPostsApi.update(editingPost.id, dataToSave);
           toast.success('Đã cập nhật bài viết!');
         } else {
-          await blogPostsApi.create(postForm);
-          toast.success('Đã tạo bài viết mới!');
+          await blogPostsApi.create(dataToSave);
+          if (status === 'PUBLISHED') {
+            toast.success('Đã xuất bản bài viết!');
+          } else {
+            toast.success('Đã lưu bản nháp!');
+          }
         }
         await loadPosts();
         handleClosePostEditor();
