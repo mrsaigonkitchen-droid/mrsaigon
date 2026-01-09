@@ -20,7 +20,7 @@ NC='\033[0m' # No Color
 APP=$1
 if [ -z "$APP" ]; then
   echo -e "${YELLOW}Usage: ./deploy-manual.sh <app>${NC}"
-  echo "Available apps: api, landing, admin, portal, all"
+  echo "Available apps: api, landing, admin, all"
   exit 1
 fi
 
@@ -107,18 +107,14 @@ case $APP in
   admin)
     deploy_frontend "admin"
     ;;
-  portal)
-    deploy_frontend "portal"
-    ;;
   all)
     deploy_api
     deploy_frontend "landing"
     deploy_frontend "admin"
-    deploy_frontend "portal"
     ;;
   *)
     echo -e "${RED}Unknown app: $APP${NC}"
-    echo "Available apps: api, landing, admin, portal, all"
+    echo "Available apps: api, landing, admin, all"
     exit 1
     ;;
 esac

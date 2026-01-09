@@ -1,7 +1,7 @@
 /**
  * Admin-specific design tokens for Light Mode
  * These tokens are used exclusively in the admin app
- * Landing and Portal apps continue using the dark mode tokens from index.ts
+ * Landing app continues using the dark mode tokens from index.ts
  */
 export const adminTokens = {
   color: {

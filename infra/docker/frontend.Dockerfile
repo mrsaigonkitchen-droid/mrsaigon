@@ -1,6 +1,6 @@
 # ============================================
 # NỘI THẤT NHANH - Frontend Dockerfile
-# For Landing, Admin, Portal apps
+# For Landing, Admin apps
 # ============================================
 
 # Stage 1: Build

@@ -414,49 +414,6 @@ importers:
         specifier: ^2.8.1
         version: 2.8.1
 
-  portal:
-    dependencies:
-      '@app/shared':
-        specifier: workspace:*
-        version: link:../packages/shared
-      '@app/ui':
-        specifier: workspace:*
-        version: link:../packages/ui
-      '@tanstack/react-query':
-        specifier: ^5.90.2
-        version: 5.90.2(react@19.0.0)
-      '@testing-library/react':
-        specifier: 16.1.0
-        version: 16.1.0(@testing-library/dom@10.4.0)(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      fast-check:
-        specifier: ^4.4.0
-        version: 4.4.0
-      framer-motion:
-        specifier: ^12.23.22
-        version: 12.23.22(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      react:
-        specifier: ^19.0.0
-        version: 19.0.0
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.0.0(react@19.0.0)
-      react-router-dom:
-        specifier: ^7.9.3
-        version: 7.9.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      vitest:
-        specifier: ^3.0.0
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@20.19.9)(@vitest/ui@3.2.4)(jiti@1.21.7)(jsdom@22.1.0)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)
-    devDependencies:
-      autoprefixer:
-        specifier: ^10.4.19
-        version: 10.4.21(postcss@8.5.6)
-      postcss:
-        specifier: ^8.4.38
-        version: 8.5.6
-      tailwindcss:
-        specifier: ^3.4.3
-        version: 3.4.19(tsx@4.20.6)(yaml@2.8.1)
-
 packages:
 
   '@alloc/quick-lru@5.2.0':

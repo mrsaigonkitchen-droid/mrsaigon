@@ -151,7 +151,8 @@ function AppContent() {
   useEffect(() => {
     // Use CSS custom property for background image
     // This allows the ::before pseudo-element to use it
-    const bgUrl = backgroundImage || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1920&q=40';
+    // Default: elegant restaurant/dining ambiance image
+    const bgUrl = backgroundImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1920&q=40';
     
     // Set CSS custom property for background
     document.documentElement.style.setProperty('--bg-image', `url("${bgUrl}")`);
@@ -172,7 +173,7 @@ function AppContent() {
     const mockData = {
       id: '1',
       slug: 'home',
-      title: 'Nội Thất Nhanh - Giải pháp nội thất trọn gói',
+      title: 'MrSaiGon - Nhà hàng hẹn hò sang trọng',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       sections: [
@@ -181,11 +182,11 @@ function AppContent() {
           kind: 'HERO',
           order: 1,
           data: {
-            title: 'Nội Thất Nhanh',
-            subtitle: 'Giải pháp nội thất trọn gói cho căn hộ, nhà phố - Thiết kế miễn phí, thi công nhanh chóng',
-            imageUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200',
-            ctaText: 'Báo Giá Ngay',
-            ctaLink: '/bao-gia'
+            title: 'MrSaiGon',
+            subtitle: 'Nhà hàng hẹn hò sang trọng - Trải nghiệm ẩm thực tinh tế trong không gian lãng mạn',
+            imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200',
+            ctaText: 'Đặt Bàn Ngay',
+            ctaLink: '/dat-ban'
           }
         },
         {
@@ -194,12 +195,12 @@ function AppContent() {
           order: 2,
           data: {
             title: 'Dịch Vụ Của Chúng Tôi',
-            subtitle: 'Giải pháp toàn diện cho ngôi nhà của bạn',
+            subtitle: 'Trải nghiệm ẩm thực đẳng cấp',
             services: [
-              { icon: 'ri-home-smile-line', title: 'Nội thất căn hộ', description: 'Thiết kế và thi công nội thất căn hộ trọn gói' },
-              { icon: 'ri-building-line', title: 'Nội thất nhà phố', description: 'Giải pháp nội thất cho nhà phố, biệt thự' },
-              { icon: 'ri-sofa-line', title: 'Nội thất theo yêu cầu', description: 'Thiết kế riêng theo phong cách của bạn' },
-              { icon: 'ri-tools-line', title: 'Thi công chuyên nghiệp', description: 'Đội ngũ thợ lành nghề, thi công nhanh chóng' }
+              { icon: 'ri-restaurant-line', title: 'Ẩm thực tinh tế', description: 'Thực đơn được chế biến bởi đầu bếp hàng đầu' },
+              { icon: 'ri-goblet-line', title: 'Rượu vang cao cấp', description: 'Bộ sưu tập rượu vang được tuyển chọn kỹ lưỡng' },
+              { icon: 'ri-heart-line', title: 'Không gian lãng mạn', description: 'Thiết kế sang trọng, riêng tư cho các cặp đôi' },
+              { icon: 'ri-calendar-event-line', title: 'Sự kiện đặc biệt', description: 'Tổ chức sinh nhật, kỷ niệm, cầu hôn' }
             ]
           }
         },
@@ -208,10 +209,10 @@ function AppContent() {
           kind: 'CTA',
           order: 3,
           data: {
-            title: 'Nhận Báo Giá Miễn Phí',
-            description: 'Chỉ cần chọn căn hộ và sản phẩm, hệ thống sẽ tự động tính toán chi phí dự kiến',
-            buttonText: 'Báo Giá Ngay',
-            buttonLink: '/bao-gia'
+            title: 'Đặt Bàn Ngay Hôm Nay',
+            description: 'Trải nghiệm bữa tối lãng mạn tại MrSaiGon - Đặt bàn trước để có vị trí tốt nhất',
+            buttonText: 'Đặt Bàn',
+            buttonLink: '/dat-ban'
           }
         }
       ],
@@ -375,14 +376,14 @@ function AppContent() {
                 : page.headerConfig)
             : (headerConfigFromSettings ?? {
                 logo: {
-                  text: page?.title ?? 'Nội Thất Nhanh',
-                  icon: 'ri-home-smile-fill',
+                  text: page?.title ?? 'MrSaiGon',
+                  icon: 'ri-restaurant-fill',
                 },
                 navigation: [
                   { label: 'Trang chủ', path: '/' },
-                  { label: 'Báo giá', path: '/bao-gia' },
-                  { label: 'Dự án', path: '/gallery' },
-                  { label: 'Giới thiệu', path: '/about' },
+                  { label: 'Thực đơn', path: '/menu' },
+                  { label: 'Đặt bàn', path: '/dat-ban' },
+                  { label: 'Về chúng tôi', path: '/about' },
                   { label: 'Blog', path: '/blog' },
                   { label: 'Liên hệ', path: '/contact' },
                 ],
@@ -472,11 +473,11 @@ function AppContent() {
                 : page.footerConfig)
             : (footerConfigFromSettings ?? {
                 brand: {
-                  text: page?.title ?? 'Nội Thất Nhanh',
-                  icon: 'ri-home-smile-fill',
+                  text: page?.title ?? 'MrSaiGon',
+                  icon: 'ri-restaurant-fill',
                 },
                 copyright: {
-                  text: `© ${new Date().getFullYear()} ${page?.title ?? 'Nội Thất Nhanh'}. All rights reserved.`,
+                  text: `© ${new Date().getFullYear()} ${page?.title ?? 'MrSaiGon'}. All rights reserved.`,
                 },
               });
 

@@ -174,14 +174,6 @@ echo "🔨 Creating Cloud Build triggers..."
 #   --included-files="admin/**,packages/**" \
 #   --build-config="infra/gcp/cloudbuild-admin.yaml"
 
-# gcloud builds triggers create github \
-#   --name="ntn-portal-trigger" \
-#   --repo-name="noi-that-nhanh" \
-#   --repo-owner="YOUR_GITHUB_USERNAME" \
-#   --branch-pattern="^main$" \
-#   --included-files="portal/**,packages/**" \
-#   --build-config="infra/gcp/cloudbuild-portal.yaml"
-
 echo ""
 echo "✅ Setup complete!"
 echo ""
@@ -194,6 +186,5 @@ echo "🔗 URLs after deployment:"
 echo "   API:     https://ntn-api-xxxxx-as.a.run.app"
 echo "   Landing: https://ntn-landing-xxxxx-as.a.run.app"
 echo "   Admin:   https://ntn-admin-xxxxx-as.a.run.app"
-echo "   Portal:  https://ntn-portal-xxxxx-as.a.run.app"
 echo ""
 echo "💡 To map custom domains, use Cloud Run > Manage Custom Domains"

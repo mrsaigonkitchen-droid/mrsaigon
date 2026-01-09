@@ -218,7 +218,7 @@ export function LegalContentForm({ data, updateField, addArrayItem, removeArrayI
               type="text"
               value={(data.companyName as string) || ''}
               onChange={(e) => updateField('companyName', e.target.value)}
-              placeholder="Nội Thất Nhanh"
+              placeholder="MrSaiGon"
               style={inputStyle}
             />
           </div>

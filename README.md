@@ -1,12 +1,15 @@
-# 🏠 NỘI THẤT NHANH - WebApp MVP
+# 🍽️ MrSaiGon - Nhà hàng hẹn hò sang trọng
 
-WebApp cho doanh nghiệp thiết kế nội thất với tính năng báo giá & dự toán tự động.
+WebApp cho nhà hàng MrSaiGon - Trải nghiệm ẩm thực sang trọng và lãng mạn.
+
+## 🌐 Domain
+- Production: https://mrsaigon.vn/
 
 ## 🎯 Mục tiêu
 
-1. **Khách hàng**: Nhận dự toán nhanh hoặc đăng ký tư vấn trực tiếp
-2. **Chủ doanh nghiệp**: Toàn quyền kiểm soát đơn giá, vật dụng, hạng mục, hệ số - không cần code
-3. **Sẵn sàng**: Automation AI + Google Sheet + SEO trong tương lai
+1. **Khách hàng**: Đặt bàn online, xem menu, trải nghiệm không gian sang trọng
+2. **Chủ nhà hàng**: Quản lý đặt bàn, menu, khuyến mãi - không cần code
+3. **Sẵn sàng**: Tích hợp thanh toán, loyalty program trong tương lai
 
 ## 🏗️ Kiến trúc Monorepo (Nx)
 
@@ -158,4 +161,4 @@ MIT
 
 ---
 
-**Built with ❤️ for NỘI THẤT NHANH**
+**Built with ❤️ for MrSaiGon - Nhà hàng hẹn hò sang trọng**

@@ -123,7 +123,7 @@ export function MarketplaceForm({ data, updateField }: MarketplaceFormProps) {
             label="Link nút chính"
             value={data.ctaLink || ''}
             onChange={(v) => updateField('ctaLink', v)}
-            placeholder="/portal/marketplace"
+            placeholder="/cong-trinh"
             fullWidth
           />
         </div>
@@ -140,7 +140,7 @@ export function MarketplaceForm({ data, updateField }: MarketplaceFormProps) {
             label="Link nút đăng ký"
             value={data.registerLink || ''}
             onChange={(v) => updateField('registerLink', v)}
-            placeholder="/portal/auth/register?type=contractor"
+            placeholder="/dang-ky-nha-thau"
             fullWidth
           />
         </div>

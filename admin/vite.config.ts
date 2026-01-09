@@ -12,10 +12,6 @@ export default defineConfig(({ mode }) => {
   // Get API URL from env or process.env (for Docker build)
   const apiUrl =
     process.env.VITE_API_URL || env.VITE_API_URL || 'http://localhost:4202';
-  const portalUrl =
-    process.env.VITE_PORTAL_URL ||
-    env.VITE_PORTAL_URL ||
-    'http://localhost:4203';
 
   // eslint-disable-next-line no-console -- Build-time debug info
   console.log(`[Vite] Building admin with VITE_API_URL=${apiUrl}`);
@@ -28,7 +24,6 @@ export default defineConfig(({ mode }) => {
     // Define env vars for build-time replacement in all modules including packages
     define: {
       'import.meta.env.VITE_API_URL': JSON.stringify(apiUrl),
-      'import.meta.env.VITE_PORTAL_URL': JSON.stringify(portalUrl),
     },
     server: {
       port: 4201,

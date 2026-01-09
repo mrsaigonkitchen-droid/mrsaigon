@@ -1,5 +1,5 @@
 {
-  "name": "@anh-tho-xay/source",
+  "name": "@mrsaigon/source",
   "version": "0.0.1",
   "type": "commonjs",
   "main": "./src/index.js",
@@ -23,8 +23,7 @@
     "db:migrate-furniture": "tsx infra/prisma/migrate-furniture-products.ts",
     "dev:api": "nx serve api",
     "dev:landing": "nx serve landing",
-    "dev:admin": "nx serve admin",
-    "dev:portal": "nx serve portal"
+    "dev:admin": "nx serve admin"
   },
   "nx": {
     "includedScripts": []

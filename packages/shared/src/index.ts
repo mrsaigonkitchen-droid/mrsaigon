@@ -4,7 +4,7 @@ export * from './schemas';
 
 // API Configuration - centralized URL management
 // Import from config module instead of hardcoding
-export { API_URL, getApiUrl, PORTAL_URL, getPortalUrl, isProduction, isDevelopment } from './config';
+export { API_URL, getApiUrl, isProduction, isDevelopment } from './config';
 import { getApiUrl } from './config';
 
 /**

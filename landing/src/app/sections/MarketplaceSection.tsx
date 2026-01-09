@@ -50,9 +50,9 @@ export const MarketplaceSection = memo(function MarketplaceSection({ data }: Pro
     showStats = true,
     limit = 6,
     ctaText = 'Xem tất cả công trình',
-    ctaLink = '/portal/marketplace',
+    ctaLink = '/cong-trinh',
     registerText = 'Đăng ký làm nhà thầu',
-    registerLink = '/portal/auth/register?type=contractor',
+    registerLink = '/dang-ky-nha-thau',
   } = data;
 
   // State

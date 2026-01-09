@@ -124,7 +124,7 @@ export function EmailSettingsTab({ onShowMessage, onError }: EmailSettingsTabPro
             label="Tên thương hiệu"
             value={settings.brandName}
             onChange={(value) => updateField('brandName', value)}
-            placeholder="NỘI THẤT NHANH"
+            placeholder="MRSAIGON"
             fullWidth
           />
           <Input
@@ -140,7 +140,7 @@ export function EmailSettingsTab({ onShowMessage, onError }: EmailSettingsTabPro
             label="Tiêu đề email"
             value={settings.subjectTemplate}
             onChange={(value) => updateField('subjectTemplate', value)}
-            placeholder="[NỘI THẤT NHANH] Báo giá nội thất - Căn hộ {{unitNumber}}"
+            placeholder="[MRSAIGON] Xác nhận đặt bàn - {{reservationCode}}"
             fullWidth
           />
           <div style={{ fontSize: 12, color: tokens.color.muted, marginTop: 4 }}>
@@ -327,7 +327,7 @@ export function EmailSettingsTab({ onShowMessage, onError }: EmailSettingsTabPro
             label="Copyright"
             value={settings.footerCopyright}
             onChange={(value) => updateField('footerCopyright', value)}
-            placeholder="© {{year}} NỘI THẤT NHANH - Đối tác tin cậy cho ngôi nhà của bạn"
+            placeholder="© {{year}} MRSAIGON - Nhà hàng hẹn hò sang trọng"
             fullWidth
           />
           <div style={{ fontSize: 12, color: tokens.color.muted, marginTop: 4 }}>

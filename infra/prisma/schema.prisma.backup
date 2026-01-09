@@ -1,4 +1,4 @@
-﻿datasource db {
+datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
@@ -1498,6 +1498,7 @@ model FurnitureQuotation {
 // ============================================
 // API KEY MANAGEMENT (External Integrations)
 // ============================================
+
 // API Key Scope: READ_ONLY, READ_WRITE, FULL_ACCESS
 // API Key Status: ACTIVE, INACTIVE, EXPIRED
 
@@ -1552,4 +1553,3 @@ model ApiKeyUsageLog {
   @@index([apiKeyId])
   @@index([createdAt])
 }
-

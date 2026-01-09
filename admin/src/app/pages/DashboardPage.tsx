@@ -1,7 +1,6 @@
 /**
- * DashboardPage - NỘI THẤT NHANH Admin Dashboard
+ * DashboardPage - MRSAIGON Admin Dashboard
  * Main dashboard page - Currently focused on quotation management (báo giá nội thất/thi công)
- * Portal features (bidding, contractors) are coming soon
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -283,119 +282,6 @@ function ActiveQuickActions() {
 }
 
 
-// Coming Soon Section - Portal features
-function ComingSoonSection() {
-  const { isMobile } = useResponsive();
-
-  const comingSoonFeatures = [
-    {
-      key: 'projects',
-      icon: 'ri-building-line',
-      label: 'Công trình',
-      description: 'Quản lý công trình từ chủ nhà',
-      color: tokens.color.info,
-    },
-    {
-      key: 'bids',
-      icon: 'ri-auction-line',
-      label: 'Đấu thầu',
-      description: 'Quản lý bids từ nhà thầu',
-      color: '#8b5cf6',
-    },
-    {
-      key: 'contractors',
-      icon: 'ri-building-2-line',
-      label: 'Nhà thầu',
-      description: 'Xét duyệt và quản lý nhà thầu',
-      color: tokens.color.warning,
-    },
-    {
-      key: 'matches',
-      icon: 'ri-links-line',
-      label: 'Ghép nối',
-      description: 'Quản lý ghép nối chủ nhà - nhà thầu',
-      color: tokens.color.success,
-    },
-    {
-      key: 'escrow',
-      icon: 'ri-safe-2-line',
-      label: 'Escrow',
-      description: 'Quản lý tiền đặt cọc',
-      color: tokens.color.info,
-    },
-    {
-      key: 'disputes',
-      icon: 'ri-scales-3-line',
-      label: 'Tranh chấp',
-      description: 'Giải quyết tranh chấp',
-      color: tokens.color.error,
-    },
-  ];
-
-  return (
-    <Card
-      title="Tính năng Portal"
-      icon="ri-rocket-line"
-      actions={<ComingSoonBadge />}
-      style={{ marginTop: isMobile ? 24 : 32 }}
-    >
-      <p
-        style={{
-          color: tokens.color.muted,
-          fontSize: 14,
-          margin: '0 0 20px',
-        }}
-      >
-        Các tính năng dưới đây sẽ được kích hoạt khi Portal (app cho chủ nhà và nhà thầu) được triển khai.
-      </p>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 16,
-        }}
-      >
-        {comingSoonFeatures.map((feature) => (
-          <div
-            key={feature.key}
-            style={{
-              padding: 16,
-              background: tokens.color.surfaceAlt,
-              border: `1px dashed ${tokens.color.border}`,
-              borderRadius: tokens.radius.md,
-              opacity: 0.6,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: tokens.radius.md,
-                  background: `${feature.color}15`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: feature.color,
-                  fontSize: 18,
-                }}
-              >
-                <i className={feature.icon} />
-              </div>
-              <span style={{ color: tokens.color.text, fontWeight: 500 }}>
-                {feature.label}
-              </span>
-            </div>
-            <p style={{ color: tokens.color.muted, fontSize: 13, margin: 0 }}>
-              {feature.description}
-            </p>
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}
-
 export function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
@@ -503,7 +389,7 @@ export function DashboardPage() {
               margin: 0,
             }}
           >
-            Quản lý báo giá nội thất & thi công - Nội Thất Nhanh
+            Quản lý đặt bàn & nội dung - MrSaiGon
           </p>
         </div>
 
@@ -656,8 +542,7 @@ export function DashboardPage() {
         <ActiveQuickActions />
       </ResponsiveGrid>
 
-      {/* Coming Soon Section - Portal Features */}
-      <ComingSoonSection />
+      {/* Coming Soon Section */}
     </div>
   );
 }

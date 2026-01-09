@@ -503,7 +503,7 @@ export function CompanyTab({ settings, onChange, onShowMessage, onError }: Compa
           label="Tên công ty"
           value={settings.name}
           onChange={(value) => onChange({ ...settings, name: value })}
-          placeholder="Nội Thất Nhanh"
+          placeholder="MrSaiGon"
           fullWidth
         />
 

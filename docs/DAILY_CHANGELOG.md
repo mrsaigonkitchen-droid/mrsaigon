@@ -2,6 +2,84 @@
 
 ## 2026-01-09
 
+### Task: Cleanup Portal App References
+
+**✏️ Modified:**
+- `packages/shared/src/config.ts` - Xoá PORTAL_URL, getPortalUrl()
+- `packages/shared/src/index.ts` - Xoá re-export PORTAL_URL, getPortalUrl
+- `packages/shared/src/vite-env.d.ts` - Xoá VITE_PORTAL_URL type
+- `packages/shared/src/adminTokens.ts` - Xoá comment về Portal
+- `admin/vite.config.ts` - Xoá portalUrl variable
+- `landing/vite.config.ts` - Xoá portalUrl variable
+- `landing/src/app/sections/MarketplaceSection.tsx` - Đổi portal links sang /cong-trinh, /dang-ky-nha-thau
+- `admin/src/app/pages/DashboardPage.tsx` - Xoá ComingSoonSection và Portal comments
+- `admin/src/app/components/SectionEditor/defaults.ts` - Đổi portal links
+- `admin/src/app/components/SectionEditor/forms/MarketplaceForm.tsx` - Đổi placeholders
+- `api/src/config/cors.ts` - Xoá localhost:4203 từ DEFAULT_DEV_ORIGINS
+- `infra/gcp/cloudbuild-api.yaml` - Xoá portal.noithatnhanh.vn từ CORS
+- `infra/gcp/deploy-manual.sh` - Xoá portal case
+- `infra/gcp/setup.sh` - Xoá portal trigger và URL
+- `infra/docker/frontend.Dockerfile` - Xoá comment về Portal
+- `env.example` - Xoá comment về Portal
+- `pnpm-lock.yaml` - Xoá portal entry
+- `.pnpm/lock.yaml` - Xoá portal entry
+
+**🆕 Created:**
+- `.kiro/specs/remove-portal-app/requirements.md` - Spec requirements
+- `.kiro/specs/remove-portal-app/design.md` - Spec design
+- `.kiro/specs/remove-portal-app/tasks.md` - Spec tasks
+
+---
+
+### Task: Chuyển đổi dự án sang MrSaiGon - Nhà hàng hẹn hò sang trọng
+
+**🔧 Ngắt kết nối:**
+- Đã remove git remote origin (github.com/thienvyma/anhthoxay.git)
+- Đã xóa Google OAuth credentials cũ khỏi .env
+
+**🗑️ Deleted:**
+- `portal/` - Xóa toàn bộ app portal (không cần cho dự án nhà hàng)
+- `infra/gcp/cloudbuild-portal.yaml` - Xóa file build config portal
+
+**✏️ Modified:**
+- `package.json` - Đổi tên package, xóa script dev:portal
+- `pnpm-workspace.yaml` - Xóa portal khỏi workspace
+- `.env` - Cập nhật DATABASE_URL cho mrsaigon, xóa Google OAuth credentials cũ
+- `README.md` - Cập nhật branding MrSaiGon - Nhà hàng hẹn hò sang trọng
+- `Product.md` - Viết lại hoàn toàn cho dự án nhà hàng
+- `packages/shared/src/config.ts` - Cập nhật comment header
+- `landing/src/app/app.tsx` - Thay background image (nhà hàng sang trọng), cập nhật mock data, navigation, branding
+- `landing/src/app/components/Header.tsx` - Cập nhật default config cho MrSaiGon
+- `landing/src/app/components/Footer.tsx` - Cập nhật default config cho MrSaiGon
+- `landing/src/app/components/MobileMenu.tsx` - Cập nhật menu items và branding
+- `landing/src/app/components/MaintenancePage.tsx` - Thay icon và text cho nhà hàng
+- `landing/src/app/pages/UnsubscribePage.tsx` - Cập nhật branding
+- `admin/src/app/components/LoginPage.tsx` - Cập nhật text đăng nhập
+- `admin/src/app/pages/DashboardPage.tsx` - Cập nhật branding
+- `admin/src/app/pages/GuidePage/tabs/OverviewTab.tsx` - Cập nhật branding
+- `admin/src/app/pages/SettingsPage/LayoutTab.tsx` - Cập nhật default values
+- `admin/src/app/pages/SettingsPage/CompanyTab.tsx` - Cập nhật placeholder
+- `admin/src/app/pages/SettingsPage/EmailSettingsTab.tsx` - Cập nhật placeholders
+- `admin/src/app/pages/SettingsPage/components/HeaderEditor.tsx` - Cập nhật placeholder
+- `admin/src/app/pages/SettingsPage/components/FooterEditor.tsx` - Cập nhật placeholders
+- `admin/src/app/pages/FurniturePage/PdfSettingsTab.tsx` - Cập nhật default settings
+- `admin/src/app/components/SectionEditor/forms/LegalContentForm.tsx` - Cập nhật placeholder
+- `admin/src/app/components/*.tsx` - Cập nhật comment headers
+- `.kiro/steering/_index.md` - Cập nhật branding, domain, roles (ADMIN > MANAGER > USER)
+- `.kiro/steering/gcp-deployment.md` - Cập nhật URLs production dự kiến (mrsaigon.vn)
+- `.kiro/steering/ath-business-logic.md` - Viết lại hoàn toàn cho business logic nhà hàng
+- `.kiro/steering/security-checklist.md` - Cập nhật role hierarchy
+
+**📋 Branding mới:**
+- Tên: MrSaiGon - Nhà hàng hẹn hò sang trọng
+- Domain: https://mrsaigon.vn/
+- Roles: ADMIN > MANAGER > USER
+- Background: Elegant restaurant ambiance (Unsplash)
+- Icon: ri-restaurant-fill (thay vì ri-home-smile-fill)
+- Navigation: Trang chủ, Thực đơn, Đặt bàn, Về chúng tôi, Blog, Liên hệ
+
+---
+
 ### Task: Cải thiện UI Blog Manager - Nút Lưu nháp và Xuất bản riêng biệt
 
 **✏️ Modified:**

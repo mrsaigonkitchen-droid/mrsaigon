@@ -168,28 +168,25 @@ export function Header({ config, mobileMenuComponent }: HeaderProps) {
   const location = useLocation();
   const [ctaDropdownOpen, setCtaDropdownOpen] = useState(false);
 
-  // Default config - NỘI THẤT NHANH
+  // Default config - MrSaiGon
   const defaultConfig: HeaderConfig = {
     logo: {
-      text: 'Nội Thất Nhanh',
-      icon: 'ri-home-smile-line',
+      text: 'MrSaiGon',
+      icon: 'ri-restaurant-line',
       animateIcon: true,
     },
     links: [
       { href: '/', label: 'Trang chủ', icon: 'ri-home-line' },
-      { href: '/bao-gia', label: 'Báo giá', icon: 'ri-calculator-line' },
-      { href: '/noi-that', label: 'Nội thất', icon: 'ri-home-smile-line' },
+      { href: '/menu', label: 'Thực đơn', icon: 'ri-restaurant-line' },
+      { href: '/dat-ban', label: 'Đặt bàn', icon: 'ri-calendar-event-line', highlight: true },
+      { href: '/about', label: 'Về chúng tôi', icon: 'ri-information-line' },
       { href: '/blog', label: 'Blog', icon: 'ri-article-line' },
-      { href: '/chinh-sach', label: 'Chính sách', icon: 'ri-shield-check-line' },
+      { href: '/contact', label: 'Liên hệ', icon: 'ri-phone-line' },
     ],
     ctaButton: {
-      text: 'Báo giá ngay',
-      icon: 'ri-price-tag-3-line',
-      // Multiple links for dropdown
-      links: [
-        { text: 'Báo giá xây dựng', href: '/bao-gia', icon: 'ri-calculator-line' },
-        { text: 'Báo giá nội thất', href: '/noi-that', icon: 'ri-home-smile-line' },
-      ],
+      text: 'Đặt bàn ngay',
+      href: '/dat-ban',
+      icon: 'ri-calendar-check-line',
     },
     showMobileMenu: true,
   };
@@ -255,7 +252,7 @@ export function Header({ config, mobileMenuComponent }: HeaderProps) {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <img
                 src={resolveMediaUrl(logo.imageUrl)}
-                alt={logo.text || 'Nội Thất Nhanh Logo'}
+                alt={logo.text || 'MrSaiGon Logo'}
                 className="header-logo-img"
                 style={{
                   height: 'clamp(38px, 8vw, 48px)', // Responsive height: 38px mobile min, 48px desktop

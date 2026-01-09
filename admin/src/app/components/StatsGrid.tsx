@@ -1,4 +1,4 @@
-// StatsGrid Component - NỘI THẤT NHANH Admin Dashboard
+// StatsGrid Component - MRSAIGON Admin Dashboard
 // Responsive grid layout for stats cards with skeleton loader
 //
 // **Feature: admin-dashboard-enhancement**

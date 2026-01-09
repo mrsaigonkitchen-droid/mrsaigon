@@ -1,4 +1,4 @@
-// StatsCard Component - NỘI THẤT NHANH Admin Dashboard
+// StatsCard Component - MRSAIGON Admin Dashboard
 // Individual stats card with icon, label, value, and optional pending badge
 //
 // **Feature: admin-dashboard-enhancement**

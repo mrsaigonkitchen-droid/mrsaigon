@@ -1,4 +1,4 @@
-// QuickActions Component - NỘI THẤT NHANH Admin Dashboard
+// QuickActions Component - MRSAIGON Admin Dashboard
 // Action buttons with icons and optional badges for quick navigation
 //
 // **Feature: admin-dashboard-enhancement**

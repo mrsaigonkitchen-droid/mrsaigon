@@ -28,17 +28,19 @@ interface MobileMenuProps {
 const defaultConfig: MobileMenuConfig = {
   items: [
     { href: '/', label: 'Trang chủ', icon: 'ri-home-fill' },
-    { href: '/bao-gia', label: 'Báo giá', icon: 'ri-calculator-fill' },
-    { href: '/noi-that', label: 'Nội thất', icon: 'ri-home-smile-fill' },
+    { href: '/menu', label: 'Thực đơn', icon: 'ri-restaurant-fill' },
+    { href: '/dat-ban', label: 'Đặt bàn', icon: 'ri-calendar-event-fill', highlight: true },
+    { href: '/about', label: 'Về chúng tôi', icon: 'ri-information-fill' },
     { href: '/blog', label: 'Blog', icon: 'ri-article-fill' },
+    { href: '/contact', label: 'Liên hệ', icon: 'ri-phone-fill' },
   ],
   showLogo: true,
   showCTA: true,
-  ctaText: 'Liên hệ ngay',
-  ctaLink: 'tel:+84123456789',
+  ctaText: 'Đặt bàn ngay',
+  ctaLink: '/dat-ban',
   socialLinks: [
     { platform: 'Facebook', url: 'https://facebook.com', icon: 'ri-facebook-fill' },
-    { platform: 'Youtube', url: 'https://youtube.com', icon: 'ri-youtube-fill' },
+    { platform: 'Instagram', url: 'https://instagram.com', icon: 'ri-instagram-fill' },
     { platform: 'Tiktok', url: 'https://tiktok.com', icon: 'ri-tiktok-fill' },
   ],
 };
@@ -116,8 +118,8 @@ export function MobileMenu({ currentRoute, menuItems }: MobileMenuProps) {
           fontSize: 26,
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <i className="ri-home-smile-fill" />
-          Nội Thất Nhanh
+          <i className="ri-restaurant-fill" />
+          MrSaiGon
         </div>
 
         {/* Navigation Items */}

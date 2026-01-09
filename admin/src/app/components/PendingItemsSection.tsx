@@ -1,4 +1,4 @@
-// PendingItemsSection Component - NỘI THẤT NHANH Admin Dashboard
+// PendingItemsSection Component - MRSAIGON Admin Dashboard
 // Tabbed interface showing pending items requiring admin attention
 //
 // **Feature: admin-dashboard-enhancement**

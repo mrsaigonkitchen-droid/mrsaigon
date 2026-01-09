@@ -39,34 +39,34 @@ interface FooterProps {
 }
 
 export function Footer({ config }: FooterProps) {
-  // Default config - NỘI THẤT NHANH
+  // Default config - MrSaiGon
   const defaultConfig: FooterConfig = {
     brand: {
-      text: 'Nội Thất Nhanh',
-      icon: 'ri-home-smile-fill',
+      text: 'MrSaiGon',
+      icon: 'ri-restaurant-fill',
       description:
-        'Giải pháp nội thất trọn gói cho căn hộ, nhà phố. Thiết kế miễn phí, thi công nhanh chóng.',
-      awards: ['🏠', '⭐', '✅'],
+        'Nhà hàng hẹn hò sang trọng - Trải nghiệm ẩm thực tinh tế trong không gian lãng mạn.',
+      awards: ['🍷', '⭐', '❤️'],
     },
     quickLinks: [
       { label: 'Trang chủ', href: '/' },
-      { label: 'Báo giá', href: '/bao-gia' },
+      { label: 'Thực đơn', href: '/menu' },
+      { label: 'Đặt bàn', href: '/dat-ban' },
       { label: 'Blog', href: '/blog' },
-      { label: 'Chính sách', href: '/chinh-sach' },
     ],
     newsletter: {
       enabled: true,
-      title: 'Nhận tư vấn',
-      description: 'Đăng ký để nhận tư vấn và báo giá miễn phí',
+      title: 'Nhận ưu đãi',
+      description: 'Đăng ký để nhận thông tin ưu đãi và sự kiện đặc biệt',
       placeholder: 'Email của bạn',
     },
     socialLinks: [
       { platform: 'facebook', url: 'https://facebook.com', icon: 'ri-facebook-fill' },
-      { platform: 'zalo', url: 'https://zalo.me', icon: 'ri-chat-3-fill' },
-      { platform: 'youtube', url: 'https://youtube.com', icon: 'ri-youtube-fill' },
+      { platform: 'instagram', url: 'https://instagram.com', icon: 'ri-instagram-fill' },
+      { platform: 'tiktok', url: 'https://tiktok.com', icon: 'ri-tiktok-fill' },
     ],
     copyright: {
-      text: `© ${new Date().getFullYear()} Nội Thất Nhanh. All rights reserved.`,
+      text: `© ${new Date().getFullYear()} MrSaiGon. All rights reserved.`,
     },
   };
 
@@ -121,7 +121,7 @@ export function Footer({ config }: FooterProps) {
               >
                 <img
                   src={resolveMediaUrl(brand.imageUrl)}
-                  alt={brand.text || 'Nội Thất Nhanh Logo'}
+                  alt={brand.text || 'MrSaiGon Logo'}
                   style={{
                     height: 'clamp(50px, 8vw, 70px)', // Responsive: 50px mobile, 70px desktop
                     width: 'auto',

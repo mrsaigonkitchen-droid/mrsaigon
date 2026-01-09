@@ -63,7 +63,7 @@ export function MaintenancePage({
           zIndex: 1,
         }}
       >
-        {/* Illustration - Construction/Building Theme */}
+        {/* Illustration - Restaurant Theme */}
         <motion.div
           initial={{ scale: 0, rotate: -10 }}
           animate={{ scale: 1, rotate: 0 }}
@@ -89,9 +89,9 @@ export function MaintenancePage({
               position: 'relative',
             }}
           >
-            {/* Construction crane icon */}
+            {/* Restaurant icon */}
             <i 
-              className="ri-building-4-line" 
+              className="ri-restaurant-2-line" 
               style={{ 
                 fontSize: 72, 
                 color: tokens.color.primary,
@@ -99,7 +99,7 @@ export function MaintenancePage({
             />
           </div>
           
-          {/* Animated gear */}
+          {/* Animated wine glass */}
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
@@ -117,10 +117,10 @@ export function MaintenancePage({
               boxShadow: `0 4px 15px ${tokens.color.primary}50`,
             }}
           >
-            <i className="ri-settings-3-line" style={{ fontSize: 24, color: '#111' }} />
+            <i className="ri-goblet-line" style={{ fontSize: 24, color: '#111' }} />
           </motion.div>
 
-          {/* Animated wrench */}
+          {/* Animated heart */}
           <motion.div
             animate={{ rotate: [-10, 10, -10] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -138,7 +138,7 @@ export function MaintenancePage({
               justifyContent: 'center',
             }}
           >
-            <i className="ri-hammer-line" style={{ fontSize: 22, color: tokens.color.primary }} />
+            <i className="ri-heart-line" style={{ fontSize: 22, color: tokens.color.primary }} />
           </motion.div>
         </motion.div>
 
@@ -290,7 +290,7 @@ export function MaintenancePage({
           >
             <i className="ri-heart-pulse-line" style={{ color: tokens.color.primary }} />
           </motion.div>
-          <span>Nội Thất Nhanh - Giải pháp nội thất trọn gói</span>
+          <span>MrSaiGon - Nhà hàng hẹn hò sang trọng</span>
         </motion.div>
       </motion.div>
     </div>

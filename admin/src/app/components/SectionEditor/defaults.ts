@@ -216,9 +216,9 @@ export function getDefaultData(sectionKind: SectionKind): Record<string, unknown
         showStats: true,
         limit: 6,
         ctaText: 'Xem tất cả công trình',
-        ctaLink: '/portal/marketplace',
+        ctaLink: '/cong-trinh',
         registerText: 'Đăng ký làm nhà thầu',
-        registerLink: '/portal/auth/register?type=contractor',
+        registerLink: '/dang-ky-nha-thau',
       };
     case 'FURNITURE_QUOTE':
       return {

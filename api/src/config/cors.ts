@@ -44,7 +44,6 @@ export class CorsValidationError extends Error {
 const DEFAULT_DEV_ORIGINS = [
   'http://localhost:4200',  // Landing
   'http://localhost:4201',  // Admin
-  'http://localhost:4203',  // Portal
 ];
 
 /** Ngrok domain pattern for validation */
