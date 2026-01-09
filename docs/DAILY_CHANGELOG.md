@@ -2,6 +2,31 @@
 
 ## 2026-01-09
 
+### Task: Deploy MrSaiGon to GCP (New Project)
+
+**🔧 GCP Resources Created:**
+- Project: `mrsaigon` (398392345282) - Account: `mr.saigon.kitchen@gmail.com`
+- Artifact Registry: `mrsaigon-repo`
+- Cloud Storage: `gs://mrsaigon-media` (public)
+- Cloud SQL: `mrsaigon-db` (PostgreSQL 15, db-f1-micro, IP: 34.142.146.27)
+- Memorystore Redis: `mrsaigon-redis` (IP: 10.83.174.107:6379)
+- VPC Connector: `mrsaigon-connector`
+- Secrets: DATABASE_URL, JWT_SECRET, ENCRYPTION_KEY, REDIS_URL
+
+**✅ Deployed Services:**
+- API: https://mrsaigon-api-398392345282.asia-southeast1.run.app ✅ Healthy
+- Landing: https://mrsaigon-landing-398392345282.asia-southeast1.run.app ✅ 200 OK
+- Admin: https://mrsaigon-admin-398392345282.asia-southeast1.run.app ✅ 200 OK
+
+**✏️ Modified:**
+- `infra/gcp/cloudbuild-api.yaml` - Updated for mrsaigon project
+- `infra/gcp/cloudbuild-landing.yaml` - Updated for mrsaigon project
+- `infra/gcp/cloudbuild-admin.yaml` - Updated for mrsaigon project
+- `infra/prisma/schema.prisma` - Removed UTF-8 BOM character
+- `.kiro/steering/gcp-deployment.md` - Updated with production URLs and GCP info
+
+---
+
 ### Task: Cleanup Portal App References
 
 **✏️ Modified:**
