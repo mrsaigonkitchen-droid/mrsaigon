@@ -6,7 +6,7 @@ export function getDefaultData(sectionKind: SectionKind): Record<string, unknown
   switch (sectionKind) {
     case 'HERO':
       return {
-        title: 'Nội Thất Nhanh - Thiết Kế Nội Thất Chuyên Nghiệp',
+        title: 'Mr.SaiGon - Thiết Kế Nội Thất Chuyên Nghiệp',
         subtitle: 'Biến ngôi nhà của bạn thành không gian sống mơ ước với dịch vụ nội thất uy tín',
         imageUrl: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&q=80',
         ctaText: 'Nhận Báo Giá Miễn Phí',
@@ -103,7 +103,7 @@ export function getDefaultData(sectionKind: SectionKind): Record<string, unknown
     case 'MISSION_VISION':
       return {
         title: 'Sứ Mệnh & Tầm Nhìn',
-        subtitle: 'Định hướng phát triển của Nội Thất Nhanh',
+        subtitle: 'Định hướng phát triển của Mr.SaiGon',
         mission: { icon: 'ri-target-line', title: 'Sứ Mệnh', content: 'Mang đến dịch vụ thiết kế nội thất chất lượng cao với giá cả hợp lý.' },
         vision: { icon: 'ri-eye-line', title: 'Tầm Nhìn', content: 'Trở thành đơn vị thiết kế nội thất uy tín hàng đầu tại Việt Nam.' },
       };
@@ -161,7 +161,7 @@ export function getDefaultData(sectionKind: SectionKind): Record<string, unknown
     case 'QUOTE_CALCULATOR':
       return {
         title: 'Báo Giá & Dự Toán',
-        subtitle: 'Tính toán chi phí nội thất nhanh chóng và chính xác',
+        subtitle: 'Tính toán chi phí Mr.SaiGon chóng và chính xác',
         defaultTab: 'calculator',
         calculatorTab: {
           label: 'Dự Toán Nhanh',
@@ -181,7 +181,7 @@ export function getDefaultData(sectionKind: SectionKind): Record<string, unknown
     case 'ABOUT':
       return {
         badge: 'Về Chúng Tôi',
-        title: 'Nội Thất Nhanh - Đối Tác Tin Cậy',
+        title: 'Mr.SaiGon - Đối Tác Tin Cậy',
         description: 'Với hơn 10 năm kinh nghiệm trong lĩnh vực thiết kế nội thất, chúng tôi tự hào mang đến dịch vụ chất lượng cao với giá cả hợp lý.',
         imageUrl: '',
       };
@@ -235,7 +235,7 @@ export function getDefaultData(sectionKind: SectionKind): Record<string, unknown
     case 'LEGAL_CONTENT':
       return {
         documentType: 'privacy_policy',
-        companyName: 'Nội Thất Nhanh',
+        companyName: 'Mr.SaiGon',
         companyAddress: '123 Đường ABC, Quận 1, TP. Hồ Chí Minh',
         companyEmail: 'contact@noithatnhanh.vn',
         companyPhone: '+84 123 456 789',
@@ -267,26 +267,39 @@ export function getDefaultData(sectionKind: SectionKind): Record<string, unknown
         // Terms of Use sections
         termsOfUse: {
           introduction: 'Bằng việc sử dụng website và dịch vụ của chúng tôi, bạn đồng ý tuân thủ các điều khoản sau đây.',
-          serviceDescription: 'Nội Thất Nhanh là nền tảng kết nối chủ nhà với nhà thầu nội thất uy tín. Chúng tôi cung cấp công cụ báo giá, quản lý dự án và hệ thống đánh giá.',
+          serviceDescription: 'Mr.SaiGon là nền tảng kết nối chủ nhà với nhà thầu nội thất uy tín. Chúng tôi cung cấp công cụ báo giá, quản lý dự án và hệ thống đánh giá.',
           userObligations: [
             { _id: generateUniqueId(), title: 'Thông tin chính xác', description: 'Cung cấp thông tin trung thực khi đăng ký và sử dụng dịch vụ.' },
             { _id: generateUniqueId(), title: 'Bảo mật tài khoản', description: 'Giữ bí mật thông tin đăng nhập và chịu trách nhiệm về hoạt động tài khoản.' },
             { _id: generateUniqueId(), title: 'Sử dụng hợp pháp', description: 'Không sử dụng dịch vụ cho mục đích bất hợp pháp hoặc gây hại.' },
             { _id: generateUniqueId(), title: 'Tôn trọng người khác', description: 'Không đăng nội dung xúc phạm, spam hoặc quấy rối người dùng khác.' },
           ],
-          intellectualProperty: 'Tất cả nội dung trên website bao gồm logo, thiết kế, văn bản và hình ảnh thuộc sở hữu của Nội Thất Nhanh hoặc đối tác được cấp phép.',
+          intellectualProperty: 'Tất cả nội dung trên website bao gồm logo, thiết kế, văn bản và hình ảnh thuộc sở hữu của Mr.SaiGon hoặc đối tác được cấp phép.',
           liability: [
             { _id: generateUniqueId(), title: 'Giới hạn trách nhiệm', description: 'Chúng tôi không chịu trách nhiệm về chất lượng công việc của nhà thầu. Mọi thỏa thuận là giữa chủ nhà và nhà thầu.' },
             { _id: generateUniqueId(), title: 'Tranh chấp', description: 'Chúng tôi hỗ trợ giải quyết tranh chấp nhưng quyết định cuối cùng thuộc về các bên liên quan.' },
             { _id: generateUniqueId(), title: 'Gián đoạn dịch vụ', description: 'Chúng tôi không đảm bảo dịch vụ hoạt động liên tục 100% và không chịu trách nhiệm về thiệt hại do gián đoạn.' },
           ],
-          paymentTerms: 'Thanh toán được thực hiện trực tiếp giữa chủ nhà và nhà thầu. Nội Thất Nhanh có thể thu phí dịch vụ theo quy định công khai trên website.',
+          paymentTerms: 'Thanh toán được thực hiện trực tiếp giữa chủ nhà và nhà thầu. Mr.SaiGon có thể thu phí dịch vụ theo quy định công khai trên website.',
           termination: 'Chúng tôi có quyền đình chỉ hoặc chấm dứt tài khoản vi phạm điều khoản mà không cần thông báo trước.',
           disputeResolution: 'Mọi tranh chấp sẽ được giải quyết theo pháp luật Việt Nam. Tòa án có thẩm quyền là Tòa án nhân dân TP. Hồ Chí Minh.',
           changes: 'Chúng tôi có quyền cập nhật điều khoản bất cứ lúc nào. Thay đổi sẽ có hiệu lực ngay khi đăng tải trên website.',
         },
         showTableOfContents: true,
         layout: 'tabs',
+      };
+    case 'RESTAURANT_MENU':
+      return {
+        title: 'Thực Đơn',
+        subtitle: 'Khám phá hương vị đặc trưng của MrSaiGon',
+        layout: 'grid',
+        showPrice: true,
+        showDescription: true,
+        onlyBestSeller: false,
+        onlySpecial: false,
+        limit: 0,
+        ctaText: 'Xem toàn bộ thực đơn',
+        ctaLink: '/menu',
       };
     default:
       return {};

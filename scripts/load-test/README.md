@@ -1,6 +1,6 @@
 # Load Testing Scripts
 
-This directory contains k6 load testing scripts for the NỘI THẤT NHANH API.
+This directory contains k6 load testing scripts for the Mr.SaiGon API.
 
 ## Prerequisites
 

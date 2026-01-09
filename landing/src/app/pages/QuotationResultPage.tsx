@@ -315,7 +315,7 @@ export function QuotationResultPage() {
                   fontFamily: tokens.font.display,
                 }}
               >
-                NỘI THẤT NHANH
+                Mr.SaiGon
               </h1>
               <h2
                 style={{
@@ -661,7 +661,7 @@ export function QuotationResultPage() {
               Báo giá này chỉ mang tính chất tham khảo. Giá thực tế có thể thay đổi tùy theo thời điểm và điều kiện cụ thể.
             </p>
             <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: '#666666' }}>
-              © NỘI THẤT NHANH - Đối tác tin cậy cho ngôi nhà của bạn
+              © Mr.SaiGon - Đối tác tin cậy cho ngôi nhà của bạn
             </p>
           </div>
         </motion.div>

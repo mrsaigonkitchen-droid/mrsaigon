@@ -1,4 +1,4 @@
-// Type definitions for Landing app - NỘI THẤT NHANH
+// Type definitions for Landing app - Mr.SaiGon
 
 export type RouteType = 'home' | 'bao-gia' | 'about' | 'contact' | 'blog' | 'chinh-sach';
 
@@ -34,6 +34,7 @@ export type SectionKind =
   | 'FAQ'
   | 'FURNITURE_QUOTE'
   | 'LEGAL_CONTENT'
+  | 'RESTAURANT_MENU'
   // Legacy sections (kept for backward compatibility)
   | 'GALLERY'
   | 'GALLERY_SLIDESHOW'

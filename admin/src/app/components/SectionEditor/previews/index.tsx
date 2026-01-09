@@ -27,6 +27,7 @@ import { MediaGalleryPreview } from './MediaGalleryPreview';
 import { VideoShowcasePreview } from './VideoShowcasePreview';
 import { FurnitureQuotePreview } from './FurnitureQuotePreview';
 import { LegalContentPreview } from './LegalContentPreview';
+import { RestaurantMenuPreview } from './RestaurantMenuPreview';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DataRecord = Record<string, any>;
@@ -89,6 +90,8 @@ export function renderPreview(kind: SectionKind, data: DataRecord): React.JSX.El
       return <FurnitureQuotePreview data={data} />;
     case 'LEGAL_CONTENT':
       return <LegalContentPreview data={data} />;
+    case 'RESTAURANT_MENU':
+      return <RestaurantMenuPreview data={data} />;
     default:
       return (
         <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>

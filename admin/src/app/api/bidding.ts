@@ -1,4 +1,4 @@
-// Bidding APIs - NỘI THẤT NHANH Admin Dashboard
+// Bidding APIs - Mr.SaiGon Admin Dashboard
 // Projects, Bids, Matches, Escrows, Fees, Disputes
 import { API_BASE, apiFetch } from './client';
 import { tokenStorage } from '../store';

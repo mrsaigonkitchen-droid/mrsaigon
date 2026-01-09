@@ -26,6 +26,10 @@ const RichTextSection = lazy(() => import('./RichTextSection').then(m => ({ defa
 const VideoShowcase = lazy(() => import('./VideoShowcase').then(m => ({ default: m.VideoShowcase })));
 const FurnitureQuoteSection = lazy(() => import('./FurnitureQuote').then(m => ({ default: m.FurnitureQuoteSection })));
 const LegalContent = lazy(() => import('./LegalContent').then(m => ({ default: m.LegalContent })));
+const About = lazy(() => import('./About').then(m => ({ default: m.About })));
+const FAQ = lazy(() => import('./FAQ').then(m => ({ default: m.FAQ })));
+const RestaurantMenu = lazy(() => import('./RestaurantMenu').then(m => ({ default: m.RestaurantMenu })));
+const FeaturedMenu = lazy(() => import('./FeaturedMenu').then(m => ({ default: m.FeaturedMenu })));
 
 // Loading fallback component
 const SectionLoader = () => (
@@ -66,9 +70,15 @@ export function renderSection(section: Section) {
       );
 
     case 'GALLERY':
-    case 'FEATURED_MENU':
-      // These sections have been removed - not needed for ATH project
+      // Gallery section removed - use MEDIA_GALLERY instead
       return null;
+
+    case 'FEATURED_MENU':
+      return (
+        <Suspense key={section.id} fallback={<SectionLoader />}>
+          <FeaturedMenu data={data} />
+        </Suspense>
+      );
 
     case 'TESTIMONIALS':
       return (
@@ -87,7 +97,7 @@ export function renderSection(section: Section) {
 
     case 'SPECIAL_OFFERS':
     case 'RESERVATION_FORM':
-      // These sections have been removed - not needed for ATH project
+      // These sections are deprecated - use QUOTE_FORM instead
       return null;
 
     case 'CONTACT_INFO':
@@ -98,7 +108,7 @@ export function renderSection(section: Section) {
       );
 
     case 'GALLERY_SLIDESHOW':
-      // This section has been removed - not needed for ATH project
+      // This section is deprecated - use FEATURED_SLIDESHOW instead
       return null;
 
     case 'FEATURED_BLOG_POSTS':
@@ -116,7 +126,7 @@ export function renderSection(section: Section) {
       );
 
     case 'OPENING_HOURS':
-      // This section has been removed - not needed for ATH project
+      // This section is deprecated - include in CONTACT_INFO instead
       return null;
 
     case 'SOCIAL_MEDIA':
@@ -263,6 +273,27 @@ export function renderSection(section: Section) {
       return (
         <Suspense key={section.id} fallback={<SectionLoader />}>
           <LegalContent data={data} />
+        </Suspense>
+      );
+
+    case 'ABOUT':
+      return (
+        <Suspense key={section.id} fallback={<SectionLoader />}>
+          <About data={data} />
+        </Suspense>
+      );
+
+    case 'FAQ':
+      return (
+        <Suspense key={section.id} fallback={<SectionLoader />}>
+          <FAQ data={data} />
+        </Suspense>
+      );
+
+    case 'RESTAURANT_MENU':
+      return (
+        <Suspense key={section.id} fallback={<SectionLoader />}>
+          <RestaurantMenu data={data} />
         </Suspense>
       );
 

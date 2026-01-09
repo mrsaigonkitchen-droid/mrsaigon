@@ -2,6 +2,178 @@
 
 ## 2026-01-09
 
+### Task: Fix Image URL Resolution in Admin Menu
+
+**✏️ Modified:**
+- `admin/src/app/pages/MenuManagerPage/components/MenuItemList.tsx` - Thêm `resolveMediaUrl` để hiển thị ảnh đúng
+- `admin/src/app/pages/MenuManagerPage/components/MenuItemModal.tsx` - Thêm `resolveMediaUrl` cho preview ảnh
+
+**📋 Issues Fixed:**
+- Ảnh món ăn không hiển thị trong admin do thiếu resolve URL
+
+---
+
+### Task: Improve Menu Sections UI (Elegant Design)
+
+**✏️ Modified:**
+- `landing/src/app/sections/RestaurantMenu.tsx` - Redesign với style sang trọng: decorative elements, italic font, letter-spacing, hover animations
+- `landing/src/app/sections/FeaturedMenu.tsx` - Redesign với featured item showcase, slideshow navigation, elegant typography
+
+**📋 Features:**
+- Typography sang trọng với font display italic
+- Decorative elements (lines, icons)
+- Smooth hover animations
+- Better image handling với placeholder
+- Category tags với uppercase styling
+- CTA buttons với outline style
+
+---
+
+### Task: Fix Glass Effect & Register FEATURED_MENU in Admin
+
+**✏️ Modified:**
+- `landing/src/app/sections/FeaturedMenu.tsx` - Thêm glass effect background thay vì solid color
+- `landing/src/app/sections/RestaurantMenu.tsx` - Thêm glass effect background thay vì solid color
+- `admin/src/app/components/SectionTypePicker.tsx` - Thêm FEATURED_MENU vào danh sách section types
+
+**📋 Issues Fixed:**
+- FeaturedMenu và RestaurantMenu sections không có glass effect như các sections khác
+- FEATURED_MENU không hiển thị trong admin Sections page picker
+
+---
+
+### Task: Fix Menu Item Validation & Modal Responsive
+
+**✏️ Modified:**
+- `api/src/schemas/menu.schema.ts` - Fix imageUrl validation: accept empty string hoặc valid URL (transform empty to undefined)
+- `admin/src/app/pages/MenuManagerPage/components/MenuItemModal.tsx` - Fix modal responsive: center modal properly on mobile với `top: 50%`, `transform: translate(-50%, -50%)`
+
+**📋 Issues Fixed:**
+- "Invalid request data" error khi lưu món ăn với imageUrl rỗng
+- Modal tạo món không canh giữa màn hình trên mobile
+
+---
+
+### Task: Create FEATURED_MENU Section
+
+**🆕 Created:**
+- `landing/src/app/sections/FeaturedMenu.tsx` - Slideshow section hiển thị các món nổi bật (Best Seller, Special)
+- `admin/src/app/components/SectionEditor/forms/FeaturedMenuForm.tsx` - Form editor cho FEATURED_MENU section
+
+**✏️ Modified:**
+- `landing/src/app/sections/render.tsx` - Thêm lazy import và render case cho FEATURED_MENU, cleanup old project comments
+- `admin/src/app/components/SectionEditor/forms/index.tsx` - Export FeaturedMenuForm
+- `admin/src/app/types/content.ts` - Move FEATURED_MENU từ Legacy sang Core sections
+
+**📋 Features:**
+- Auto-slide với configurable interval
+- Hiển thị Best Seller và/hoặc Special items
+- Responsive design với Framer Motion animations
+- CTA button để xem full menu
+
+---
+
+### Task: Connect Menu Manager to Database API
+
+**🆕 Created:**
+- `api/src/routes/menu.routes.ts` - API routes cho MenuCategory và MenuItem (public + admin)
+- `api/src/services/menu.service.ts` - Business logic cho menu CRUD
+- `api/src/schemas/menu.schema.ts` - Zod validation schemas với type exports
+- `admin/src/app/api/menu.ts` - Admin API client cho menu operations
+
+**✏️ Modified:**
+- `api/src/main.ts` - Mount menu routes tại `/menu`
+- `admin/src/app/pages/MenuManagerPage/index.tsx` - Kết nối với API thay vì mock data
+- `admin/src/app/pages/MenuManagerPage/components/MenuItemModal.tsx` - Thêm ImageDropzone để upload ảnh
+- `infra/prisma/schema.prisma` - Thêm models MenuCategory và MenuItem
+
+**🔧 Database:**
+- Push schema mới lên production (MenuCategory, MenuItem tables)
+
+**📋 Features:**
+- Admin có thể tạo/sửa/xóa danh mục và món ăn
+- Upload ảnh món ăn hoặc nhập URL
+- Dữ liệu lưu vào database, hiển thị trên landing
+- Public API `/menu` để landing fetch menu
+
+---
+
+### Task: Fix Menu Manager Light Mode & Preview
+
+**🆕 Created:**
+- `admin/src/app/components/SectionEditor/previews/RestaurantMenuPreview.tsx` - Preview component cho section RESTAURANT_MENU
+
+**✏️ Modified:**
+- `admin/src/app/pages/MenuManagerPage/index.tsx` - Fix import tokens từ admin theme (light mode), thêm responsive grid
+- `admin/src/app/pages/MenuManagerPage/components/CategoryList.tsx` - Fix import tokens
+- `admin/src/app/pages/MenuManagerPage/components/CategoryModal.tsx` - Fix import tokens
+- `admin/src/app/pages/MenuManagerPage/components/MenuItemList.tsx` - Fix import tokens
+- `admin/src/app/pages/MenuManagerPage/components/MenuItemModal.tsx` - Fix import tokens, fix modal positioning để không bị khuất trên mobile
+- `admin/src/app/components/SectionEditor/previews/index.tsx` - Thêm RESTAURANT_MENU preview
+- `admin/src/app/components/SectionEditor/forms/RestaurantMenuForm.tsx` - Fix InfoBanner color prop
+- `admin/src/styles.css` - Thêm responsive CSS cho menu-manager-grid
+
+**📋 Issues Fixed:**
+- Menu Manager dùng dark mode colors thay vì light mode
+- Section RESTAURANT_MENU không có preview trong editor
+- Layout không responsive trên mobile
+- Modal thêm món bị khuất phần dưới trên màn hình nhỏ
+
+---
+
+### Task: Tạo tài khoản Admin cho Production
+
+**🆕 Created:**
+- `scripts/seed-admin.ts` - Script tạo admin user với bcrypt password hashing
+
+**🔧 Database:**
+- Tạo admin user: `admin@mrsaigon.vn` với role ADMIN
+- Password được hash bằng bcrypt (12 rounds)
+
+**📋 Credentials:**
+- Email: admin@mrsaigon.vn
+- Password: 151194Vy@
+
+---
+
+### Task: Fix Missing Sections in Landing (ABOUT, FAQ)
+
+**🆕 Created:**
+- `landing/src/app/sections/About.tsx` - Component hiển thị section Giới thiệu với badge, title, description và image
+- `landing/src/app/sections/FAQ.tsx` - Component hiển thị Câu hỏi thường gặp với accordion animation
+
+**✏️ Modified:**
+- `landing/src/app/sections/render.tsx` - Thêm lazy import và render case cho ABOUT và FAQ sections
+
+**📋 Issue Fixed:**
+- Sections ABOUT và FAQ có thể tạo trong Admin nhưng không hiển thị trên Landing do thiếu component render
+
+---
+
+### Task: Thêm Section RESTAURANT_MENU cho nhà hàng
+
+**🆕 Created:**
+- `admin/src/app/components/SectionEditor/forms/RestaurantMenuForm.tsx` - Form editor cho section thực đơn nhà hàng
+- `landing/src/app/sections/RestaurantMenu.tsx` - Component hiển thị thực đơn với 3 layouts (grid, list, tabs)
+
+**✏️ Modified:**
+- `admin/src/app/types/content.ts` - Thêm `RESTAURANT_MENU` vào SectionKind
+- `landing/src/app/types.ts` - Thêm `RESTAURANT_MENU` vào SectionKind
+- `admin/src/app/components/SectionEditor/forms/index.tsx` - Import và route RestaurantMenuForm
+- `admin/src/app/components/SectionEditor/defaults.ts` - Thêm default data cho RESTAURANT_MENU
+- `admin/src/app/components/SectionEditor/utils.ts` - Thêm icon và description cho RESTAURANT_MENU
+- `admin/src/app/components/SectionTypePicker.tsx` - Thêm RESTAURANT_MENU vào danh sách section types
+- `landing/src/app/sections/render.tsx` - Thêm lazy import và render case cho RESTAURANT_MENU
+
+**📋 Features:**
+- Hiển thị thực đơn từ database (API /menu)
+- 3 layouts: Grid (lưới ảnh), List (danh sách), Tabs (tab theo danh mục)
+- Tùy chọn: hiển thị giá, mô tả, chỉ Best Seller, chỉ món đặc biệt
+- Giới hạn số món hiển thị
+- Nút CTA xem toàn bộ thực đơn
+
+---
+
 ### Task: Cleanup Admin - Xóa các tính năng không cần thiết & Thêm Menu Manager
 
 **🗑️ Deleted Pages:**

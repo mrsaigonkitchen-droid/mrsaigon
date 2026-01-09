@@ -1,5 +1,5 @@
 /**
- * NỘI THẤT NHANH - Comprehensive Database Seed Script
+ * Mr.SaiGon - Comprehensive Database Seed Script
  *
  * Seeds comprehensive data for:
  * - Blog Categories & Posts
@@ -1335,12 +1335,12 @@ Liên hệ với chúng tôi để được tư vấn miễn phí:
   const homePage = await prisma.page.upsert({
     where: { slug: 'home' },
     update: {
-      title: 'Trang Chủ - Nội Thất Nhanh',
+      title: 'Trang Chủ - Mr.SaiGon',
       isActive: true,
     },
     create: {
       slug: 'home',
-      title: 'Trang Chủ - Nội Thất Nhanh',
+      title: 'Trang Chủ - Mr.SaiGon',
       isActive: true,
     },
   });
@@ -1469,7 +1469,7 @@ Liên hệ với chúng tôi để được tư vấn miễn phí:
     update: {
       order: 3,
       data: JSON.stringify({
-        title: 'Nội Thất Nhanh Trong Số',
+        title: 'Mr.SaiGon Trong Số',
         subtitle: 'Thành tựu và kinh nghiệm của chúng tôi',
         stats: [
           {
@@ -1509,7 +1509,7 @@ Liên hệ với chúng tôi để được tư vấn miễn phí:
       order: 3,
       pageId: homePage.id,
       data: JSON.stringify({
-        title: 'Nội Thất Nhanh Trong Số',
+        title: 'Mr.SaiGon Trong Số',
         subtitle: 'Thành tựu và kinh nghiệm của chúng tôi',
         stats: [
           {
@@ -1583,7 +1583,7 @@ Liên hệ với chúng tôi để được tư vấn miễn phí:
             role: 'Gia Chủ',
             avatar: '/uploads/testimonials/lan.jpg',
             rating: 5,
-            content: 'Rất hài lòng với dịch vụ của Nội Thất Nhanh. Thi công đúng hẹn, chất lượng tốt, giá cả hợp lý. Phòng khách nhà tôi giờ đẹp như mơ!',
+            content: 'Rất hài lòng với dịch vụ của Mr.SaiGon. Thi công đúng hẹn, chất lượng tốt, giá cả hợp lý. Phòng khách nhà tôi giờ đẹp như mơ!',
             date: '2024-12-15',
           },
           {
@@ -1591,7 +1591,7 @@ Liên hệ với chúng tôi để được tư vấn miễn phí:
             role: 'Doanh Nhân',
             avatar: '/uploads/testimonials/minh.jpg',
             rating: 5,
-            content: 'Đã làm việc với nhiều nhà thầu nhưng Nội Thất Nhanh là chuyên nghiệp nhất. Tư vấn tận tình, thiết kế sáng tạo, thi công cẩn thận.',
+            content: 'Đã làm việc với nhiều nhà thầu nhưng Mr.SaiGon là chuyên nghiệp nhất. Tư vấn tận tình, thiết kế sáng tạo, thi công cẩn thận.',
             date: '2024-12-10',
           },
           {
@@ -1620,7 +1620,7 @@ Liên hệ với chúng tôi để được tư vấn miễn phí:
             role: 'Gia Chủ',
             avatar: '/uploads/testimonials/lan.jpg',
             rating: 5,
-            content: 'Rất hài lòng với dịch vụ của Nội Thất Nhanh. Thi công đúng hẹn, chất lượng tốt, giá cả hợp lý. Phòng khách nhà tôi giờ đẹp như mơ!',
+            content: 'Rất hài lòng với dịch vụ của Mr.SaiGon. Thi công đúng hẹn, chất lượng tốt, giá cả hợp lý. Phòng khách nhà tôi giờ đẹp như mơ!',
             date: '2024-12-15',
           },
           {
@@ -1628,7 +1628,7 @@ Liên hệ với chúng tôi để được tư vấn miễn phí:
             role: 'Doanh Nhân',
             avatar: '/uploads/testimonials/minh.jpg',
             rating: 5,
-            content: 'Đã làm việc với nhiều nhà thầu nhưng Nội Thất Nhanh là chuyên nghiệp nhất. Tư vấn tận tình, thiết kế sáng tạo, thi công cẩn thận.',
+            content: 'Đã làm việc với nhiều nhà thầu nhưng Mr.SaiGon là chuyên nghiệp nhất. Tư vấn tận tình, thiết kế sáng tạo, thi công cẩn thận.',
             date: '2024-12-10',
           },
           {

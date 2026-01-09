@@ -36,10 +36,11 @@ export type SectionKind =
   | 'FAQ'
   | 'FURNITURE_QUOTE'
   | 'LEGAL_CONTENT'
+  | 'RESTAURANT_MENU'
+  | 'FEATURED_MENU'
   // Legacy sections (kept for backward compatibility, not shown in UI)
   | 'GALLERY'
   | 'GALLERY_SLIDESHOW'
-  | 'FEATURED_MENU'
   | 'RESERVATION_FORM'
   | 'SPECIAL_OFFERS'
   | 'OPENING_HOURS'

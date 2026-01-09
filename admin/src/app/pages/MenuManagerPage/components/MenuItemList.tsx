@@ -5,7 +5,8 @@
 
 import { memo } from 'react';
 import { motion } from 'framer-motion';
-import { tokens } from '@app/shared';
+import { resolveMediaUrl } from '@app/shared';
+import { tokens } from '../../../../theme';
 import type { MenuItem, MenuCategory } from '../types';
 
 interface Props {
@@ -123,7 +124,7 @@ export const MenuItemList = memo(function MenuItemList({
               >
                 {item.imageUrl ? (
                   <img
-                    src={item.imageUrl}
+                    src={resolveMediaUrl(item.imageUrl)}
                     alt={item.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />

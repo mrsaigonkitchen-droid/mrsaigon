@@ -72,7 +72,7 @@ export class NotificationChannelService {
     this.emailConfig = {
       provider: 'mock',
       from: 'noreply@noithatnhanh.vn',
-      fromName: 'Nội Thất Nhanh',
+      fromName: 'Mr.SaiGon',
       baseUrl: process.env.APP_URL || 'https://noithatnhanh.vn',
       ...emailConfig,
     };

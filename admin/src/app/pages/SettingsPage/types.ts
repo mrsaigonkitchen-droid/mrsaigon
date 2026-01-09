@@ -1,4 +1,4 @@
-// Settings Page Type Definitions - NỘI THẤT NHANH
+// Settings Page Type Definitions - Mr.SaiGon
 
 export interface CompanySettings {
   name: string;
@@ -139,9 +139,9 @@ export interface EmailSettings {
 }
 
 export const defaultEmailSettings: EmailSettings = {
-  brandName: 'NỘI THẤT NHANH',
+  brandName: 'Mr.SaiGon',
   tagline: 'Đối tác tin cậy cho ngôi nhà của bạn',
-  subjectTemplate: '[NỘI THẤT NHANH] Báo giá nội thất - Căn hộ {{unitNumber}}',
+  subjectTemplate: '[Mr.SaiGon] Báo giá nội thất - Căn hộ {{unitNumber}}',
   
   greetingTemplate: 'Xin chào {{leadName}},',
   introText: 'Cảm ơn bạn đã sử dụng dịch vụ báo giá nội thất của {{brandName}}. Chúng tôi đã chuẩn bị báo giá chi tiết cho căn hộ của bạn.',
@@ -162,7 +162,7 @@ export const defaultEmailSettings: EmailSettings = {
   signatureClosing: 'Trân trọng,',
   signatureTeam: 'Đội ngũ tư vấn nội thất',
   
-  footerCopyright: '© {{year}} NỘI THẤT NHANH - Đối tác tin cậy cho ngôi nhà của bạn',
+  footerCopyright: '© {{year}} Mr.SaiGon - Đối tác tin cậy cho ngôi nhà của bạn',
   footerWebsite: 'noithatnhanh.vn',
   footerHotline: '1900-xxxx',
   spamNotice: '📧 Nếu bạn không thấy email này trong hộp thư đến, vui lòng kiểm tra thư mục Spam hoặc Quảng cáo.',
@@ -180,7 +180,7 @@ export const glass = {
 
 // Default values - NTN Interior
 export const defaultCompanySettings: CompanySettings = {
-  name: 'Nội Thất Nhanh',
+  name: 'Mr.SaiGon',
   description: 'Dịch vụ thiết kế nội thất chuyên nghiệp',
   address: '123 Đường ABC, Quận 1, TP.HCM',
   phone: '0909 123 456',
@@ -217,7 +217,7 @@ export const defaultPromoSettings: PromoSettings = {
 };
 
 export const defaultHeaderConfig: HeaderConfig = {
-  logo: { text: 'Nội Thất Nhanh', icon: 'ri-home-smile-fill', animateIcon: true },
+  logo: { text: 'Mr.SaiGon', icon: 'ri-home-smile-fill', animateIcon: true },
   navigation: [
     { label: 'Trang chủ', route: '/', icon: 'ri-home-4-line' },
     { label: 'Báo giá', route: '/bao-gia', icon: 'ri-calculator-line' },
@@ -238,7 +238,7 @@ export const defaultHeaderConfig: HeaderConfig = {
 };
 
 export const defaultFooterConfig: FooterConfig = {
-  brand: { text: 'Nội Thất Nhanh', icon: 'ri-home-smile-fill', tagline: 'Dịch vụ thiết kế nội thất chuyên nghiệp' },
+  brand: { text: 'Mr.SaiGon', icon: 'ri-home-smile-fill', tagline: 'Dịch vụ thiết kế nội thất chuyên nghiệp' },
   quickLinks: [
     { label: 'Giới thiệu', link: '/about' },
     { label: 'Báo giá', link: '/bao-gia' },
@@ -255,7 +255,7 @@ export const defaultFooterConfig: FooterConfig = {
     { platform: 'Zalo', url: 'https://zalo.me', icon: 'ri-chat-3-fill' },
     { platform: 'Youtube', url: 'https://youtube.com', icon: 'ri-youtube-fill' },
   ],
-  copyright: { text: `© ${new Date().getFullYear()} Nội Thất Nhanh. All rights reserved.` },
+  copyright: { text: `© ${new Date().getFullYear()} Mr.SaiGon. All rights reserved.` },
 };
 
 // Re-export API_URL from shared for convenience

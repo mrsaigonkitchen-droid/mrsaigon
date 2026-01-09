@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# NỘI THẤT NHANH - Google Cloud Setup Script
+# Mr.SaiGon - Google Cloud Setup Script
 # Run this script once to set up GCP resources
 # ============================================
 
@@ -15,7 +15,7 @@ DB_USER="ntn_user"
 BUCKET_NAME="ntn-media-bucket"
 REPO_NAME="ntn-repo"
 
-echo "🚀 Setting up Google Cloud for NỘI THẤT NHANH..."
+echo "🚀 Setting up Google Cloud for Mr.SaiGon..."
 
 # 1. Set project
 echo "📌 Setting project..."
@@ -38,7 +38,7 @@ echo "📦 Creating Artifact Registry..."
 gcloud artifacts repositories create $REPO_NAME \
   --repository-format=docker \
   --location=$REGION \
-  --description="NỘI THẤT NHANH Docker images" \
+  --description="Mr.SaiGon Docker images" \
   2>/dev/null || echo "Repository already exists"
 
 # 4. Create Cloud SQL instance

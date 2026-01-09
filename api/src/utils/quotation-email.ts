@@ -10,9 +10,9 @@ import type { PrismaClient } from '@prisma/client';
 
 // Default email settings (fallback when no settings in DB)
 export const defaultEmailSettings = {
-  brandName: 'NỘI THẤT NHANH',
+  brandName: 'Mr.SaiGon',
   tagline: 'Đối tác tin cậy cho ngôi nhà của bạn',
-  subjectTemplate: '[NỘI THẤT NHANH] Báo giá nội thất - Căn hộ {{unitNumber}}',
+  subjectTemplate: '[Mr.SaiGon] Báo giá nội thất - Căn hộ {{unitNumber}}',
   
   greetingTemplate: 'Xin chào {{leadName}},',
   introText: 'Cảm ơn bạn đã sử dụng dịch vụ báo giá nội thất của {{brandName}}. Chúng tôi đã chuẩn bị báo giá chi tiết cho căn hộ của bạn.',
@@ -33,7 +33,7 @@ export const defaultEmailSettings = {
   signatureClosing: 'Trân trọng,',
   signatureTeam: 'Đội ngũ tư vấn nội thất',
   
-  footerCopyright: '© {{year}} NỘI THẤT NHANH',
+  footerCopyright: '© {{year}} Mr.SaiGon',
   footerWebsite: 'noithatnhanh.vn',
   footerHotline: '1900-xxxx',
   spamNotice: 'Nếu bạn không thấy email này trong hộp thư đến, vui lòng kiểm tra thư mục Spam.',

@@ -74,3 +74,11 @@ code {
 .spinner {
   animation: spin 1s linear infinite;
 }
+
+
+/* Menu Manager Responsive */
+@media (max-width: 900px) {
+  .menu-manager-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

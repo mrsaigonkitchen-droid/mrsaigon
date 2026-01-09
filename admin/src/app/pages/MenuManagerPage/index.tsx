@@ -5,8 +5,9 @@
 
 import { useState, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { tokens } from '@app/shared';
+import { tokens } from '../../../theme';
 import { useToast } from '../../components/Toast';
+import { menuApi } from '../../api/menu';
 import { CategoryList } from './components/CategoryList';
 import { MenuItemList } from './components/MenuItemList';
 import { CategoryModal } from './components/CategoryModal';
@@ -24,29 +25,47 @@ export const MenuManagerPage = memo(function MenuManagerPage() {
   const [categoryModal, setCategoryModal] = useState<{ open: boolean; data?: MenuCategory }>({ open: false });
   const [menuItemModal, setMenuItemModal] = useState<{ open: boolean; data?: MenuItem }>({ open: false });
 
-  // Load data
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  // Load data from API
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API calls
-      // For now, use mock data
-      setCategories([
-        { id: '1', name: 'Khai vị', slug: 'khai-vi', description: 'Các món khai vị', order: 1, isActive: true },
-        { id: '2', name: 'Món chính', slug: 'mon-chinh', description: 'Các món chính', order: 2, isActive: true },
-        { id: '3', name: 'Tráng miệng', slug: 'trang-mieng', description: 'Các món tráng miệng', order: 3, isActive: true },
-        { id: '4', name: 'Đồ uống', slug: 'do-uong', description: 'Các loại đồ uống', order: 4, isActive: true },
+      const [categoriesRes, itemsRes] = await Promise.all([
+        menuApi.getCategories(),
+        menuApi.getItems(),
       ]);
-      setMenuItems([]);
-    } catch {
-      toast.error('Không thể tải dữ liệu');
+      
+      setCategories(categoriesRes.map(c => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        description: c.description || undefined,
+        order: c.order,
+        isActive: c.isActive,
+      })));
+      
+      setMenuItems(itemsRes.map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description || undefined,
+        price: item.price,
+        categoryId: item.categoryId,
+        imageUrl: item.imageUrl || undefined,
+        isAvailable: item.isAvailable,
+        isBestSeller: item.isBestSeller,
+        isSpecial: item.isSpecial,
+        order: item.order,
+      })));
+    } catch (err) {
+      console.error('Failed to load menu data:', err);
+      toast.error('Không thể tải dữ liệu thực đơn');
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   // Filter items by category
   const filteredItems = selectedCategory
@@ -58,77 +77,109 @@ export const MenuManagerPage = memo(function MenuManagerPage() {
     try {
       if (categoryModal.data?.id) {
         // Update
-        setCategories(prev => prev.map(c => c.id === categoryModal.data?.id ? { ...c, ...data } : c));
+        await menuApi.updateCategory(categoryModal.data.id, {
+          name: data.name,
+          slug: data.slug,
+          description: data.description,
+          order: data.order,
+          isActive: data.isActive,
+        });
         toast.success('Đã cập nhật danh mục');
       } else {
         // Create
-        const newCategory: MenuCategory = {
-          id: Date.now().toString(),
+        await menuApi.createCategory({
           name: data.name || '',
           slug: data.slug || '',
           description: data.description,
-          order: categories.length + 1,
-          isActive: true,
-        };
-        setCategories(prev => [...prev, newCategory]);
+          order: data.order ?? categories.length + 1,
+          isActive: data.isActive ?? true,
+        });
         toast.success('Đã tạo danh mục mới');
       }
       setCategoryModal({ open: false });
-    } catch {
-      toast.error('Có lỗi xảy ra');
+      loadData(); // Reload data
+    } catch (err) {
+      console.error('Failed to save category:', err);
+      toast.error('Có lỗi xảy ra khi lưu danh mục');
     }
-  }, [categoryModal.data, categories.length, toast]);
+  }, [categoryModal.data, categories.length, toast, loadData]);
 
   const handleDeleteCategory = useCallback(async (id: string) => {
     if (!confirm('Bạn có chắc muốn xóa danh mục này?')) return;
     try {
-      setCategories(prev => prev.filter(c => c.id !== id));
+      await menuApi.deleteCategory(id);
       if (selectedCategory === id) setSelectedCategory(null);
       toast.success('Đã xóa danh mục');
-    } catch {
-      toast.error('Có lỗi xảy ra');
+      loadData();
+    } catch (err) {
+      console.error('Failed to delete category:', err);
+      toast.error('Không thể xóa danh mục (có thể còn món ăn)');
     }
-  }, [selectedCategory, toast]);
+  }, [selectedCategory, toast, loadData]);
 
   // Menu item handlers
   const handleSaveMenuItem = useCallback(async (data: Partial<MenuItem>) => {
     try {
       if (menuItemModal.data?.id) {
         // Update
-        setMenuItems(prev => prev.map(m => m.id === menuItemModal.data?.id ? { ...m, ...data } : m));
+        await menuApi.updateItem(menuItemModal.data.id, {
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          categoryId: data.categoryId,
+          imageUrl: data.imageUrl,
+          isAvailable: data.isAvailable,
+          isBestSeller: data.isBestSeller,
+          isSpecial: data.isSpecial,
+          order: data.order,
+        });
         toast.success('Đã cập nhật món ăn');
       } else {
         // Create
-        const newItem: MenuItem = {
-          id: Date.now().toString(),
+        await menuApi.createItem({
           name: data.name || '',
           description: data.description,
           price: data.price || 0,
           categoryId: data.categoryId || selectedCategory || '',
           imageUrl: data.imageUrl,
-          isAvailable: true,
-          isBestSeller: false,
-          isSpecial: false,
-          order: filteredItems.length + 1,
-        };
-        setMenuItems(prev => [...prev, newItem]);
+          isAvailable: data.isAvailable ?? true,
+          isBestSeller: data.isBestSeller ?? false,
+          isSpecial: data.isSpecial ?? false,
+          order: data.order ?? filteredItems.length + 1,
+        });
         toast.success('Đã thêm món ăn mới');
       }
       setMenuItemModal({ open: false });
-    } catch {
-      toast.error('Có lỗi xảy ra');
+      loadData();
+    } catch (err) {
+      console.error('Failed to save menu item:', err);
+      toast.error('Có lỗi xảy ra khi lưu món ăn');
     }
-  }, [menuItemModal.data, selectedCategory, filteredItems.length, toast]);
+  }, [menuItemModal.data, selectedCategory, filteredItems.length, toast, loadData]);
 
   const handleDeleteMenuItem = useCallback(async (id: string) => {
     if (!confirm('Bạn có chắc muốn xóa món ăn này?')) return;
     try {
-      setMenuItems(prev => prev.filter(m => m.id !== id));
+      await menuApi.deleteItem(id);
       toast.success('Đã xóa món ăn');
-    } catch {
+      loadData();
+    } catch (err) {
+      console.error('Failed to delete menu item:', err);
+      toast.error('Có lỗi xảy ra khi xóa món ăn');
+    }
+  }, [toast, loadData]);
+
+  const handleToggleAvailable = useCallback(async (id: string) => {
+    const item = menuItems.find(m => m.id === id);
+    if (!item) return;
+    try {
+      await menuApi.updateItem(id, { isAvailable: !item.isAvailable });
+      loadData();
+    } catch (err) {
+      console.error('Failed to toggle availability:', err);
       toast.error('Có lỗi xảy ra');
     }
-  }, [toast]);
+  }, [menuItems, loadData, toast]);
 
   if (loading) {
     return (
@@ -165,7 +216,14 @@ export const MenuManagerPage = memo(function MenuManagerPage() {
       </div>
 
       {/* Main content */}
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 24 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(250px, 300px) 1fr',
+          gap: 24,
+        }}
+        className="menu-manager-grid"
+      >
         {/* Categories sidebar */}
         <CategoryList
           categories={categories}
@@ -184,9 +242,7 @@ export const MenuManagerPage = memo(function MenuManagerPage() {
           onEdit={(item: MenuItem) => setMenuItemModal({ open: true, data: item })}
           onDelete={handleDeleteMenuItem}
           onAdd={() => setMenuItemModal({ open: true })}
-          onToggleAvailable={(id: string) => {
-            setMenuItems(prev => prev.map(m => m.id === id ? { ...m, isAvailable: !m.isAvailable } : m));
-          }}
+          onToggleAvailable={handleToggleAvailable}
         />
       </div>
 

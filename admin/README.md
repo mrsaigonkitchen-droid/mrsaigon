@@ -1,4 +1,4 @@
-# 🎛️ Admin Dashboard - NỘI THẤT NHANH
+# 🎛️ Admin Dashboard - Mr.SaiGon
 
 Dashboard quản trị cho hệ thống báo giá & dự toán thiết kế nội thất.
 
@@ -93,4 +93,4 @@ admin/src/app/
 
 ---
 
-**Built for NỘI THẤT NHANH**
+**Built for Mr.SaiGon**

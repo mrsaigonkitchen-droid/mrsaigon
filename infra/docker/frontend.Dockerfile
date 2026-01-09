@@ -1,5 +1,5 @@
 # ============================================
-# NỘI THẤT NHANH - Frontend Dockerfile
+# Mr.SaiGon - Frontend Dockerfile
 # For Landing, Admin apps
 # ============================================
 

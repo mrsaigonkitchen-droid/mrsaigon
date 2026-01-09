@@ -17,7 +17,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}============================================${NC}"
-echo -e "${BLUE}  Setup Google Integration for NỘI THẤT NHANH  ${NC}"
+echo -e "${BLUE}  Setup Google Integration for Mr.SaiGon  ${NC}"
 echo -e "${BLUE}============================================${NC}"
 echo ""
 

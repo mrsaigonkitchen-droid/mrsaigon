@@ -261,6 +261,22 @@ const sectionTypes: Array<{
     category: 'other',
   },
   {
+    type: 'RESTAURANT_MENU',
+    icon: 'ri-restaurant-2-line',
+    label: 'Thực Đơn Nhà Hàng',
+    description: 'Hiển thị menu món ăn từ database',
+    color: '#ef4444',
+    category: 'other',
+  },
+  {
+    type: 'FEATURED_MENU',
+    icon: 'ri-star-smile-line',
+    label: 'Món Đặc Sắc',
+    description: 'Slideshow món best seller & đặc biệt',
+    color: '#f59e0b',
+    category: 'other',
+  },
+  {
     type: 'FURNITURE_QUOTE',
     icon: 'ri-sofa-line',
     label: 'Báo Giá Nội Thất',

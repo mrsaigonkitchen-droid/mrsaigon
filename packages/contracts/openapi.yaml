@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: NỘI THẤT NHANH API
+  title: Mr.SaiGon API
   description: API cho hệ thống báo giá & dự toán thiết kế nội thất
   version: 1.0.0
 servers:

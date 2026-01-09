@@ -1409,7 +1409,7 @@ model FurniturePdfSettings {
   id String @id @default("default")
 
   // Company info
-  companyName    String @default("NỘI THẤT NHANH")
+  companyName    String @default("Mr.SaiGon")
   companyTagline String @default("Đối tác tin cậy cho ngôi nhà của bạn")
   companyLogo    String? // URL to logo image
 
@@ -1438,7 +1438,7 @@ model FurniturePdfSettings {
 
   // Footer settings
   footerNote      String @default("Báo giá này chỉ mang tính chất tham khảo. Giá thực tế có thể thay đổi tùy theo thời điểm và điều kiện cụ thể.")
-  footerCopyright String @default("© NỘI THẤT NHANH - Đối tác tin cậy cho ngôi nhà của bạn")
+  footerCopyright String @default("© Mr.SaiGon - Đối tác tin cậy cho ngôi nhà của bạn")
 
   // Contact info (optional, shown in PDF)
   contactPhone   String?
@@ -1553,3 +1553,56 @@ model ApiKeyUsageLog {
   @@index([createdAt])
 }
 
+
+// ============================================
+// RESTAURANT MENU - DANH MỤC MÓN ĂN
+// ============================================
+
+model MenuCategory {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  order       Int     @default(0)
+  isActive    Boolean @default(true)
+
+  // Relations
+  items MenuItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, order])
+}
+
+// ============================================
+// RESTAURANT MENU - MÓN ĂN
+// ============================================
+
+model MenuItem {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  imageUrl    String?
+
+  // Category relation
+  categoryId String
+  category   MenuCategory @relation(fields: [categoryId], references: [id])
+
+  // Flags
+  isAvailable  Boolean @default(true)
+  isBestSeller Boolean @default(false)
+  isSpecial    Boolean @default(false)
+
+  // Ordering
+  order Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([isAvailable, order])
+  @@index([isBestSeller])
+  @@index([isSpecial])
+}

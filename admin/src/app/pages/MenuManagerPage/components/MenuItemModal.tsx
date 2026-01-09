@@ -1,11 +1,13 @@
 /**
  * MenuItemModal Component
- * Modal tạo/sửa món ăn
+ * Modal tạo/sửa món ăn với tính năng upload ảnh
  */
 
 import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { tokens } from '@app/shared';
+import { resolveMediaUrl } from '@app/shared';
+import { tokens } from '../../../../theme';
+import { ImageDropzone } from '../../../components/ImageDropzone';
 import type { MenuItem, MenuCategory } from '../types';
 
 interface Props {
@@ -32,6 +34,7 @@ export const MenuItemModal = memo(function MenuItemModal({
     isBestSeller: data?.isBestSeller || false,
     isSpecial: data?.isSpecial || false,
   });
+  const [useUrlInput, setUseUrlInput] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +44,7 @@ export const MenuItemModal = memo(function MenuItemModal({
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay + Centering Container */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -52,31 +55,33 @@ export const MenuItemModal = memo(function MenuItemModal({
           inset: 0,
           background: 'rgba(0,0,0,0.7)',
           zIndex: 9998,
-        }}
-      />
-
-      {/* Modal */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 'min(550px, 90vw)',
-          maxHeight: '90vh',
-          background: tokens.color.surface,
-          borderRadius: tokens.radius.lg,
-          border: `1px solid ${tokens.color.border}`,
-          zIndex: 9999,
-          overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16,
+          overflowY: 'auto',
         }}
       >
+        {/* Modal */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: '100%',
+            maxWidth: 550,
+            maxHeight: 'calc(100vh - 32px)',
+            background: tokens.color.surface,
+            borderRadius: tokens.radius.lg,
+            border: `1px solid ${tokens.color.border}`,
+            zIndex: 9999,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            margin: 'auto',
+          }}
+        >
         {/* Header */}
         <div
           style={{
@@ -107,7 +112,7 @@ export const MenuItemModal = memo(function MenuItemModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} style={{ padding: 20, overflowY: 'auto' }}>
+        <form onSubmit={handleSubmit} style={{ padding: 20, overflowY: 'auto', flex: 1 }}>
           {/* Name */}
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', marginBottom: 6, fontSize: 13, color: tokens.color.muted }}>
@@ -206,31 +211,63 @@ export const MenuItemModal = memo(function MenuItemModal({
             />
           </div>
 
-          {/* Image URL */}
+          {/* Image Upload */}
           <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, color: tokens.color.muted }}>
-              URL hình ảnh
-            </label>
-            <input
-              type="text"
-              value={form.imageUrl}
-              onChange={(e) => setForm(prev => ({ ...prev, imageUrl: e.target.value }))}
-              placeholder="https://..."
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: tokens.radius.md,
-                border: `1px solid ${tokens.color.border}`,
-                background: tokens.color.background,
-                color: tokens.color.text,
-                fontSize: 14,
-                outline: 'none',
-              }}
-            />
-            {form.imageUrl && (
-              <div style={{ marginTop: 8, borderRadius: tokens.radius.md, overflow: 'hidden', maxWidth: 200 }}>
-                <img src={form.imageUrl} alt="Preview" style={{ width: '100%', height: 'auto' }} />
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <label style={{ fontSize: 13, color: tokens.color.muted }}>
+                Hình ảnh
+              </label>
+              <button
+                type="button"
+                onClick={() => setUseUrlInput(!useUrlInput)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: tokens.color.primary,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <i className={useUrlInput ? 'ri-upload-cloud-line' : 'ri-link'} style={{ fontSize: 14 }} />
+                {useUrlInput ? 'Upload ảnh' : 'Nhập URL'}
+              </button>
+            </div>
+            
+            {useUrlInput ? (
+              <>
+                <input
+                  type="text"
+                  value={form.imageUrl}
+                  onChange={(e) => setForm(prev => ({ ...prev, imageUrl: e.target.value }))}
+                  placeholder="https://..."
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: tokens.radius.md,
+                    border: `1px solid ${tokens.color.border}`,
+                    background: tokens.color.background,
+                    color: tokens.color.text,
+                    fontSize: 14,
+                    outline: 'none',
+                  }}
+                />
+                {form.imageUrl && (
+                  <div style={{ marginTop: 8, borderRadius: tokens.radius.md, overflow: 'hidden', maxWidth: 200 }}>
+                    <img src={resolveMediaUrl(form.imageUrl)} alt="Preview" style={{ width: '100%', height: 'auto' }} />
+                  </div>
+                )}
+              </>
+            ) : (
+              <ImageDropzone
+                value={form.imageUrl}
+                onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
+                onRemove={() => setForm(prev => ({ ...prev, imageUrl: '' }))}
+                height={150}
+                useGalleryUpload
+              />
             )}
           </div>
 
@@ -300,6 +337,7 @@ export const MenuItemModal = memo(function MenuItemModal({
             </motion.button>
           </div>
         </form>
+        </motion.div>
       </motion.div>
     </>
   );

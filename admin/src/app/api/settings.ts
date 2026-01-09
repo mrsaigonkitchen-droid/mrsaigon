@@ -1,4 +1,4 @@
-// Settings APIs - NỘI THẤT NHANH Admin Dashboard
+// Settings APIs - Mr.SaiGon Admin Dashboard
 // Settings, Bidding Settings, Service Fees, Pricing, Google Sheets Integration
 import { apiFetch } from './client';
 import type {

@@ -1,4 +1,4 @@
-// Auth API - NỘI THẤT NHANH Admin Dashboard
+// Auth API - Mr.SaiGon Admin Dashboard
 import { tokenStorage } from '../store';
 import { apiFetch } from './client';
 

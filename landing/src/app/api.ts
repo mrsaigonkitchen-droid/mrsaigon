@@ -1,5 +1,5 @@
 /**
- * Shared API client for Landing page - NỘI THẤT NHANH
+ * Shared API client for Landing page - Mr.SaiGon
  * Only includes endpoints needed for ATH project
  */
 

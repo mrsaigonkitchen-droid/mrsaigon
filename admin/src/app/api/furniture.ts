@@ -1,5 +1,5 @@
 /**
- * Furniture APIs - NỘI THẤT NHANH Admin Dashboard
+ * Furniture APIs - Mr.SaiGon Admin Dashboard
  *
  * This file re-exports from the furniture/ module for backward compatibility.
  * New code should import directly from './furniture/index' or specific files.

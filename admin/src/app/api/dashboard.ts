@@ -1,4 +1,4 @@
-// Dashboard APIs - NỘI THẤT NHANH Admin Dashboard
+// Dashboard APIs - Mr.SaiGon Admin Dashboard
 // Dashboard statistics and activity feed
 //
 // **Feature: admin-dashboard-enhancement**

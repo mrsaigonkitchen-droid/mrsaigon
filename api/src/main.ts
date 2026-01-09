@@ -1,5 +1,5 @@
 /**
- * NỘI THẤT NHANH API - Main Entry Point
+ * Mr.SaiGon API - Main Entry Point
  *
  * This file handles:
  * - Environment setup
@@ -90,6 +90,7 @@ import { createMetricsRoutes } from './routes/metrics.routes';
 import { createQueueHealthRoutes } from './routes/queue-health.routes';
 import { createIPBlockingRoutes } from './routes/ip-blocking.routes';
 import { ipBlockingMiddleware } from './middleware/ip-blocking';
+import { createMenuRoutes } from './routes/menu.routes';
 
 // Service imports
 import { AuthService } from './services/auth.service';
@@ -159,7 +160,7 @@ if (process.env.DATABASE_URL?.startsWith('file:')) {
 }
 
 // eslint-disable-next-line no-console -- Startup logging before logger initialization
-console.info('🔧 NỘI THẤT NHANH API Starting...');
+console.info('🔧 Mr.SaiGon API Starting...');
 // eslint-disable-next-line no-console -- Startup logging before logger initialization
 console.info('📁 Project root:', projectRoot);
 // eslint-disable-next-line no-console -- Startup logging before logger initialization
@@ -298,7 +299,7 @@ app.route('/metrics', createMetricsRoutes());
 
 app.get('/', (c) =>
   successResponse(c, {
-    message: 'Nội Thất Nhanh API',
+    message: 'Mr.SaiGon API',
     endpoints: ['/health', '/health/ready', '/health/live', '/metrics', '/api/auth/login', '/pages/:slug', '/service-categories', '/materials', '/leads'],
   })
 );
@@ -439,6 +440,9 @@ app.route('/api/admin/ip-blocking', createIPBlockingRoutes(prisma));
 // External API routes - Feature: admin-guide-api-keys (API Key authenticated)
 app.route('/api/external', createExternalApiRoutes(prisma));
 
+// Menu routes - Restaurant menu management
+app.route('/menu', createMenuRoutes(prisma));
+
 // ============================================
 // GLOBAL ERROR HANDLER
 // ============================================
@@ -455,7 +459,7 @@ console.info(`🚀 Starting server on port ${port}...`);
 
 const server = serve({ fetch: app.fetch, port }, (info) => {
   // eslint-disable-next-line no-console -- Startup logging
-  console.info(`✅ NỘI THẤT NHANH API running at http://localhost:${info.port}`);
+  console.info(`✅ Mr.SaiGon API running at http://localhost:${info.port}`);
 });
 
 // ============================================

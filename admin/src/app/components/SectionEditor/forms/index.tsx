@@ -37,6 +37,8 @@ import { MediaGalleryForm } from './MediaGalleryForm';
 import { VideoShowcaseForm } from './VideoShowcaseForm';
 import { FurnitureQuoteForm } from './FurnitureQuoteForm';
 import { LegalContentForm } from './LegalContentForm';
+import { RestaurantMenuForm } from './RestaurantMenuForm';
+import { FeaturedMenuForm } from './FeaturedMenuForm';
 
 // Re-export types
 export type { DataRecord, UpdateFieldFn, AddArrayItemFn, RemoveArrayItemFn, OnImagePickFn };
@@ -218,6 +220,14 @@ export function renderFormFields(
           removeArrayItem={removeArrayItem}
         />
       );
+
+    case 'RESTAURANT_MENU':
+      return <RestaurantMenuForm data={data} updateField={updateField} />;
+
+    case 'FEATURED_MENU':
+      return <FeaturedMenuForm data={data} onChange={(newData) => {
+        Object.entries(newData).forEach(([key, value]) => updateField(key, value));
+      }} />;
 
     default:
       return (

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# NỘI THẤT NHANH - Manual Deploy Script
+# Mr.SaiGon - Manual Deploy Script
 # Use this for quick manual deployments
 # ============================================
 

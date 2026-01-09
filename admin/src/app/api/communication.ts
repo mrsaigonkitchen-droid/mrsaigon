@@ -1,4 +1,4 @@
-// Communication APIs - NỘI THẤT NHANH Admin Dashboard
+// Communication APIs - Mr.SaiGon Admin Dashboard
 // Notification Templates, Chat Management
 import { apiFetch } from './client';
 import type {
