@@ -112,6 +112,7 @@ export class PagesService {
 
   /**
    * Create a new page
+   * Automatically copies headerConfig and footerConfig from home page
    * @throws PagesServiceError if slug already exists
    */
   async createPage(input: CreatePageInput): Promise<Page> {
@@ -120,8 +121,20 @@ export class PagesService {
     }
 
     try {
+      // Get home page to copy header/footer config
+      const homePage = await this.prisma.page.findUnique({
+        where: { slug: 'home' },
+        select: { headerConfig: true, footerConfig: true },
+      });
+
       return await this.prisma.page.create({
-        data: { slug: input.slug, title: input.title },
+        data: {
+          slug: input.slug,
+          title: input.title,
+          // Copy header/footer config from home page for consistency
+          headerConfig: homePage?.headerConfig || null,
+          footerConfig: homePage?.footerConfig || null,
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -166,6 +179,35 @@ export class PagesService {
     // Delete sections first, then page
     await this.prisma.section.deleteMany({ where: { pageId: page.id } });
     await this.prisma.page.delete({ where: { slug } });
+  }
+
+  /**
+   * Sync header/footer config from home page to all other pages
+   * @returns Number of pages updated
+   */
+  async syncHeaderFooterConfig(): Promise<{ updated: number; total: number }> {
+    // Get home page config
+    const homePage = await this.prisma.page.findUnique({
+      where: { slug: 'home' },
+      select: { headerConfig: true, footerConfig: true },
+    });
+
+    if (!homePage) {
+      throw new PagesServiceError('NOT_FOUND', 'Home page not found', 404);
+    }
+
+    // Update all other pages
+    const result = await this.prisma.page.updateMany({
+      where: { slug: { not: 'home' } },
+      data: {
+        headerConfig: homePage.headerConfig,
+        footerConfig: homePage.footerConfig,
+      },
+    });
+
+    const total = await this.prisma.page.count();
+
+    return { updated: result.count, total };
   }
 
   // ============================================

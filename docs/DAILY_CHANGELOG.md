@@ -2,6 +2,27 @@
 
 ## 2026-01-09
 
+### Task: Fix Header/Footer Config Sync Issue
+
+**✏️ Modified:**
+- `api/src/services/pages.service.ts` - createPage() tự động copy headerConfig/footerConfig từ home page; thêm syncHeaderFooterConfig() method
+- `api/src/routes/pages.routes.ts` - Thêm POST /pages/sync-header endpoint (ADMIN only) để sync header/footer config cho tất cả pages
+
+**📋 Issues Fixed:**
+- Page mới tạo không có headerConfig → header hiển thị khác với home page
+- Thêm API endpoint để sync lại header/footer cho các pages hiện có
+
+---
+
+### Task: Fix Glass Effect & Register FEATURED_MENU in Admin
+
+**✏️ Modified:**
+- `landing/src/app/sections/FeaturedMenu.tsx` - Thêm glass effect background
+- `landing/src/app/sections/RestaurantMenu.tsx` - Thêm glass effect background
+- `admin/src/app/components/SectionTypePicker.tsx` - Thêm FEATURED_MENU vào danh sách section types
+
+---
+
 ### Task: Fix Image URL Resolution in Admin Menu
 
 **✏️ Modified:**

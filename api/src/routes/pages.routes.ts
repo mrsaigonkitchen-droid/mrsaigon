@@ -133,6 +133,27 @@ export function createPagesRoutes(prisma: PrismaClient) {
     }
   });
 
+  /**
+   * @route POST /pages/sync-header
+   * @description Sync header/footer config from home page to all other pages
+   * @access Admin only
+   */
+  app.post('/sync-header', authenticate(), requireRole('ADMIN'), async (c) => {
+    try {
+      const result = await pagesService.syncHeaderFooterConfig();
+      return successResponse(c, {
+        message: `Synced header/footer config to ${result.updated} pages`,
+        ...result,
+      });
+    } catch (error) {
+      if (error instanceof PagesServiceError) {
+        return errorResponse(c, error.code, error.message, error.statusCode);
+      }
+      console.error('Sync header error:', error);
+      return errorResponse(c, 'INTERNAL_ERROR', 'Failed to sync header config', 500);
+    }
+  });
+
   // ============================================
   // SECTION ROUTES (nested under pages)
   // ============================================
